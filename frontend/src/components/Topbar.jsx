@@ -1,4 +1,9 @@
+import { useAuth } from '../hooks/useAuth'
+import { getInitials } from '../utils/formatters'
+
 function Topbar() {
+  const { user, notifications, isLoadingNotifications } = useAuth()
+
   return (
     <header className="topbar">
       <label className="topbar-search" aria-label="Search issues">
@@ -14,7 +19,7 @@ function Topbar() {
           type="button"
           aria-label="Notifications"
         >
-          !
+          {isLoadingNotifications ? '...' : `!${notifications.unreadCount ? ` ${notifications.unreadCount}` : ''}`}
         </button>
         <button className="topbar-icon-button" type="button" aria-label="Settings">
           *
@@ -22,11 +27,11 @@ function Topbar() {
 
         <div className="topbar-user">
           <div>
-            <strong>John Doe</strong>
-            <span>Developer</span>
+            <strong>{user?.fullName || 'Guest User'}</strong>
+            <span>{user?.role || 'Visitor'}</span>
           </div>
           <div className="topbar-avatar" aria-hidden="true">
-            JD
+            {getInitials(user?.fullName)}
           </div>
         </div>
       </div>
