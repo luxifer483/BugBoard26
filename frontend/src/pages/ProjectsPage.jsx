@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { getProjects } from '../api/projectsApi'
 import { formatRelativeDate, getProjectAccent } from '../utils/formatters'
@@ -96,7 +97,11 @@ function ProjectsPage() {
           {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
           {!isLoading && !errorMessage
             ? projects.map((project) => (
-                <article className="project-card" key={project.id}>
+                <Link
+                  className="project-card project-card-link"
+                  key={project.id}
+                  to={`/dashboard/${project.id}`}
+                >
                   <div className="project-card-header">
                     <div
                       className={`project-card-badge ${getProjectAccent(project.id)}`}
@@ -129,7 +134,7 @@ function ProjectsPage() {
                     <span>{project.memberCount} members</span>
                     <span>{formatRelativeDate(project.updatedAt)}</span>
                   </div>
-                </article>
+                </Link>
               ))
             : null}
         </section>

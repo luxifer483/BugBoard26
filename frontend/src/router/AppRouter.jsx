@@ -43,6 +43,14 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/dashboard/:projectId"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }

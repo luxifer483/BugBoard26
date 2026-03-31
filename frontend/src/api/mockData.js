@@ -1,3 +1,5 @@
+// Dati statici usati dai moduli API quando `VITE_USE_MOCK_API` non e' impostata a `false`.
+// Permettono di sviluppare l'interfaccia anche senza backend disponibile.
 export const mockUser = {
   id: 1,
   fullName: 'John Doe',
@@ -6,6 +8,26 @@ export const mockUser = {
   avatarUrl: '',
 }
 
+// Elenco mock di utenti disponibili per assegnazioni, profili e membership.
+export const mockUsers = [
+  mockUser,
+  {
+    id: 2,
+    fullName: 'Alice Johnson',
+    email: 'alice.johnson@bugboard26.dev',
+    role: 'Project Manager',
+    avatarUrl: '',
+  },
+  {
+    id: 3,
+    fullName: 'Marco Rossi',
+    email: 'marco.rossi@bugboard26.dev',
+    role: 'Tester',
+    avatarUrl: '',
+  },
+]
+
+// Collezione mock per simulare la risposta dell'endpoint `/projects`.
 export const mockProjects = [
   {
     id: 1,
@@ -69,6 +91,81 @@ export const mockProjects = [
   },
 ]
 
+// Collezione mock per simulare la risposta dell'endpoint `/issues`.
+export const mockIssues = [
+  {
+    id: 41,
+    code: 'BUG-26-41',
+    title: 'Login button remains disabled after failed submit',
+    description: 'The login form does not restore the CTA state after an API error.',
+    type: 'BUG',
+    priority: 'HIGH',
+    status: 'OPEN',
+    reporter: mockUsers[1],
+    assignee: mockUsers[0],
+    project: mockProjects[0],
+    createdAt: '2026-03-29T09:00:00',
+    updatedAt: '2026-03-30T08:50:00',
+    attachmentUrl: '',
+  },
+  {
+    id: 39,
+    code: 'BUG-26-39',
+    title: 'Notifications badge does not refresh immediately',
+    description: 'Unread notifications count updates only after a full page refresh.',
+    type: 'BUG',
+    priority: 'MEDIUM',
+    status: 'IN_PROGRESS',
+    reporter: mockUsers[2],
+    assignee: mockUsers[0],
+    project: mockProjects[1],
+    createdAt: '2026-03-28T14:30:00',
+    updatedAt: '2026-03-30T07:10:00',
+    attachmentUrl: '',
+  },
+]
+
+// Collezione mock per simulare la risposta dell'endpoint `/comments`.
+export const mockComments = [
+  {
+    id: 1,
+    content: 'I reproduced the issue on the latest build.',
+    author: mockUsers[2],
+    issueId: 41,
+    createdAt: '2026-03-30T09:10:00',
+  },
+  {
+    id: 2,
+    content: 'Working on a fix for the disabled state reset.',
+    author: mockUsers[0],
+    issueId: 41,
+    createdAt: '2026-03-30T09:40:00',
+  },
+]
+
+// Collezione mock per simulare la risposta dell'endpoint `/projects/{id}/members`.
+export const mockProjectMembers = [
+  {
+    userId: 1,
+    projectId: 1,
+    role: 'Developer',
+    joinedAt: '2026-03-01T10:00:00',
+  },
+  {
+    userId: 2,
+    projectId: 1,
+    role: 'Project Manager',
+    joinedAt: '2026-03-01T10:00:00',
+  },
+  {
+    userId: 3,
+    projectId: 2,
+    role: 'Tester',
+    joinedAt: '2026-03-10T11:30:00',
+  },
+]
+
+// Collezione mock per simulare la risposta dell'endpoint `/notifications`.
 export const mockNotifications = [
   {
     id: 1,
