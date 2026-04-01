@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getProjectDashboardRoute } from '../config/routeConfig'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { getProjects } from '../api/projectsApi'
 import { formatRelativeDate, getProjectAccent } from '../utils/formatters'
@@ -100,7 +101,7 @@ function ProjectsPage() {
                 <Link
                   className="project-card project-card-link"
                   key={project.id}
-                  to={`/dashboard/${project.id}`}
+                  to={getProjectDashboardRoute(project.id)}
                 >
                   <div className="project-card-header">
                     <div

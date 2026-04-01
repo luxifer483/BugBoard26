@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockUsers } from './mockData'
 
 // Prepara le operazioni utente che serviranno per amministrazione e assegnazioni.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   return new Promise((resolve) => {
     window.setTimeout(() => resolve(data), 200)
@@ -11,7 +10,7 @@ function delay(data) {
 }
 
 export async function getUsers() {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       items: mockUsers,
       totalCount: mockUsers.length,
@@ -23,7 +22,7 @@ export async function getUsers() {
 }
 
 export async function createUser(payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       id: Date.now(),
       avatarUrl: '',

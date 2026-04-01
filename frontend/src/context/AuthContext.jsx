@@ -6,30 +6,13 @@ import {
 } from 'react'
 import { login as loginRequest } from '../api/authApi'
 import { getNotifications } from '../api/notificationsApi'
-import { setAuthToken } from '../api/client'
+import {
+  clearStoredSession,
+  readStoredSession,
+  writeStoredSession,
+} from '../security/authStorage'
+import { setAuthToken } from '../security/tokenManager'
 import { AuthContext } from './auth-context'
-
-const STORAGE_KEY = 'bugboard26.session'
-
-function readStoredSession() {
-  const savedSession = window.localStorage.getItem(STORAGE_KEY)
-
-  if (!savedSession) {
-    return {
-      token: '',
-      user: null,
-    }
-  }
-
-  try {
-    return JSON.parse(savedSession)
-  } catch {
-    return {
-      token: '',
-      user: null,
-    }
-  }
-}
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession)
@@ -43,11 +26,11 @@ export function AuthProvider({ children }) {
     setAuthToken(session.token)
 
     if (session.token && session.user) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+      writeStoredSession(session)
       return
     }
 
-    window.localStorage.removeItem(STORAGE_KEY)
+    clearStoredSession()
   }, [session])
 
   useEffect(() => {

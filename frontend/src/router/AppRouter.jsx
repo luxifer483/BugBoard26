@@ -1,18 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
 import DashboardPage from '../pages/DashboardPage'
 import LoginPage from '../pages/LoginPage'
 import ProjectsPage from '../pages/ProjectsPage'
-
-function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth()
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-
-  return children
-}
+import RouteGuard from '../security/RouteGuard'
 
 function AppRouter() {
   const { isAuthenticated } = useAuth()
@@ -20,35 +12,35 @@ function AppRouter() {
   return (
     <Routes>
       <Route
-        path="/"
-        element={<Navigate to={isAuthenticated ? '/projects' : '/login'} replace />}
+        path={ROUTES.home}
+        element={<Navigate to={isAuthenticated ? ROUTES.projects : ROUTES.login} replace />}
       />
       <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/projects" replace /> : <LoginPage />}
+        path={ROUTES.login}
+        element={isAuthenticated ? <Navigate to={ROUTES.projects} replace /> : <LoginPage />}
       />
       <Route
-        path="/projects"
+        path={ROUTES.projects}
         element={
-          <ProtectedRoute>
+          <RouteGuard>
             <ProjectsPage />
-          </ProtectedRoute>
+          </RouteGuard>
         }
       />
       <Route
-        path="/dashboard"
+        path={ROUTES.dashboard}
         element={
-          <ProtectedRoute>
+          <RouteGuard>
             <DashboardPage />
-          </ProtectedRoute>
+          </RouteGuard>
         }
       />
       <Route
-        path="/dashboard/:projectId"
+        path={`${ROUTES.dashboard}/:projectId`}
         element={
-          <ProtectedRoute>
+          <RouteGuard>
             <DashboardPage />
-          </ProtectedRoute>
+          </RouteGuard>
         }
       />
     </Routes>

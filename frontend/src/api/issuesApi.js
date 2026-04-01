@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockIssues } from './mockData'
 
 // Anticipa gli endpoint dedicati alle issue mantenendo la stessa forma tra mock e backend.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   return new Promise((resolve) => {
     window.setTimeout(() => resolve(data), 250)
@@ -11,7 +10,7 @@ function delay(data) {
 }
 
 export async function getIssues(projectId) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     const items = projectId
       ? mockIssues.filter((issue) => issue.project.id === Number(projectId))
       : mockIssues
@@ -29,7 +28,7 @@ export async function getIssues(projectId) {
 }
 
 export async function createIssue(payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       id: Date.now(),
       code: `BUG-26-${mockIssues.length + 1}`,
@@ -45,7 +44,7 @@ export async function createIssue(payload) {
 }
 
 export async function updateIssueStatus(issueId, payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       issueId,
       ...payload,

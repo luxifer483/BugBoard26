@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ROUTES } from '../config/routeConfig'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { getIssues } from '../api/issuesApi'
 import { getProjectById } from '../api/projectsApi'
@@ -114,7 +115,7 @@ function DashboardPage() {
             <p className="status-message">
               Open a project from the projects page to see its issues dashboard.
             </p>
-            <Link className="dashboard-link" to="/projects">
+            <Link className="dashboard-link" to={ROUTES.projects}>
               Go to projects
             </Link>
           </section>

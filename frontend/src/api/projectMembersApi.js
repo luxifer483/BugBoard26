@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockProjectMembers } from './mockData'
 
 // Anticipa la gestione dei membri di progetto usando gli stessi DTO previsti dal diagramma.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   return new Promise((resolve) => {
     window.setTimeout(() => resolve(data), 200)
@@ -11,7 +10,7 @@ function delay(data) {
 }
 
 export async function getProjectMembers(projectId) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     const items = mockProjectMembers.filter((member) => member.projectId === projectId)
 
     return delay({
@@ -25,7 +24,7 @@ export async function getProjectMembers(projectId) {
 }
 
 export async function addExistingUserToProject(payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       joinedAt: new Date().toISOString(),
       ...payload,
@@ -37,7 +36,7 @@ export async function addExistingUserToProject(payload) {
 }
 
 export async function removeUserFromProject(payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       removed: true,
       ...payload,
