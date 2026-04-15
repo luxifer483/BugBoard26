@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockUser } from './mockData'
 
 // Separa le operazioni di profilo dall'autenticazione per mantenere le responsabilita' chiare.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   return new Promise((resolve) => {
     window.setTimeout(() => resolve(data), 200)
@@ -11,7 +10,7 @@ function delay(data) {
 }
 
 export async function updateProfile(payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       ...mockUser,
       ...payload,

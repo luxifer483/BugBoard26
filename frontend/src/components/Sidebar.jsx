@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { ROUTES } from '../config/routeConfig'
 import AppLogo from './AppLogo'
 
 function Sidebar() {
@@ -11,7 +12,7 @@ function Sidebar() {
           className={({ isActive }) =>
             `sidebar-nav-item${isActive ? ' is-active' : ''}`
           }
-          to="/projects"
+          to={ROUTES.projects}
         >
           <span className="sidebar-nav-icon" aria-hidden="true">
             []
@@ -22,7 +23,7 @@ function Sidebar() {
           className={({ isActive }) =>
             `sidebar-nav-item${isActive ? ' is-active' : ''}`
           }
-          to="/dashboard"
+          to={ROUTES.dashboard}
         >
           <span className="sidebar-nav-icon" aria-hidden="true">
             #

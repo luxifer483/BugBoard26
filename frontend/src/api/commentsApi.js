@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockComments } from './mockData'
 
 // Gestisce il recupero e la creazione dei commenti legati a una issue.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   return new Promise((resolve) => {
     window.setTimeout(() => resolve(data), 200)
@@ -11,7 +10,7 @@ function delay(data) {
 }
 
 export async function getComments(issueId) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     const items = mockComments.filter((comment) => comment.issueId === issueId)
 
     return delay({
@@ -25,7 +24,7 @@ export async function getComments(issueId) {
 }
 
 export async function createComment(issueId, payload) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       id: Date.now(),
       issueId,

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppLogo from '../components/AppLogo'
+import { ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
 
 function LoginPage() {
@@ -29,7 +30,7 @@ function LoginPage() {
 
     try {
       await login(formState)
-      navigate('/projects')
+      navigate(ROUTES.projects)
     } catch {
       setErrorMessage('Unable to sign in. Please check your credentials and try again.')
     } finally {

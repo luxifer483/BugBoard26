@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockProjects } from './mockData'
 
 // Il modulo progetti espone la stessa interfaccia sia con mock sia con backend reale.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   // Ritardo simulato per avvicinare il mock al comportamento di una chiamata HTTP.
   return new Promise((resolve) => {
@@ -13,7 +12,7 @@ function delay(data) {
 
 export async function getProjects() {
   // In mock ritorna i progetti gia' presenti in memoria e il conteggio totale.
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     return delay({
       items: mockProjects,
       totalCount: mockProjects.length,
@@ -26,7 +25,7 @@ export async function getProjects() {
 }
 
 export async function getProjectById(projectId) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     const project = mockProjects.find((item) => item.id === Number(projectId)) || null
     return delay(project)
   }

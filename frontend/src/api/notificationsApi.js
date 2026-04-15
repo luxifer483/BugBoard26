@@ -1,9 +1,8 @@
 import apiClient from './client'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { mockNotifications } from './mockData'
 
 // Anche le notifiche possono arrivare da mock o da API reale in base alla env.
-const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false'
-
 function delay(data) {
   // Piccolo ritardo artificiale per mantenere realistico il comportamento UI.
   return new Promise((resolve) => {
@@ -13,7 +12,7 @@ function delay(data) {
 
 export async function getNotifications() {
   // In mock restituisce l'elenco completo e calcola il numero di notifiche non lette.
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     const unreadCount = mockNotifications.filter((notification) => !notification.read).length
 
     return delay({
