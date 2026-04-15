@@ -28,7 +28,7 @@ export async function getIssues(projectId) {
 }
 
 export async function getIssueById(issueId) {
-  if (useMockApi) {
+  if (USE_MOCK_API) {
     const issue = mockIssues.find((item) => item.id === Number(issueId)) || null
     return delay(issue)
   }

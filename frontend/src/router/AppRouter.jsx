@@ -47,9 +47,9 @@ function AppRouter() {
       <Route
         path="/issues/:issueId"
         element={
-          <ProtectedRoute>
+          <RouteGuard>
             <IssueDetailPage />
-          </ProtectedRoute>
+          </RouteGuard>
         }
       />
     </Routes>
