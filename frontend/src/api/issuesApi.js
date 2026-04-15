@@ -28,6 +28,16 @@ export async function getIssues(projectId) {
   return data
 }
 
+export async function getIssueById(issueId) {
+  if (useMockApi) {
+    const issue = mockIssues.find((item) => item.id === Number(issueId)) || null
+    return delay(issue)
+  }
+
+  const { data } = await apiClient.get(`/issues/${issueId}`)
+  return data
+}
+
 export async function createIssue(payload) {
   if (useMockApi) {
     return delay({

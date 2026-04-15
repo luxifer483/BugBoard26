@@ -96,16 +96,16 @@ export const mockIssues = [
   {
     id: 41,
     code: 'BUG-26-41',
-    title: 'Login button remains disabled after failed submit',
-    description: 'The login form does not restore the CTA state after an API error.',
+    title: 'Login button not responding on mobile devices',
+    description: 'When users attempt to click the login button on mobile devices tested on iPhone 12, iPhone 14, and Samsung Galaxy S21, the button does not respond to touch events. The issue appears to be specific to mobile browsers Safari and Chrome mobile. Desktop browsers work as expected.\n\nSteps to reproduce:\n1. Navigate to the login page on a mobile device\n2. Enter valid credentials\n3. Tap the login button\n4. Nothing happens, no loading state, no error message\n\nExpected behavior: The login process should initiate and the user should be redirected to the dashboard upon successful authentication.',
     type: 'BUG',
     priority: 'HIGH',
     status: 'OPEN',
     reporter: mockUsers[1],
     assignee: mockUsers[0],
     project: mockProjects[0],
-    createdAt: '2026-03-29T09:00:00',
-    updatedAt: '2026-03-30T08:50:00',
+    createdAt: '2026-03-15T09:00:00',
+    updatedAt: '2026-03-16T11:20:00',
     attachmentUrl: '',
   },
   {
@@ -129,17 +129,37 @@ export const mockIssues = [
 export const mockComments = [
   {
     id: 1,
-    content: 'I reproduced the issue on the latest build.',
+    content: 'I identified the issue. The event listener is not properly attached on mobile Safari. Working on a fix now.',
     author: mockUsers[2],
     issueId: 41,
-    createdAt: '2026-03-30T09:10:00',
+    createdAt: '2026-03-15T10:30:00',
   },
   {
     id: 2,
-    content: 'Working on a fix for the disabled state reset.',
+    content: 'Thanks for the update! Let me know if you need any help with testing on iOS devices.',
     author: mockUsers[0],
     issueId: 41,
-    createdAt: '2026-03-30T09:40:00',
+    createdAt: '2026-03-15T14:45:00',
+  },
+  {
+    id: 3,
+    content: 'I have pushed a potential fix to the dev branch. Could someone test it on iPhone 14 and iPad?',
+    author: mockUsers[2],
+    issueId: 41,
+    createdAt: '2026-03-16T09:15:00',
+  },
+  {
+    id: 4,
+    content: 'Tested on iPhone 14 Pro. The login button is now working correctly. Great job.',
+    author: {
+      id: 4,
+      fullName: 'Alex Rivera',
+      email: 'alex.rivera@bugboard26.dev',
+      role: 'QA Engineer',
+      avatarUrl: '',
+    },
+    issueId: 41,
+    createdAt: '2026-03-16T11:20:00',
   },
 ]
 

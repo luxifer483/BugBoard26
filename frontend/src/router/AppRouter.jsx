@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import DashboardPage from '../pages/DashboardPage'
+import IssueDetailPage from '../pages/IssueDetailPage'
 import LoginPage from '../pages/LoginPage'
 import ProjectsPage from '../pages/ProjectsPage'
 
@@ -48,6 +49,14 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/issues/:issueId"
+        element={
+          <ProtectedRoute>
+            <IssueDetailPage />
           </ProtectedRoute>
         }
       />

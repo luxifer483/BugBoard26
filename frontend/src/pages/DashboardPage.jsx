@@ -141,7 +141,11 @@ function DashboardPage() {
               {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
               {!isLoading && !errorMessage
                 ? issues.map((issue) => (
-                    <article className="issue-card" key={issue.id}>
+                    <Link
+                      className="issue-card issue-card-link"
+                      key={issue.id}
+                      to={`/issues/${issue.id}`}
+                    >
                       <div className="issue-card-header">
                         <div className="project-card-badge is-blue" aria-hidden="true">
                           !
@@ -177,7 +181,7 @@ function DashboardPage() {
                           <strong>{formatRelativeDate(issue.updatedAt)}</strong>
                         </div>
                       </div>
-                    </article>
+                    </Link>
                   ))
                 : null}
             </section>
