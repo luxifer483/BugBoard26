@@ -99,7 +99,7 @@ function DashboardPage() {
   ]
 
   return (
-    <DashboardLayout>
+    <DashboardLayout projectId={projectId}>
       <main className="projects-page">
         <section className="projects-hero">
           <h1>Dashboard</h1>

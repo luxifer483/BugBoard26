@@ -143,7 +143,7 @@ function IssueDetailPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout projectId={issue?.project?.id ? String(issue.project.id) : ''}>
       <main className="issue-detail-page">
         {isLoading ? <p className="status-message">Loading issue detail...</p> : null}
         {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}

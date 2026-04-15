@@ -4,7 +4,9 @@ import { useAuth } from '../hooks/useAuth'
 import DashboardPage from '../pages/DashboardPage'
 import IssueDetailPage from '../pages/IssueDetailPage'
 import LoginPage from '../pages/LoginPage'
+import PlaceholderPage from '../pages/PlaceholderPage'
 import ProjectsPage from '../pages/ProjectsPage'
+import UserManagementPage from '../pages/UserManagementPage'
 import RouteGuard from '../security/RouteGuard'
 
 function AppRouter() {
@@ -49,6 +51,30 @@ function AppRouter() {
         element={
           <RouteGuard>
             <IssueDetailPage />
+          </RouteGuard>
+        }
+      />
+      <Route
+        path={`${ROUTES.projects}/:projectId/users`}
+        element={
+          <RouteGuard>
+            <UserManagementPage />
+          </RouteGuard>
+        }
+      />
+      <Route
+        path={`${ROUTES.createIssue}/:projectId`}
+        element={
+          <RouteGuard>
+            <PlaceholderPage type="createIssue" />
+          </RouteGuard>
+        }
+      />
+      <Route
+        path={ROUTES.profile}
+        element={
+          <RouteGuard>
+            <PlaceholderPage type="profile" />
           </RouteGuard>
         }
       />

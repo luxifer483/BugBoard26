@@ -11,7 +11,7 @@ function delay(data) {
 
 export async function getProjectMembers(projectId) {
   if (USE_MOCK_API) {
-    const items = mockProjectMembers.filter((member) => member.projectId === projectId)
+    const items = mockProjectMembers.filter((member) => member.projectId === Number(projectId))
 
     return delay({
       items,
