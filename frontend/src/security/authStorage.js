@@ -1,8 +1,27 @@
+import { USE_MOCK_API } from '../config/apiConfig'
 import { STORAGE_KEYS } from '../config/storageKeys'
+import { mockUser } from '../api/mockData'
 
 const EMPTY_SESSION = {
   token: '',
   user: null,
+}
+
+function normalizeStoredSession(session) {
+  if (!USE_MOCK_API || !session?.token || !session.user) {
+    return session
+  }
+
+  return {
+    ...session,
+    user: {
+      ...session.user,
+      id: mockUser.id,
+      fullName: mockUser.fullName,
+      role: mockUser.role,
+      avatarUrl: mockUser.avatarUrl,
+    },
+  }
 }
 
 export function readStoredSession() {
@@ -13,7 +32,7 @@ export function readStoredSession() {
   }
 
   try {
-    return JSON.parse(savedSession)
+    return normalizeStoredSession(JSON.parse(savedSession))
   } catch {
     return EMPTY_SESSION
   }

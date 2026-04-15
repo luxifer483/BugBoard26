@@ -30,6 +30,10 @@ function UserManagementPage() {
     async function loadUserManagement() {
       setIsLoading(true)
       setErrorMessage('')
+      setSuccessMessage('')
+      setProject(null)
+      setUsers([])
+      setMembers([])
 
       try {
         const [projectResponse, usersResponse, membersResponse] = await Promise.all([
@@ -39,6 +43,11 @@ function UserManagementPage() {
         ])
 
         if (!isMounted) {
+          return
+        }
+
+        if (!projectResponse) {
+          setErrorMessage('Project not found.')
           return
         }
 
@@ -79,8 +88,7 @@ function UserManagementPage() {
     [members, users],
   )
 
-  const currentMember = members.find((member) => member.userId === user?.id)
-  const canManageUsers = currentMember?.role === 'Admin' || user?.role === 'Admin'
+  const canManageUsers = user?.role === 'Admin'
 
   async function handleCreateUser(payload) {
     setIsSubmitting(true)
@@ -153,7 +161,11 @@ function UserManagementPage() {
       <main className="user-management-page">
         <header className="user-management-header">
           <h1>User Management</h1>
-          <p>Manage project members and permissions</p>
+          <p>
+            {project
+              ? `Manage members and permissions for ${project.name}`
+              : 'Manage project members and permissions'}
+          </p>
         </header>
 
         {isLoading ? <p className="status-message">Loading user management...</p> : null}

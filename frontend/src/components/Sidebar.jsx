@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
-import { getProjectMembers } from '../api/projectMembersApi'
 import { getProjectById } from '../api/projectsApi'
 import {
   getProjectCreateIssueRoute,
@@ -21,7 +20,6 @@ function Sidebar({ activeProjectId = '' }) {
     return window.sessionStorage.getItem(ACTIVE_PROJECT_STORAGE_KEY) || ''
   })
   const [project, setProject] = useState(null)
-  const [members, setMembers] = useState([])
   const currentProjectId = activeProjectId || projectId || storedProjectId
 
   useEffect(() => {
@@ -29,7 +27,6 @@ function Sidebar({ activeProjectId = '' }) {
       window.sessionStorage.removeItem(ACTIVE_PROJECT_STORAGE_KEY)
       setStoredProjectId('')
       setProject(null)
-      setMembers([])
       return
     }
 
@@ -43,21 +40,16 @@ function Sidebar({ activeProjectId = '' }) {
   useEffect(() => {
     if (!currentProjectId) {
       setProject(null)
-      setMembers([])
       return
     }
 
     let isMounted = true
 
     async function loadProjectNavigation() {
-      const [projectResponse, membersResponse] = await Promise.all([
-        getProjectById(currentProjectId),
-        getProjectMembers(currentProjectId),
-      ])
+      const projectResponse = await getProjectById(currentProjectId)
 
       if (isMounted) {
         setProject(projectResponse)
-        setMembers(membersResponse.items)
       }
     }
 
@@ -67,11 +59,6 @@ function Sidebar({ activeProjectId = '' }) {
       isMounted = false
     }
   }, [currentProjectId])
-
-  const canManageUsers = useMemo(() => {
-    const currentMember = members.find((member) => member.userId === user?.id)
-    return currentMember?.role === 'Admin' || user?.role === 'Admin'
-  }, [members, user])
 
   const dashboardRoute = currentProjectId
     ? getProjectDashboardRoute(currentProjectId)
@@ -129,7 +116,7 @@ function Sidebar({ activeProjectId = '' }) {
             <span>Create Issue</span>
           </NavLink>
         ) : null}
-        {currentProjectId && canManageUsers ? (
+        {currentProjectId && user?.role === 'Admin' ? (
           <NavLink
             className={({ isActive }) =>
               `sidebar-nav-item${isActive ? ' is-active' : ''}`
