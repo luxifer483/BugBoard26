@@ -39,14 +39,18 @@ export async function getIssueById(issueId) {
 
 export async function createIssue(payload) {
   if (USE_MOCK_API) {
-    return delay({
+    const createdIssue = {
       id: Date.now(),
       code: `BUG-26-${mockIssues.length + 1}`,
       status: 'OPEN',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...payload,
-    })
+    }
+
+    mockIssues.unshift(createdIssue)
+
+    return delay(createdIssue)
   }
 
   const { data } = await apiClient.post('/issues', payload)

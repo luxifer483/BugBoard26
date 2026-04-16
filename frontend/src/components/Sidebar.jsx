@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { NavLink, useLocation, useParams } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getProjectById } from '../api/projectsApi'
 import {
-  getProjectCreateIssueRoute,
   getProjectDashboardRoute,
   getProjectUserManagementRoute,
   ROUTES,
@@ -15,6 +14,7 @@ const ACTIVE_PROJECT_STORAGE_KEY = 'bugboard26.activeProjectId'
 function Sidebar({ activeProjectId = '' }) {
   const { projectId } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const { user } = useAuth()
   const [storedProjectId, setStoredProjectId] = useState(() => {
     return window.sessionStorage.getItem(ACTIVE_PROJECT_STORAGE_KEY) || ''
@@ -63,6 +63,21 @@ function Sidebar({ activeProjectId = '' }) {
   const dashboardRoute = currentProjectId
     ? getProjectDashboardRoute(currentProjectId)
     : ROUTES.dashboard
+  const isCreateIssueOpen = location.search.includes('modal=create-issue')
+
+  function handleOpenCreateIssue() {
+    if (!currentProjectId) {
+      return
+    }
+
+    const searchParams = new URLSearchParams(location.search)
+    searchParams.set('modal', 'create-issue')
+
+    navigate({
+      pathname: location.pathname,
+      search: searchParams.toString(),
+    })
+  }
 
   return (
     <aside className="app-sidebar">
@@ -104,17 +119,16 @@ function Sidebar({ activeProjectId = '' }) {
           <span>Dashboard</span>
         </NavLink>
         {currentProjectId ? (
-          <NavLink
-            className={({ isActive }) =>
-              `sidebar-nav-item${isActive ? ' is-active' : ''}`
-            }
-            to={getProjectCreateIssueRoute(currentProjectId)}
+          <button
+            className={`sidebar-nav-item${isCreateIssueOpen ? ' is-active' : ''}`}
+            onClick={handleOpenCreateIssue}
+            type="button"
           >
             <span className="sidebar-nav-icon" aria-hidden="true">
               +
             </span>
             <span>Create Issue</span>
-          </NavLink>
+          </button>
         ) : null}
         {currentProjectId && user?.role === 'Admin' ? (
           <NavLink

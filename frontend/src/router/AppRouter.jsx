@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
+import CreateIssueRedirectPage from '../pages/CreateIssueRedirectPage'
 import DashboardPage from '../pages/DashboardPage'
 import IssueDetailPage from '../pages/IssueDetailPage'
 import LoginPage from '../pages/LoginPage'
@@ -66,7 +67,7 @@ function AppRouter() {
         path={`${ROUTES.createIssue}/:projectId`}
         element={
           <RouteGuard>
-            <PlaceholderPage type="createIssue" />
+            <CreateIssueRedirectPage />
           </RouteGuard>
         }
       />
