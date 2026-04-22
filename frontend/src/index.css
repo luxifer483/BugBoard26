@@ -683,6 +683,86 @@ p {
   gap: 16px;
 }
 
+.issues-toolbar {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e5eaf1;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.issues-toolbar-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.issues-toolbar-header strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.issues-toolbar-header p {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.issues-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.issues-filter-field {
+  display: grid;
+  gap: 8px;
+}
+
+.issues-filter-field span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.issues-filter-field select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+}
+
+.issues-filter-field select:focus {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.issues-filter-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 700;
+}
+
+.issues-filter-reset:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .project-stat-card {
   display: flex;
   align-items: center;
@@ -725,6 +805,10 @@ p {
 .issues-list {
   display: grid;
   gap: 16px;
+}
+
+.issues-empty {
+  justify-items: start;
 }
 
 .status-message {
@@ -1638,6 +1722,7 @@ p {
     border-bottom: 1px solid #e6ebf2;
   }
 
+  .issues-filters,
   .projects-stats,
   .projects-grid,
   .issue-card-details,

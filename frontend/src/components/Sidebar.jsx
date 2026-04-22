@@ -16,31 +16,30 @@ function Sidebar({ activeProjectId = '' }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [storedProjectId, setStoredProjectId] = useState(() => {
-    return window.sessionStorage.getItem(ACTIVE_PROJECT_STORAGE_KEY) || ''
-  })
   const [project, setProject] = useState(null)
+  const storedProjectId =
+    location.pathname === ROUTES.projects
+      ? ''
+      : window.sessionStorage.getItem(ACTIVE_PROJECT_STORAGE_KEY) || ''
   const currentProjectId = activeProjectId || projectId || storedProjectId
+  const displayedProject =
+    project?.id === Number(currentProjectId) ? project : null
 
   useEffect(() => {
     if (location.pathname === ROUTES.projects) {
       window.sessionStorage.removeItem(ACTIVE_PROJECT_STORAGE_KEY)
-      setStoredProjectId('')
-      setProject(null)
       return
     }
 
     if (activeProjectId || projectId) {
       const nextProjectId = activeProjectId || projectId
       window.sessionStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, nextProjectId)
-      setStoredProjectId(nextProjectId)
     }
   }, [activeProjectId, location.pathname, projectId])
 
   useEffect(() => {
     if (!currentProjectId) {
-      setProject(null)
-      return
+      return undefined
     }
 
     let isMounted = true
@@ -83,13 +82,13 @@ function Sidebar({ activeProjectId = '' }) {
     <aside className="app-sidebar">
       <AppLogo size="small" />
 
-      {project ? (
+      {displayedProject ? (
         <section className="sidebar-project" aria-label="Current project">
           <div className="sidebar-project-icon" aria-hidden="true">
             []
           </div>
           <div>
-            <strong>{project.name}</strong>
+            <strong>{displayedProject.name}</strong>
             <span>Active Project</span>
           </div>
         </section>

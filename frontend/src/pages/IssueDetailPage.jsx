@@ -6,6 +6,7 @@ import CommentsList from '../components/CommentsList'
 import IssueInfoCard from '../components/IssueInfoCard'
 import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
+import { formatEnumLabel } from '../utils/formatters'
 
 const STATUS_CLASS_MAP = {
   OPEN: 'is-red',
@@ -18,16 +19,6 @@ const PRIORITY_CLASS_MAP = {
   MEDIUM: 'is-blue',
   HIGH: 'is-orange',
   CRITICAL: 'is-red',
-}
-
-function formatTitleCase(value) {
-  return value
-    ? value
-        .toLowerCase()
-        .split('_')
-        .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
-        .join(' ')
-    : 'Unknown'
 }
 
 function formatHeaderDate(value) {
@@ -160,12 +151,12 @@ function IssueDetailPage() {
               </div>
               <h1>{issue.title}</h1>
               <div className="issue-detail-tags">
-                <span className="issue-chip is-red">{formatTitleCase(issue.type)}</span>
+                <span className="issue-chip is-red">{formatEnumLabel(issue.type)}</span>
                 <span className={`issue-chip ${STATUS_CLASS_MAP[issue.status] || 'is-blue'}`}>
-                  {formatTitleCase(issue.status)}
+                  {formatEnumLabel(issue.status)}
                 </span>
                 <span className={`issue-chip ${PRIORITY_CLASS_MAP[issue.priority] || 'is-blue'}`}>
-                  Priority: {formatTitleCase(issue.priority)}
+                  Priority: {formatEnumLabel(issue.priority)}
                 </span>
               </div>
             </header>

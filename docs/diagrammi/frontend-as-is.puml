@@ -1,0 +1,201 @@
+@startuml
+title BugBoard26 - Frontend Class Diagram As-Is
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 60
+
+package "Core Frontend" {
+  class App <<Component>> {
+    +render()
+  }
+
+  class AuthProvider <<Context>> {
+    +login(credentials)
+    +logout()
+  }
+
+  class AuthContext <<Context>>
+
+  class useAuth <<Hook>> {
+    +useAuth()
+  }
+
+  class AppRouter <<Component>> {
+    +mapRoutes()
+  }
+
+  class DashboardLayout <<Layout>> {
+    +handleCloseCreateIssueModal()
+  }
+}
+
+package "Pages" {
+  class LoginPage <<Page>> {
+    +handleChange(event)
+    +handleSubmit(event)
+  }
+
+  class ProjectsPage <<Page>> {
+    +loadProjects()
+    +renderProjectCards()
+  }
+
+  class DashboardPage <<Page>> {
+    +loadDashboard(projectId)
+    +handleFilterChange(event)
+    +clearFilters()
+    +renderStats()
+    +renderIssueCards()
+  }
+
+  class IssueDetailPage <<Page>> {
+    +loadIssueDetail(issueId)
+    +handleStatusChange(nextStatus)
+    +handleAddComment(content)
+  }
+
+  class UserManagementPage <<Page>> {
+    +loadUserManagement(projectId)
+    +handleCreateUser(payload)
+    +handleAddExistingUser(email)
+  }
+
+  class CreateIssueRedirectPage <<Page>> {
+    +resolveTargetRoute(projectId)
+  }
+
+  class PlaceholderPage <<Page>> {
+    +resolveContent(type)
+  }
+}
+
+package "Shared Components" {
+  class AppLogo <<Component>> {
+    +render()
+  }
+
+  class Sidebar <<Component>> {
+    +handleOpenCreateIssue()
+  }
+
+  class Topbar <<Component>> {
+    +handleToggleNotifications()
+    +handleToggleProfile()
+    +handleLogout()
+  }
+
+  class CreateIssueModal <<Component>> {
+    +loadAssignableUsers()
+    +handleFieldChange(event)
+    +handleFileChange(event)
+    +handleSubmit(event)
+  }
+
+  class UserForm <<Component>> {
+    +handleCreateUser(event)
+    +handleAddExistingUser(event)
+  }
+
+  class UserList <<Component>> {
+    +renderMembers()
+  }
+
+  class RoleSelector <<Component>> {
+    +renderRoleOptions()
+  }
+
+  class IssueInfoCard <<Component>> {
+    +renderDetails()
+  }
+
+  class StatusDropdown <<Component>> {
+    +handleChange(event)
+  }
+
+  class CommentsList <<Component>> {
+    +renderComments()
+  }
+
+  class CommentInput <<Component>> {
+    +handleSubmit(event)
+  }
+}
+
+' layout helpers
+App -[hidden]-> AuthProvider
+AuthProvider -[hidden]-> AuthContext
+AuthContext -[hidden]-> useAuth
+useAuth -[hidden]-> AppRouter
+AppRouter -[hidden]-> DashboardLayout
+
+LoginPage -[hidden]-> ProjectsPage
+ProjectsPage -[hidden]-> DashboardPage
+DashboardPage -[hidden]-> IssueDetailPage
+IssueDetailPage -[hidden]-> UserManagementPage
+UserManagementPage -[hidden]-> CreateIssueRedirectPage
+CreateIssueRedirectPage -[hidden]-> PlaceholderPage
+
+AppLogo -[hidden]-> Sidebar
+Sidebar -[hidden]-> Topbar
+Topbar -[hidden]-> CreateIssueModal
+CreateIssueModal -[hidden]-> UserForm
+UserForm -[hidden]-> UserList
+UserList -[hidden]-> RoleSelector
+RoleSelector -[hidden]-> IssueInfoCard
+IssueInfoCard -[hidden]-> StatusDropdown
+StatusDropdown -[hidden]-> CommentsList
+CommentsList -[hidden]-> CommentInput
+
+' core structure
+App --> AuthProvider
+App --> AppRouter
+AuthProvider --> AuthContext
+useAuth ..> AuthContext
+AppRouter ..> useAuth
+
+' routing toward pages
+AppRouter --> LoginPage
+AppRouter --> ProjectsPage
+AppRouter --> DashboardPage
+AppRouter --> IssueDetailPage
+AppRouter --> UserManagementPage
+AppRouter --> CreateIssueRedirectPage
+AppRouter --> PlaceholderPage
+
+' layout usage
+ProjectsPage --> DashboardLayout
+DashboardPage --> DashboardLayout
+IssueDetailPage --> DashboardLayout
+UserManagementPage --> DashboardLayout
+PlaceholderPage --> DashboardLayout
+
+' page to shared components
+LoginPage --> AppLogo
+DashboardLayout --> Sidebar
+DashboardLayout --> Topbar
+DashboardLayout --> CreateIssueModal
+IssueDetailPage --> CommentsList
+IssueDetailPage --> IssueInfoCard
+UserManagementPage --> UserList
+UserManagementPage --> UserForm
+
+' shared component composition
+Sidebar --> AppLogo
+UserForm --> RoleSelector
+IssueInfoCard --> StatusDropdown
+CommentsList --> CommentInput
+
+' frontend hook usage
+LoginPage ..> useAuth
+IssueDetailPage ..> useAuth
+UserManagementPage ..> useAuth
+Sidebar ..> useAuth
+Topbar ..> useAuth
+CreateIssueModal ..> useAuth
+
+@enduml

@@ -27,6 +27,16 @@ export function formatRelativeDate(value) {
   return `Updated ${diffDays} day${diffDays === 1 ? '' : 's'} ago`
 }
 
+export function formatEnumLabel(value) {
+  return value
+    ? value
+        .toLowerCase()
+        .split('_')
+        .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+        .join(' ')
+    : 'Unknown'
+}
+
 export function getInitials(fullName) {
   if (!fullName) {
     return 'BB'
