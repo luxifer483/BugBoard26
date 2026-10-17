@@ -42,6 +42,7 @@ package "Pages" {
 
   class ProjectsPage <<Page>> {
     +loadProjects()
+    +handleCreateProject(event)
     +renderProjectCards()
   }
 
@@ -63,6 +64,7 @@ package "Pages" {
     +loadUserManagement(projectId)
     +handleCreateUser(payload)
     +handleAddExistingUser(email)
+    +handleRemoveMember(member)
   }
 
   class CreateIssueRedirectPage <<Page>> {

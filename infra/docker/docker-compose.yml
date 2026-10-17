@@ -1,4 +1,22 @@
 services:
+  backend:
+    build:
+      context: ../../backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:-bugboard26-development-only-secret-change-before-deploying}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@bugboard26.dev}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe123!}
   postgres:
     image: postgres:17-alpine
     container_name: bugboard26-postgres

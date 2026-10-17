@@ -33,3 +33,17 @@ export async function getProjectById(projectId) {
   const { data } = await apiClient.get(`/projects/${projectId}`)
   return data
 }
+
+export async function createProject(payload) {
+  if (USE_MOCK_API) {
+    const project = {
+      id: Date.now(), ...payload, memberCount: 0,
+      totalIssues: 0, openIssues: 0, closedIssues: 0,
+      updatedAt: new Date().toISOString(),
+    }
+    mockProjects.unshift(project)
+    return delay(project)
+  }
+  const { data } = await apiClient.post('/projects', payload)
+  return data
+}

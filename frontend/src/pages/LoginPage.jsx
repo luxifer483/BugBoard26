@@ -31,8 +31,8 @@ function LoginPage() {
     try {
       await login(formState)
       navigate(ROUTES.projects)
-    } catch {
-      setErrorMessage('Unable to sign in. Please check your credentials and try again.')
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Unable to reach the backend. Check that it is running.')
     } finally {
       setIsSubmitting(false)
     }

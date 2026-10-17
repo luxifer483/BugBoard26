@@ -27,3 +27,8 @@ export async function login(payload) {
   const { data } = await apiClient.post('/auth/login', payload)
   return data
 }
+
+export async function getCurrentUser() {
+  const { data } = await apiClient.get('/users/me')
+  return data
+}

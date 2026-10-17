@@ -1,0 +1,50 @@
+@startuml
+title BugBoard26 - Backend Model As-Is - Milestone 1
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class User <<Entity>> {
+  -id: Long
+  -fullName: String
+  -email: String
+  -passwordHash: String
+  -role: Role
+  -createdAt: Instant
+}
+enum Role {
+  USER
+  ADMIN
+}
+class Project <<Entity>> {
+  -id: Long
+  -name: String
+  -description: String
+  -status: ProjectStatus
+  -createdAt: Instant
+  -updatedAt: Instant
+  +touch(): void
+}
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+class ProjectMembership <<Entity>> {
+  -id: Long
+  -project: Project
+  -user: User
+  -joinedAt: Instant
+}
+User --> Role
+Project --> ProjectStatus
+User "1" -- "0..*" ProjectMembership
+Project "1" -- "0..*" ProjectMembership
+note bottom of ProjectMembership
+  unique(project_id, user_id)
+  I privilegi ADMIN sono globali.
+end note
+legend bottom
+  Sono mostrate le entita' implementate in questa milestone.
+  Costruttori e getter omessi per leggibilita'.
+endlegend
+@enduml

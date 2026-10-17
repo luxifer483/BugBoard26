@@ -8,6 +8,7 @@ import {
 } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
 import AppLogo from './AppLogo'
+import { USE_MOCK_API } from '../config/apiConfig'
 
 const ACTIVE_PROJECT_STORAGE_KEY = 'bugboard26.activeProjectId'
 
@@ -45,10 +46,11 @@ function Sidebar({ activeProjectId = '' }) {
     let isMounted = true
 
     async function loadProjectNavigation() {
-      const projectResponse = await getProjectById(currentProjectId)
-
-      if (isMounted) {
-        setProject(projectResponse)
+      try {
+        const projectResponse = await getProjectById(currentProjectId)
+        if (isMounted) setProject(projectResponse)
+      } catch {
+        if (isMounted) setProject(null)
       }
     }
 
@@ -117,7 +119,7 @@ function Sidebar({ activeProjectId = '' }) {
           </span>
           <span>Dashboard</span>
         </NavLink>
-        {currentProjectId ? (
+        {currentProjectId && USE_MOCK_API ? (
           <button
             className={`sidebar-nav-item${isCreateIssueOpen ? ' is-active' : ''}`}
             onClick={handleOpenCreateIssue}
@@ -129,7 +131,7 @@ function Sidebar({ activeProjectId = '' }) {
             <span>Create Issue</span>
           </button>
         ) : null}
-        {currentProjectId && user?.role === 'Admin' ? (
+        {currentProjectId && user?.role === 'ADMIN' ? (
           <NavLink
             className={({ isActive }) =>
               `sidebar-nav-item${isActive ? ' is-active' : ''}`

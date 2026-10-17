@@ -692,6 +692,34 @@ p {
   background: #ffffff;
 }
 
+.project-create-card form {
+  display: grid;
+  gap: 14px;
+}
+
+.project-create-card .primary-button {
+  justify-self: start;
+}
+
+.user-list-remove {
+  margin-top: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #b91c1c;
+  text-decoration: underline;
+  font-size: 0.8rem;
+}
+
+.user-list-remove:disabled {
+  opacity: 0.5;
+}
+
+.user-role-badge.is-user {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
 .issues-toolbar-header {
   display: flex;
   flex-wrap: wrap;

@@ -31,7 +31,7 @@ export async function addExistingUserToProject(payload) {
     })
   }
 
-  const { data } = await apiClient.post(`/projects/${payload.projectId}/members`, payload)
+  const { data } = await apiClient.post(`/projects/${payload.projectId}/members`, { userId: payload.userId })
   return data
 }
 

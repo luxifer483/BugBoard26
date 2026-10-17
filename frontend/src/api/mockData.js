@@ -4,7 +4,7 @@ export const mockUser = {
   id: 1,
   fullName: 'John Doe',
   email: 'john.doe@bugboard26.dev',
-  role: 'Admin',
+  role: 'ADMIN',
   avatarUrl: '',
 }
 

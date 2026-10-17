@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { formatRelativeDate, getInitials } from '../utils/formatters'
 
 function Topbar() {
@@ -75,6 +76,8 @@ function Topbar() {
           <button
             aria-expanded={isNotificationsOpen}
             aria-haspopup="dialog"
+            disabled={!USE_MOCK_API}
+            title={USE_MOCK_API ? 'Notifications' : 'Notifications are planned for the next backend milestone'}
             className={`topbar-icon-button${isNotificationsOpen ? ' is-active' : ''}`}
             onClick={handleToggleNotifications}
             type="button"

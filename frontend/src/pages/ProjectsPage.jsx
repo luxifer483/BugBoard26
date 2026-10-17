@@ -2,13 +2,19 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getProjectDashboardRoute } from '../config/routeConfig'
 import DashboardLayout from '../layouts/DashboardLayout'
-import { getProjects } from '../api/projectsApi'
+import { createProject, getProjects } from '../api/projectsApi'
+import { USE_MOCK_API } from '../config/apiConfig'
+import { useAuth } from '../hooks/useAuth'
 import { formatRelativeDate, getProjectAccent } from '../utils/formatters'
 
 function ProjectsPage() {
+  const { user } = useAuth()
   const [projects, setProjects] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [projectDraft, setProjectDraft] = useState({ name: '', description: '' })
+  const [isCreating, setIsCreating] = useState(false)
+  const [createError, setCreateError] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -41,6 +47,21 @@ function ProjectsPage() {
     }
   }, [])
 
+  async function handleCreateProject(event) {
+    event.preventDefault()
+    setIsCreating(true)
+    setCreateError('')
+    try {
+      const created = await createProject(projectDraft)
+      setProjects((current) => [created, ...current])
+      setProjectDraft({ name: '', description: '' })
+    } catch (error) {
+      setCreateError(error.response?.data?.message || 'Unable to create the project.')
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   const stats = [
     {
       label: 'Total Projects',
@@ -50,19 +71,19 @@ function ProjectsPage() {
     },
     {
       label: 'Total Issues',
-      value: projects.reduce((sum, project) => sum + project.totalIssues, 0),
+      value: projects.reduce((sum, project) => sum + (project.totalIssues ?? 0), 0),
       icon: '!',
       accentClass: 'is-orange',
     },
     {
       label: 'Open Issues',
-      value: projects.reduce((sum, project) => sum + project.openIssues, 0),
+      value: projects.reduce((sum, project) => sum + (project.openIssues ?? 0), 0),
       icon: 'o',
       accentClass: 'is-red',
     },
     {
       label: 'Closed Issues',
-      value: projects.reduce((sum, project) => sum + project.closedIssues, 0),
+      value: projects.reduce((sum, project) => sum + (project.closedIssues ?? 0), 0),
       icon: 'v',
       accentClass: 'is-green',
     },
@@ -77,7 +98,7 @@ function ProjectsPage() {
         </section>
 
         <section className="projects-stats" aria-label="Project statistics">
-          {stats.map((item) => (
+          {stats.filter((item) => USE_MOCK_API || item.label === 'Total Projects').map((item) => (
             <article className="project-stat-card" key={item.label}>
               <div>
                 <span>{item.label}</span>
@@ -93,9 +114,38 @@ function ProjectsPage() {
           ))}
         </section>
 
+        {user?.role === 'ADMIN' ? (
+          <section className="user-form-card project-create-card" aria-label="Create project">
+            <h2>Create Project</h2>
+            <form onSubmit={handleCreateProject}>
+              <div className="form-field-grid">
+                <label className="form-field">
+                  <span>Name</span>
+                  <input required maxLength={120} value={projectDraft.name}
+                    onChange={(event) => setProjectDraft((draft) => ({ ...draft, name: event.target.value }))} />
+                </label>
+                <label className="form-field">
+                  <span>Description</span>
+                  <input required maxLength={2000} value={projectDraft.description}
+                    onChange={(event) => setProjectDraft((draft) => ({ ...draft, description: event.target.value }))} />
+                </label>
+              </div>
+              {createError ? <p role="alert" className="status-message is-error">{createError}</p> : null}
+              <button className="primary-button" type="submit" disabled={isCreating || isLoading || Boolean(errorMessage)}>
+                {isCreating ? 'Creating...' : 'Create Project'}
+              </button>
+            </form>
+          </section>
+        ) : null}
+
         <section className="projects-grid" aria-label="Projects list">
           {isLoading ? <p className="status-message">Loading projects...</p> : null}
           {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
+          {!isLoading && !errorMessage && !projects.length ? (
+            <p className="status-message">{user?.role === 'ADMIN'
+              ? 'No projects yet. Create your first project above.'
+              : 'You do not belong to any projects yet. Contact an administrator.'}</p>
+          ) : null}
           {!isLoading && !errorMessage
             ? projects.map((project) => (
                 <Link
@@ -116,7 +166,7 @@ function ProjectsPage() {
                     </div>
                   </div>
 
-                  <div className="project-card-stats">
+                  {USE_MOCK_API ? <div className="project-card-stats">
                     <div>
                       <span>Total</span>
                       <strong>{project.totalIssues}</strong>
@@ -129,7 +179,7 @@ function ProjectsPage() {
                       <span>Closed</span>
                       <strong className="project-closed-count">{project.closedIssues}</strong>
                     </div>
-                  </div>
+                  </div> : <p className="status-message">Status: {project.status}</p>}
 
                   <div className="project-card-footer">
                     <span>{project.memberCount} members</span>

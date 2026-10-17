@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { addExistingUserToProject, getProjectMembers } from '../api/projectMembersApi'
+import { addExistingUserToProject, getProjectMembers, removeUserFromProject } from '../api/projectMembersApi'
 import { getProjectById } from '../api/projectsApi'
 import { createUser, getUsers } from '../api/usersApi'
 import UserForm from '../components/UserForm'
@@ -10,12 +10,13 @@ import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
 
 function normalizeProjectRole(role) {
-  return role === 'Admin' ? 'Admin' : role || 'Developer'
+  return role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER'
 }
 
 function UserManagementPage() {
   const { projectId } = useParams()
   const { user } = useAuth()
+  const canManageUsers = user?.role === 'ADMIN'
   const [project, setProject] = useState(null)
   const [users, setUsers] = useState([])
   const [members, setMembers] = useState([])
@@ -25,6 +26,7 @@ function UserManagementPage() {
   const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
+    if (!canManageUsers) return undefined
     let isMounted = true
 
     async function loadUserManagement() {
@@ -70,7 +72,7 @@ function UserManagementPage() {
     return () => {
       isMounted = false
     }
-  }, [projectId])
+  }, [projectId, canManageUsers])
 
   const hydratedMembers = useMemo(
     () =>
@@ -88,8 +90,6 @@ function UserManagementPage() {
     [members, users],
   )
 
-  const canManageUsers = user?.role === 'Admin'
-
   async function handleCreateUser(payload) {
     setIsSubmitting(true)
     setErrorMessage('')
@@ -99,19 +99,22 @@ function UserManagementPage() {
       const createdUser = await createUser({
         fullName: payload.fullName,
         email: payload.email,
+        password: payload.password,
         role: payload.role,
       })
+      setUsers((currentUsers) => [...currentUsers, createdUser])
       const newMember = await addExistingUserToProject({
         projectId: Number(projectId),
         userId: createdUser.id,
-        role: payload.role === 'Admin' ? 'Admin' : 'Developer',
+        role: payload.role,
       })
 
-      setUsers((currentUsers) => [...currentUsers, createdUser])
       setMembers((currentMembers) => [...currentMembers, newMember])
       setSuccessMessage(`${createdUser.fullName} has been added to ${project?.name || 'the project'}.`)
-    } catch {
-      setErrorMessage('Unable to create user right now.')
+      return true
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Unable to create or add user. If the account was created, use Add Existing User.')
+      return false
     } finally {
       setIsSubmitting(false)
     }
@@ -129,30 +132,48 @@ function UserManagementPage() {
 
       if (!existingUser) {
         setErrorMessage('No existing user was found with that email.')
-        return
+        return false
       }
 
       if (members.some((member) => member.userId === existingUser.id)) {
         setErrorMessage('That user is already a member of this project.')
-        return
+        return false
       }
 
       const newMember = await addExistingUserToProject({
         projectId: Number(projectId),
         userId: existingUser.id,
-        role: existingUser.role === 'Admin' ? 'Admin' : 'Developer',
+        role: existingUser.role,
       })
 
       setMembers((currentMembers) => [...currentMembers, newMember])
       setSuccessMessage(`${existingUser.fullName} has been added to ${project?.name || 'the project'}.`)
-    } catch {
-      setErrorMessage('Unable to add user right now.')
+      return true
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Unable to add user right now.')
+      return false
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  if (!isLoading && !canManageUsers) {
+  async function handleRemoveMember(member) {
+    if (!window.confirm(`Remove ${member.fullName} from this project?`)) return
+    setIsSubmitting(true)
+    setErrorMessage('')
+    setSuccessMessage('')
+    try {
+      await removeUserFromProject({ projectId: Number(projectId), userId: member.userId })
+      setMembers((current) => current.filter((item) => item.userId !== member.userId))
+      setSuccessMessage(`${member.fullName} has been removed from the project.`)
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Unable to remove this member.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (!canManageUsers) {
     return <Navigate to={ROUTES.projects} replace />
   }
 
@@ -172,9 +193,9 @@ function UserManagementPage() {
         {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
         {successMessage ? <p className="status-message is-success">{successMessage}</p> : null}
 
-        {!isLoading && !errorMessage ? (
+        {!isLoading && project ? (
           <div className="user-management-grid">
-            <UserList members={hydratedMembers} />
+            <UserList members={hydratedMembers} onRemove={handleRemoveMember} isSubmitting={isSubmitting} />
             <UserForm
               onCreateUser={handleCreateUser}
               onAddExistingUser={handleAddExistingUser}

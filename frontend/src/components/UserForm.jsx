@@ -6,7 +6,7 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
     fullName: '',
     email: '',
     password: '',
-    role: 'User',
+    role: 'USER',
   })
   const [existingEmail, setExistingEmail] = useState('')
 
@@ -21,18 +21,18 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
 
   async function handleCreateUser(event) {
     event.preventDefault()
-    await onCreateUser(newUser)
+    if (!await onCreateUser(newUser)) return
     setNewUser({
       fullName: '',
       email: '',
       password: '',
-      role: 'User',
+      role: 'USER',
     })
   }
 
   async function handleAddExistingUser(event) {
     event.preventDefault()
-    await onAddExistingUser(existingEmail)
+    if (!await onAddExistingUser(existingEmail)) return
     setExistingEmail('')
   }
 
@@ -46,6 +46,7 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
             <span>Full Name</span>
             <input
               name="fullName"
+              maxLength={120}
               placeholder="John Doe"
               value={newUser.fullName}
               onChange={handleNewUserChange}
@@ -56,6 +57,7 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
             <span>Email Address</span>
             <input
               name="email"
+              maxLength={254}
               type="email"
               placeholder="john@example.com"
               value={newUser.email}
@@ -67,6 +69,8 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
             <span>Password</span>
             <input
               name="password"
+              minLength={8}
+              maxLength={72}
               type="password"
               placeholder="********"
               value={newUser.password}

@@ -11,7 +11,11 @@ import UserManagementPage from '../pages/UserManagementPage'
 import RouteGuard from '../security/RouteGuard'
 
 function AppRouter() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isRestoringSession } = useAuth()
+
+  if (isRestoringSession) {
+    return <main className="dashboard-empty" role="status">Restoring session...</main>
+  }
 
   return (
     <Routes>

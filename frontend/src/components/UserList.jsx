@@ -14,7 +14,7 @@ function formatJoinedDate(value) {
   }).format(date)
 }
 
-function UserList({ members }) {
+function UserList({ members, onRemove, isSubmitting }) {
   return (
     <section className="user-list-card" aria-label="Project members">
       <header className="user-list-header">
@@ -34,6 +34,10 @@ function UserList({ members }) {
             <div className="user-list-identity">
               <strong>{member.fullName}</strong>
               <span>{member.email}</span>
+              {onRemove ? (
+                <button className="user-list-remove" type="button" disabled={isSubmitting}
+                  onClick={() => onRemove(member)}>Remove from project</button>
+              ) : null}
             </div>
             <span className={`user-role-badge is-${member.role.toLowerCase()}`}>
               {member.role}

@@ -4,7 +4,8 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { login as loginRequest } from '../api/authApi'
+import { getCurrentUser, login as loginRequest } from '../api/authApi'
+import { USE_MOCK_API } from '../config/apiConfig'
 import { getNotifications } from '../api/notificationsApi'
 import {
   clearStoredSession,
@@ -16,6 +17,9 @@ import { AuthContext } from './auth-context'
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession)
+  const [isRestoringSession, setIsRestoringSession] = useState(
+    () => !USE_MOCK_API && Boolean(readStoredSession().token),
+  )
   const [notifications, setNotifications] = useState({
     items: [],
     unreadCount: 0,
@@ -23,18 +27,46 @@ export function AuthProvider({ children }) {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
 
   useEffect(() => {
-    setAuthToken(session.token)
-
-    if (session.token && session.user) {
-      writeStoredSession(session)
-      return
+    function handleSessionExpired() {
+      setAuthToken('')
+      startTransition(() => {
+        setSession({ token: '', user: null })
+        setIsRestoringSession(false)
+      })
     }
-
-    clearStoredSession()
-  }, [session])
+    window.addEventListener('bugboard26:session-expired', handleSessionExpired)
+    return () => window.removeEventListener('bugboard26:session-expired', handleSessionExpired)
+  }, [])
 
   useEffect(() => {
-    if (!session.token) {
+    const stored = readStoredSession()
+    if (!stored.token || USE_MOCK_API) {
+      return undefined
+    }
+    let active = true
+    getCurrentUser()
+      .then((user) => {
+        if (active && readStoredSession().token === stored.token) {
+          const restored = { ...stored, user }
+          writeStoredSession(restored)
+          startTransition(() => setSession(restored))
+        }
+      })
+      .catch(() => {
+        if (active && readStoredSession().token === stored.token) {
+          clearStoredSession()
+          setAuthToken('')
+          startTransition(() => setSession({ token: '', user: null }))
+        }
+      })
+      .finally(() => {
+        if (active) setIsRestoringSession(false)
+      })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    if (!session.token || !USE_MOCK_API) {
       startTransition(() => {
         setNotifications({
           items: [],
@@ -59,6 +91,8 @@ export function AuthProvider({ children }) {
         startTransition(() => {
           setNotifications(response)
         })
+      } catch {
+        if (isMounted) setNotifications({ items: [], unreadCount: 0 })
       } finally {
         if (isMounted) {
           setIsLoadingNotifications(false)
@@ -75,6 +109,9 @@ export function AuthProvider({ children }) {
 
   async function login(credentials) {
     const response = await loginRequest(credentials)
+    const nextSession = { token: response.token, user: response.user }
+    writeStoredSession(nextSession)
+    setAuthToken(response.token)
 
     startTransition(() => {
       setSession({
@@ -87,6 +124,8 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
+    clearStoredSession()
+    setAuthToken('')
     startTransition(() => {
       setSession({
         token: '',
@@ -104,12 +143,13 @@ export function AuthProvider({ children }) {
       token: session.token,
       user: session.user,
       isAuthenticated: Boolean(session.token),
+      isRestoringSession,
       notifications,
       isLoadingNotifications,
       login,
       logout,
     }),
-    [session, notifications, isLoadingNotifications],
+    [session, notifications, isLoadingNotifications, isRestoringSession],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

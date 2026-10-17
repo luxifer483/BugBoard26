@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import CreateIssueModal from '../components/CreateIssueModal'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
+import { USE_MOCK_API } from '../config/apiConfig'
 
 function DashboardLayout({ children, projectId = '' }) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -23,7 +24,7 @@ function DashboardLayout({ children, projectId = '' }) {
         </div>
       </div>
       <CreateIssueModal
-        isOpen={Boolean(projectId) && isCreateIssueModalOpen}
+        isOpen={USE_MOCK_API && Boolean(projectId) && isCreateIssueModalOpen}
         onClose={handleCloseCreateIssueModal}
         projectId={projectId}
       />

@@ -8,6 +8,10 @@ const EMPTY_SESSION = {
 }
 
 function normalizeStoredSession(session) {
+  const expectedMode = USE_MOCK_API ? 'mock' : 'real'
+  if (session?.mode !== expectedMode || typeof session.token !== 'string' || !session.user?.id) {
+    return EMPTY_SESSION
+  }
   if (!USE_MOCK_API || !session?.token || !session.user) {
     return session
   }
@@ -39,9 +43,13 @@ export function readStoredSession() {
 }
 
 export function writeStoredSession(session) {
-  window.localStorage.setItem(STORAGE_KEYS.session, JSON.stringify(session))
+  window.localStorage.setItem(STORAGE_KEYS.session, JSON.stringify({
+    ...session,
+    mode: USE_MOCK_API ? 'mock' : 'real',
+  }))
 }
 
 export function clearStoredSession() {
   window.localStorage.removeItem(STORAGE_KEYS.session)
+  window.sessionStorage.removeItem('bugboard26.activeProjectId')
 }
