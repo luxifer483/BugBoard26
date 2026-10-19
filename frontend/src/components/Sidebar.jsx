@@ -8,7 +8,6 @@ import {
 } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
 import AppLogo from './AppLogo'
-import { USE_MOCK_API } from '../config/apiConfig'
 
 const ACTIVE_PROJECT_STORAGE_KEY = 'bugboard26.activeProjectId'
 
@@ -119,7 +118,7 @@ function Sidebar({ activeProjectId = '' }) {
           </span>
           <span>Dashboard</span>
         </NavLink>
-        {currentProjectId && USE_MOCK_API ? (
+        {currentProjectId ? (
           <button
             className={`sidebar-nav-item${isCreateIssueOpen ? ' is-active' : ''}`}
             onClick={handleOpenCreateIssue}

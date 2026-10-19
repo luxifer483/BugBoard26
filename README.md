@@ -2,11 +2,13 @@
 
 Applicazione React + Spring Boot + PostgreSQL.
 
-La prima milestone backend comprende autenticazione JWT, utenti USER/ADMIN, progetti e appartenenze persistenti.
-Il frontend usa le API reali di default; issue e notifiche saranno integrate nella prossima milestone.
+La prima milestone comprende autenticazione JWT, utenti USER/ADMIN, progetti e appartenenze persistenti.
+La seconda aggiunge issue, assegnazioni, commenti, notifiche personali e statistiche.
+Il frontend usa le API reali di default per entrambe le milestone.
 
 - [Avvio e test backend](backend/README.md)
 - [Contratto API e regole di accesso](docs/api/milestone-1.md)
+- [Issue, commenti e notifiche: contratto e verifiche](docs/api/milestone-2.md)
 - [Modello backend implementato](docs/diagrammi/backend-model-as-is.puml)
 - [Diagramma frontend](docs/diagrammi/frontend-as-is.puml)
 

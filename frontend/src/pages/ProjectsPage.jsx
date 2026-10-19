@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { getProjectDashboardRoute } from '../config/routeConfig'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { createProject, getProjects } from '../api/projectsApi'
-import { USE_MOCK_API } from '../config/apiConfig'
 import { useAuth } from '../hooks/useAuth'
 import { formatRelativeDate, getProjectAccent } from '../utils/formatters'
 
@@ -98,7 +97,7 @@ function ProjectsPage() {
         </section>
 
         <section className="projects-stats" aria-label="Project statistics">
-          {stats.filter((item) => USE_MOCK_API || item.label === 'Total Projects').map((item) => (
+          {stats.map((item) => (
             <article className="project-stat-card" key={item.label}>
               <div>
                 <span>{item.label}</span>
@@ -166,7 +165,7 @@ function ProjectsPage() {
                     </div>
                   </div>
 
-                  {USE_MOCK_API ? <div className="project-card-stats">
+                  <div className="project-card-stats">
                     <div>
                       <span>Total</span>
                       <strong>{project.totalIssues}</strong>
@@ -179,7 +178,7 @@ function ProjectsPage() {
                       <span>Closed</span>
                       <strong className="project-closed-count">{project.closedIssues}</strong>
                     </div>
-                  </div> : <p className="status-message">Status: {project.status}</p>}
+                  </div>
 
                   <div className="project-card-footer">
                     <span>{project.memberCount} members</span>

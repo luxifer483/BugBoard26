@@ -1,5 +1,5 @@
 @startuml
-title BugBoard26 - Backend Model As-Is - Milestone 1
+title BugBoard26 - Backend Model As-Is - Milestone 2
 left to right direction
 skinparam classAttributeIconSize 0
 skinparam shadowing false
@@ -36,6 +36,70 @@ class ProjectMembership <<Entity>> {
   -joinedAt: Instant
 }
 User --> Role
+class Issue <<Entity>> {
+  -id: Long
+  -project: Project
+  -reporter: User
+  -assignee: User [0..1]
+  -title: String
+  -description: String
+  -type: IssueType
+  -priority: IssuePriority
+  -status: IssueStatus
+  -createdAt: Instant
+  -updatedAt: Instant
+  +getCode(): String
+  +setStatus(status): void
+  +setAssignee(user): void
+}
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+enum IssueType {
+  BUG
+  FEATURE
+  DOCUMENTATION
+  QUESTION
+}
+enum IssuePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+class IssueComment <<Entity>> {
+  -id: Long
+  -issue: Issue
+  -author: User
+  -content: String
+  -createdAt: Instant
+}
+class Notification <<Entity>> {
+  -id: Long
+  -recipient: User
+  -issue: Issue
+  -message: String
+  -read: boolean
+  -createdAt: Instant
+  +markRead(): void
+}
+Project "1" -- "0..*" Issue
+User "1" -- "0..*" Issue : reporter
+User "0..1" -- "0..*" Issue : assignee
+Issue --> IssueStatus
+Issue --> IssueType
+Issue --> IssuePriority
+Issue "1" -- "0..*" IssueComment
+User "1" -- "0..*" IssueComment : author
+Issue "1" -- "0..*" Notification
+User "1" -- "0..*" Notification : recipient
+note bottom of Issue
+  OPEN -> IN_PROGRESS -> CLOSED
+  Assegnatario membro del progetto.
+  Reporter e autore da identita' JWT.
+end note
 Project --> ProjectStatus
 User "1" -- "0..*" ProjectMembership
 Project "1" -- "0..*" ProjectMembership
@@ -44,7 +108,7 @@ note bottom of ProjectMembership
   I privilegi ADMIN sono globali.
 end note
 legend bottom
-  Sono mostrate le entita' implementate in questa milestone.
+  Modello corrente: milestone 1 e 2.
   Costruttori e getter omessi per leggibilita'.
 endlegend
 @enduml

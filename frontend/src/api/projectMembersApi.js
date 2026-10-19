@@ -1,6 +1,6 @@
 import apiClient from './client'
 import { USE_MOCK_API } from '../config/apiConfig'
-import { mockProjectMembers } from './mockData'
+import { mockProjectMembers, mockUsers } from './mockData'
 
 // Anticipa la gestione dei membri di progetto usando gli stessi DTO previsti dal diagramma.
 function delay(data) {
@@ -12,6 +12,7 @@ function delay(data) {
 export async function getProjectMembers(projectId) {
   if (USE_MOCK_API) {
     const items = mockProjectMembers.filter((member) => member.projectId === Number(projectId))
+      .map((member) => ({ ...mockUsers.find((user) => user.id === member.userId), ...member }))
 
     return delay({
       items,

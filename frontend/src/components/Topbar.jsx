@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
-import { USE_MOCK_API } from '../config/apiConfig'
 import { formatRelativeDate, getInitials } from '../utils/formatters'
 
 function Topbar() {
-  const { user, notifications, isLoadingNotifications, logout } = useAuth()
+  const navigate = useNavigate()
+  const { user, notifications, isLoadingNotifications, notificationsError,
+    refreshNotifications, readNotification, logout } = useAuth()
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const notificationsRef = useRef(null)
@@ -45,11 +46,8 @@ function Topbar() {
 
   function handleToggleNotifications() {
     setIsProfileOpen(false)
+    if (!isNotificationsOpen) refreshNotifications()
     setIsNotificationsOpen((currentValue) => !currentValue)
-  }
-
-  function handleCloseNotifications() {
-    setIsNotificationsOpen(false)
   }
 
   function handleToggleProfile() {
@@ -76,8 +74,8 @@ function Topbar() {
           <button
             aria-expanded={isNotificationsOpen}
             aria-haspopup="dialog"
-            disabled={!USE_MOCK_API}
-            title={USE_MOCK_API ? 'Notifications' : 'Notifications are planned for the next backend milestone'}
+            aria-label="Notifications"
+            title="Notifications"
             className={`topbar-icon-button${isNotificationsOpen ? ' is-active' : ''}`}
             onClick={handleToggleNotifications}
             type="button"
@@ -103,6 +101,12 @@ function Topbar() {
               </div>
 
               <div className="notifications-dropdown-list">
+                {notificationsError ? (
+                  <p role="alert" className="notifications-empty">
+                    {notificationsError}
+                    <button type="button" onClick={refreshNotifications}>Retry</button>
+                  </p>
+                ) : null}
                 {isLoadingNotifications ? (
                   <p className="notifications-empty">Loading notifications...</p>
                 ) : null}
@@ -127,7 +131,13 @@ function Topbar() {
                         <Link
                           className="notification-item"
                           key={notification.id}
-                          onClick={handleCloseNotifications}
+                          onClick={async (event) => {
+                            event.preventDefault()
+                            if (notification.read || await readNotification(notification.id)) {
+                              setIsNotificationsOpen(false)
+                              navigate(`/issues/${notification.issueId}`)
+                            }
+                          }}
                           to={`/issues/${notification.issueId}`}
                         >
                           {content}

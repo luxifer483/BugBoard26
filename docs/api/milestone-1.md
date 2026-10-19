@@ -1,5 +1,8 @@
 # Contratto API - milestone 1
 
+Documento della prima milestone. Le funzionalita' indicate qui come successive sono ora
+descritte nel [contratto della milestone 2](milestone-2.md), che aggiorna anche stati e statistiche.
+
 Implementato: autenticazione, account, progetti e appartenenze. Base URL di sviluppo: `http://localhost:8081/api`.
 Il backend e' indipendente da React. JSON e timestamp ISO 8601 UTC.
 

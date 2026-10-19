@@ -13,10 +13,7 @@ export async function getComments(issueId) {
   if (USE_MOCK_API) {
     const items = mockComments.filter((comment) => comment.issueId === issueId)
 
-    return delay({
-      items,
-      totalCount: items.length,
-    })
+    return delay({ items, totalCount: items.length })
   }
 
   const { data } = await apiClient.get(`/issues/${issueId}/comments`)
@@ -25,14 +22,16 @@ export async function getComments(issueId) {
 
 export async function createComment(issueId, payload) {
   if (USE_MOCK_API) {
-    return delay({
+    const comment = {
       id: Date.now(),
       issueId,
       createdAt: new Date().toISOString(),
       ...payload,
-    })
+    }
+    mockComments.push(comment)
+    return delay(comment)
   }
 
-  const { data } = await apiClient.post(`/issues/${issueId}/comments`, payload)
+  const { data } = await apiClient.post(`/issues/${issueId}/comments`, { content: payload.content })
   return data
 }

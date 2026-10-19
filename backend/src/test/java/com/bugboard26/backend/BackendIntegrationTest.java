@@ -5,7 +5,6 @@ import com.bugboard26.backend.user.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,9 +21,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -33,12 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(properties = "app.jwt.secret=test-only-secret-with-more-than-thirty-two-bytes")
 @AutoConfigureMockMvc
-@Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BackendIntegrationTest {
-    @Container
-    static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withStartupTimeout(Duration.ofMinutes(3));
+    @RegisterExtension
+    static final TestDatabase database = new TestDatabase("milestone_one");
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry properties) {

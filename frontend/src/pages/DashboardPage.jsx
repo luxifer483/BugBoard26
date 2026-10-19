@@ -5,7 +5,6 @@ import DashboardLayout from '../layouts/DashboardLayout'
 import { getIssues } from '../api/issuesApi'
 import { getProjectById } from '../api/projectsApi'
 import { formatEnumLabel, formatRelativeDate } from '../utils/formatters'
-import { USE_MOCK_API } from '../config/apiConfig'
 
 const STATUS_CLASS_MAP = {
   OPEN: 'is-red',
@@ -52,7 +51,7 @@ function DashboardPage() {
       try {
         const [projectResponse, issuesResponse] = await Promise.all([
           getProjectById(projectId),
-          USE_MOCK_API ? getIssues(projectId) : Promise.resolve({ items: [] }),
+          getIssues(projectId),
         ])
 
         if (!isMounted) {
@@ -157,7 +156,7 @@ function DashboardPage() {
           <h1>Dashboard</h1>
           <p>
             {project
-              ? `${project.name} ${USE_MOCK_API ? 'issue overview' : 'project overview'}`
+              ? `${project.name} issue overview`
               : 'Select a project to open its dashboard'}
           </p>
         </section>
@@ -173,22 +172,7 @@ function DashboardPage() {
           </section>
         ) : null}
 
-        {projectId && !USE_MOCK_API ? (
-          <section className="dashboard-empty">
-            {isLoading ? <p role="status">Loading project...</p> : null}
-            {errorMessage ? <p role="alert" className="status-message is-error">{errorMessage}</p> : null}
-            {!isLoading && !errorMessage && project ? (
-              <>
-                <h2>{project.name}</h2>
-                <p>{project.description}</p>
-                <p className="status-message">{project.memberCount} members. Status: {project.status}.</p>
-                <p className="status-message">Project access is connected to the backend. Issue management will be connected in the next milestone.</p>
-              </>
-            ) : null}
-          </section>
-        ) : null}
-
-        {projectId && USE_MOCK_API ? (
+        {projectId ? (
           <>
             <section className="issues-toolbar" aria-label="Issue filters">
               <div className="issues-toolbar-header">

@@ -1,12 +1,13 @@
 import {
   startTransition,
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react'
 import { getCurrentUser, login as loginRequest } from '../api/authApi'
 import { USE_MOCK_API } from '../config/apiConfig'
-import { getNotifications } from '../api/notificationsApi'
+import { getNotifications, markNotificationRead } from '../api/notificationsApi'
 import {
   clearStoredSession,
   readStoredSession,
@@ -25,6 +26,22 @@ export function AuthProvider({ children }) {
     unreadCount: 0,
   })
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
+  const [notificationsError, setNotificationsError] = useState('')
+
+  const refreshNotifications = useCallback(() => {
+    window.dispatchEvent(new Event('bugboard26:refresh-notifications'))
+  }, [])
+
+  const readNotification = useCallback(async (id) => {
+    try {
+      await markNotificationRead(id)
+      refreshNotifications()
+      return true
+    } catch {
+      setNotificationsError('Unable to mark the notification as read. Try again.')
+      return false
+    }
+  }, [refreshNotifications])
 
   useEffect(() => {
     function handleSessionExpired() {
@@ -66,8 +83,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    if (!session.token || !USE_MOCK_API) {
+    if (!session.token) {
       startTransition(() => {
+        setIsLoadingNotifications(false)
+        setNotificationsError('')
         setNotifications({
           items: [],
           unreadCount: 0,
@@ -77,33 +96,42 @@ export function AuthProvider({ children }) {
     }
 
     let isMounted = true
+    let requestNumber = 0
 
     async function loadNotifications() {
+      const request = ++requestNumber
       setIsLoadingNotifications(true)
 
       try {
         const response = await getNotifications()
 
-        if (!isMounted) {
+        if (!isMounted || request !== requestNumber) {
           return
         }
 
         startTransition(() => {
           setNotifications(response)
+          setNotificationsError('')
         })
       } catch {
-        if (isMounted) setNotifications({ items: [], unreadCount: 0 })
+        if (isMounted && request === requestNumber) {
+          setNotificationsError('Unable to load notifications. Try again.')
+        }
       } finally {
-        if (isMounted) {
+        if (isMounted && request === requestNumber) {
           setIsLoadingNotifications(false)
         }
       }
     }
 
     loadNotifications()
+    const interval = window.setInterval(loadNotifications, 30000)
+    window.addEventListener('bugboard26:refresh-notifications', loadNotifications)
 
     return () => {
       isMounted = false
+      window.clearInterval(interval)
+      window.removeEventListener('bugboard26:refresh-notifications', loadNotifications)
     }
   }, [session.token])
 
@@ -146,10 +174,14 @@ export function AuthProvider({ children }) {
       isRestoringSession,
       notifications,
       isLoadingNotifications,
+      notificationsError,
+      refreshNotifications,
+      readNotification,
       login,
       logout,
     }),
-    [session, notifications, isLoadingNotifications, isRestoringSession],
+    [session, notifications, isLoadingNotifications, isRestoringSession,
+      notificationsError, refreshNotifications, readNotification],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

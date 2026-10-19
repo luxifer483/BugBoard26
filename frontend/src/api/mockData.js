@@ -1,4 +1,4 @@
-// Dati statici usati dai moduli API quando `VITE_USE_MOCK_API` non e' impostata a `false`.
+// Dati statici usati dai moduli API quando `VITE_USE_MOCK_API=true`.
 // Permettono di sviluppare l'interfaccia anche senza backend disponibile.
 export const mockUser = {
   id: 1,

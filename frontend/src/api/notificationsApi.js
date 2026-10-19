@@ -25,3 +25,13 @@ export async function getNotifications() {
   const { data } = await apiClient.get('/notifications')
   return data
 }
+
+export async function markNotificationRead(id) {
+  if (USE_MOCK_API) {
+    const notification = mockNotifications.find((item) => item.id === id)
+    notification.read = true
+    return delay(notification)
+  }
+  const { data } = await apiClient.patch(`/notifications/${id}/read`)
+  return data
+}

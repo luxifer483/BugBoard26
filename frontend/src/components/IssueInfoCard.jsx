@@ -51,18 +51,30 @@ function DateDetail({ label, value, includeTime = false }) {
   )
 }
 
-function IssueInfoCard({ issue, onStatusChange, isUpdatingStatus }) {
+function IssueInfoCard({ issue, onStatusChange, isUpdatingStatus, members,
+  onAssigneeChange, isAssigning }) {
   return (
     <aside className="issue-info-card" aria-label="Issue details">
       <h2>Details</h2>
       <PersonDetail label="Assigned to" person={issue.assignee} />
+      <label className="status-dropdown">
+        <span>Change Assignee</span>
+        <select value={issue.assignee?.id ?? ''} disabled={isAssigning || isUpdatingStatus}
+          onChange={(event) => onAssigneeChange(event.target.value)}>
+          <option value="">Unassigned</option>
+          {issue.assignee && !members.some((member) => member.id === issue.assignee.id) ? (
+            <option value={issue.assignee.id} disabled>{issue.assignee.fullName} (former member)</option>
+          ) : null}
+          {members.map((member) => <option key={member.id} value={member.id}>{member.fullName}</option>)}
+        </select>
+      </label>
       <PersonDetail label="Reporter" person={issue.reporter} />
       <DateDetail label="Created" value={issue.createdAt} />
       <DateDetail label="Last Updated" value={issue.updatedAt} includeTime />
       <StatusDropdown
         value={issue.status}
         onChange={onStatusChange}
-        disabled={isUpdatingStatus}
+        disabled={isUpdatingStatus || isAssigning || issue.status === 'CLOSED'}
       />
     </aside>
   )

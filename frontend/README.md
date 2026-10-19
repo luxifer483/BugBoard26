@@ -1,16 +1,53 @@
-# React + Vite
+﻿# BugBoard26 frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19, JavaScript/JSX, Vite, React Router e Axios.
 
-Currently, two official plugins are available:
+## Avvio
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Dalla root, con il backend disponibile su `http://localhost:8081/api`:
 
-## React Compiler
+```powershell
+npm.cmd --prefix frontend install
+npm.cmd --prefix frontend run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Aprire l'indirizzo stampato da Vite, normalmente `http://localhost:5173`.
+Per avviare anche backend e PostgreSQL con Docker Desktop:
 
-## Expanding the ESLint configuration
+```powershell
+docker compose -f .\infra\docker\docker-compose.yml up -d --build
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Account iniziale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
+
+## Configurazione
+
+Le API reali sono attive di default. Per personalizzarle creare `frontend/.env.local`:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8081/api
+VITE_USE_MOCK_API=false
+```
+
+Per la demo senza backend impostare `VITE_USE_MOCK_API=true` e riavviare Vite.
+I dati mock modificati restano in memoria fino al ricaricamento della pagina.
+
+## Funzionalita'
+
+Login e ripristino sessione, progetti, gestione utenti/membership per ADMIN,
+creazione e assegnazione issue, filtri e statistiche, avanzamento OPEN -> IN_PROGRESS -> CLOSED,
+commenti e notifiche personali con stato letto. Le notifiche vengono aggiornate ogni 30 secondi,
+all'apertura del pannello e dopo le operazioni. Upload e modifica del profilo non sono implementati.
+
+`pages/` contiene le schermate, `components/` gli elementi riutilizzabili,
+`layouts/` la struttura comune, `api/` gli adapter HTTP/mock, `context/` e `hooks/`
+l'autenticazione condivisa, `security/` sessione e protezione delle rotte.
+
+Contratti: [milestone 1](../docs/api/milestone-1.md), [milestone 2](../docs/api/milestone-2.md).
+
+## Verifiche
+
+```powershell
+npm.cmd --prefix frontend run lint
+npm.cmd --prefix frontend run build
+```

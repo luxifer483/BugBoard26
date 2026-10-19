@@ -17,6 +17,8 @@ package "Core Frontend" {
   class AuthProvider <<Context>> {
     +login(credentials)
     +logout()
+    +refreshNotifications()
+    +readNotification(id)
   }
 
   class AuthContext <<Context>>
@@ -57,6 +59,7 @@ package "Pages" {
   class IssueDetailPage <<Page>> {
     +loadIssueDetail(issueId)
     +handleStatusChange(nextStatus)
+    +handleAssigneeChange(assigneeId)
     +handleAddComment(content)
   }
 
@@ -94,7 +97,6 @@ package "Shared Components" {
   class CreateIssueModal <<Component>> {
     +loadAssignableUsers()
     +handleFieldChange(event)
-    +handleFileChange(event)
     +handleSubmit(event)
   }
 

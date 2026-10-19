@@ -53,18 +53,36 @@ export async function createIssue(payload) {
     return delay(createdIssue)
   }
 
-  const { data } = await apiClient.post('/issues', payload)
+  const { data } = await apiClient.post('/issues', {
+    projectId: payload.project.id,
+    title: payload.title,
+    description: payload.description,
+    type: payload.type,
+    priority: payload.priority,
+    assigneeId: payload.assignee?.id ?? null,
+  })
   return data
 }
 
 export async function updateIssueStatus(issueId, payload) {
   if (USE_MOCK_API) {
-    return delay({
-      issueId,
-      ...payload,
-    })
+    const issue = mockIssues.find((item) => item.id === Number(issueId))
+    Object.assign(issue, payload, { updatedAt: new Date().toISOString() })
+    return delay(issue)
   }
 
   const { data } = await apiClient.patch(`/issues/${issueId}/status`, payload)
+  return data
+}
+
+export async function updateIssueAssignee(issueId, assignee) {
+  if (USE_MOCK_API) {
+    const issue = mockIssues.find((item) => item.id === Number(issueId))
+    Object.assign(issue, { assignee, updatedAt: new Date().toISOString() })
+    return delay(issue)
+  }
+  const { data } = await apiClient.patch(`/issues/${issueId}/assignee`, {
+    assigneeId: assignee?.id ?? null,
+  })
   return data
 }

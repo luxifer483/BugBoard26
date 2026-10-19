@@ -1,10 +1,10 @@
 # BugBoard26 Backend
 
 Java 21, Spring Boot 3.5.16, Spring Web, Validation, Spring Security con JWT,
-Spring Data JPA/Hibernate e PostgreSQL. Package per funzionalita': auth, user, project, membership;
+Spring Data JPA/Hibernate e PostgreSQL. Package per funzionalita': auth, user, project, membership, issue, comment, notification;
 security e common contengono i servizi condivisi.
 
-Contratto e regole: [milestone 1](../docs/api/milestone-1.md).
+Contratto e regole: [milestone 1](../docs/api/milestone-1.md) e [milestone 2](../docs/api/milestone-2.md).
 
 ## Avvio locale da PowerShell
 
@@ -43,6 +43,8 @@ npm --prefix frontend run dev
 Il frontend usa le API reali di default. L'admin puo' creare un progetto, aprirlo, entrare in
 User Management, creare un utente e associarlo al progetto. Effettuando login con quell'utente
 si vedranno solo i progetti a cui appartiene. Una nuova installazione non contiene progetti demo.
+La dashboard permette di creare issue e assegnarle ai membri, avanzare OPEN -> IN_PROGRESS -> CLOSED,
+commentare e leggere le notifiche personali. Le statistiche dei progetti arrivano dal database.
 
 ## Avvio backend e database in Docker
 
@@ -81,8 +83,22 @@ mvn test
 
 JUnit e Testcontainers avviano PostgreSQL isolati e temporanei. Non puliscono e non modificano
 il database di sviluppo. Sono verificati login, password BCrypt, ruoli, token, validazione,
-unicita', CORS, isolamento dei progetti e revoca delle membership. Un test chiude completamente
-Spring Boot e lo riavvia sullo stesso DB per verificare la persistenza e l'idempotenza del bootstrap admin.
+unicita', CORS, isolamento dei progetti, revoca delle membership, issue, commenti, assegnazioni,
+transizioni concorrenti e notifiche. Un test parte dallo schema della milestone 1 e chiude completamente
+Spring Boot per verificare al riavvio persistenza di tutte le entita' e idempotenza del bootstrap admin.
+
+Se Java/Maven non sono installati, dalla root con Docker Desktop attivo:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1
+```
+
+Lo script usa Maven/Java 21 e PostgreSQL in container su una rete temporanea, senza porte host
+e senza accesso al socket Docker. Container e rete vengono rimossi anche in caso di errore;
+il volume `bugboard26-maven-cache` conserva solo le dipendenze Maven.
+La modalita' esterna dei test usa `BUGBOARD_TEST_DB_URL`, `BUGBOARD_TEST_DB_USERNAME`,
+`BUGBOARD_TEST_DB_PASSWORD` e richiede un database temporaneo nuovo a ogni esecuzione:
+crea uno schema isolato per classe e non deve essere puntata al DB di sviluppo.
 
 Questi test sono una base tecnica: il piano di test e la selezione dei quattro metodi non banali
 richiesti dalla traccia restano da documentare nella consegna finale.

@@ -14,7 +14,11 @@ function StatusDropdown({ value, onChange, disabled = false }) {
         disabled={disabled}
       >
         {STATUS_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option key={option.value} value={option.value}
+            disabled={option.value !== value && !(
+              (value === 'OPEN' && option.value === 'IN_PROGRESS') ||
+              (value === 'IN_PROGRESS' && option.value === 'CLOSED')
+            )}>
             {option.label}
           </option>
         ))}

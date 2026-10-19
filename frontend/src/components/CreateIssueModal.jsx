@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createIssue } from '../api/issuesApi'
 import { getProjectMembers } from '../api/projectMembersApi'
-import { getUsers } from '../api/usersApi'
 import { useAuth } from '../hooks/useAuth'
 
 const ISSUE_TYPES = ['BUG', 'FEATURE', 'DOCUMENTATION', 'QUESTION']
@@ -19,7 +18,6 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
     assigneeId: '',
   })
   const [assigneeOptions, setAssigneeOptions] = useState([])
-  const [selectedFiles, setSelectedFiles] = useState([])
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -46,7 +44,6 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
         priority: '',
         assigneeId: '',
       })
-      setSelectedFiles([])
       setErrorMessage('')
       return
     }
@@ -62,24 +59,20 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
       setIsLoadingMembers(true)
 
       try {
-        const [membersResponse, usersResponse] = await Promise.all([
-          getProjectMembers(projectId),
-          getUsers(),
-        ])
+        const membersResponse = await getProjectMembers(projectId)
 
         if (!isMounted) {
           return
         }
 
-        const usersById = new Map(usersResponse.items.map((member) => [member.id, member]))
         const nextOptions = membersResponse.items
-          .map((member) => usersById.get(member.userId))
-          .filter(Boolean)
+          .map((member) => ({ ...member, id: member.userId }))
 
         setAssigneeOptions(nextOptions)
       } catch {
         if (isMounted) {
           setAssigneeOptions([])
+          setErrorMessage('Unable to load project members. Close this dialog and try again.')
         }
       } finally {
         if (isMounted) {
@@ -94,14 +87,6 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
       isMounted = false
     }
   }, [isOpen, projectId])
-
-  const attachmentsLabel = useMemo(() => {
-    if (!selectedFiles.length) {
-      return 'PNG, JPG, GIF up to 10MB'
-    }
-
-    return selectedFiles.map((file) => file.name).join(', ')
-  }, [selectedFiles])
 
   if (!isOpen) {
     return null
@@ -120,11 +105,6 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
     if (event.target === event.currentTarget && !isSubmitting) {
       onClose()
     }
-  }
-
-  function handleFileChange(event) {
-    const nextFiles = Array.from(event.target.files || [])
-    setSelectedFiles(nextFiles)
   }
 
   async function handleSubmit(event) {
@@ -150,14 +130,13 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
         reporter: user,
         assignee,
         project: { id: Number(projectId) },
-        attachmentUrl: selectedFiles[0]?.name || '',
       })
 
       onIssueCreated?.(createdIssue)
       onClose()
       navigate(`/issues/${createdIssue.id}`)
-    } catch {
-      setErrorMessage('Unable to create the issue right now.')
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Unable to create the issue right now.')
     } finally {
       setIsSubmitting(false)
     }
@@ -195,6 +174,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
             <span>Title *</span>
             <input
               name="title"
+              maxLength={200}
               onChange={handleFieldChange}
               placeholder="Enter issue title"
               required
@@ -207,6 +187,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
             <span>Description *</span>
             <textarea
               name="description"
+              maxLength={10000}
               onChange={handleFieldChange}
               placeholder="Describe the issue in detail..."
               required
@@ -266,18 +247,6 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
                 </option>
               ))}
             </select>
-          </label>
-
-          <label className="attachment-dropzone" htmlFor="issue-attachments">
-            <span>Attachments</span>
-            <input
-              id="issue-attachments"
-              multiple
-              onChange={handleFileChange}
-              type="file"
-            />
-            <strong>Click to upload or drag and drop</strong>
-            <small>{attachmentsLabel}</small>
           </label>
 
           {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}

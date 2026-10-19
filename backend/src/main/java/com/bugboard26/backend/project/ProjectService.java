@@ -1,6 +1,8 @@
 package com.bugboard26.backend.project;
 
 import com.bugboard26.backend.common.ListResponse;
+import com.bugboard26.backend.issue.IssueRepository;
+import com.bugboard26.backend.issue.IssueStatus;
 import com.bugboard26.backend.membership.ProjectMembership;
 import com.bugboard26.backend.membership.ProjectMembershipRepository;
 import com.bugboard26.backend.security.CurrentUser;
@@ -15,13 +17,15 @@ public class ProjectService {
     private final ProjectMembershipRepository memberships;
     private final CurrentUser currentUser;
     private final ProjectAccess access;
+    private final IssueRepository issues;
 
     public ProjectService(ProjectRepository projects, ProjectMembershipRepository memberships,
-                          CurrentUser currentUser, ProjectAccess access) {
+                          CurrentUser currentUser, ProjectAccess access, IssueRepository issues) {
         this.projects = projects;
         this.memberships = memberships;
         this.currentUser = currentUser;
         this.access = access;
+        this.issues = issues;
     }
 
     public ListResponse<ProjectResponse> list() {
@@ -42,6 +46,9 @@ public class ProjectService {
     }
 
     private ProjectResponse response(Project project) {
-        return ProjectResponse.from(project, memberships.countByProjectId(project.getId()));
+        return ProjectResponse.from(project, memberships.countByProjectId(project.getId()),
+                issues.countByProjectId(project.getId()),
+                issues.countByProjectIdAndStatus(project.getId(), IssueStatus.OPEN),
+                issues.countByProjectIdAndStatus(project.getId(), IssueStatus.CLOSED));
     }
 }

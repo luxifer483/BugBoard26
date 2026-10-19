@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { createComment, getComments } from '../api/commentsApi'
-import { getIssueById, updateIssueStatus } from '../api/issuesApi'
+import { getIssueById, updateIssueStatus, updateIssueAssignee } from '../api/issuesApi'
+import { getProjectMembers } from '../api/projectMembersApi'
 import CommentsList from '../components/CommentsList'
 import IssueInfoCard from '../components/IssueInfoCard'
 import { useAuth } from '../hooks/useAuth'
@@ -37,13 +38,20 @@ function formatHeaderDate(value) {
 
 function IssueDetailPage() {
   const { issueId } = useParams()
-  const { user } = useAuth()
+  return <IssueDetailContent key={issueId} issueId={issueId} />
+}
+
+function IssueDetailContent({ issueId }) {
+  const { user, refreshNotifications } = useAuth()
   const [issue, setIssue] = useState(null)
   const [comments, setComments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+  const [isAssigning, setIsAssigning] = useState(false)
+  const [members, setMembers] = useState([])
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -69,6 +77,9 @@ function IssueDetailPage() {
           return
         }
 
+        const membersResponse = await getProjectMembers(issueResponse.project.id)
+        if (!isMounted) return
+        setMembers(membersResponse.items.map((member) => ({ ...member, id: member.userId })))
         setIssue(issueResponse)
         setComments(commentsResponse.items)
       } catch {
@@ -95,16 +106,29 @@ function IssueDetailPage() {
     }
 
     setIsUpdatingStatus(true)
+    setActionError('')
 
     try {
-      await updateIssueStatus(issue.id, { status: nextStatus })
-      setIssue((currentIssue) => ({
-        ...currentIssue,
-        status: nextStatus,
-        updatedAt: new Date().toISOString(),
-      }))
+      setIssue(await updateIssueStatus(issue.id, { status: nextStatus }))
+      refreshNotifications()
+    } catch (error) {
+      setActionError(error.response?.data?.message || 'Unable to update the issue status.')
     } finally {
       setIsUpdatingStatus(false)
+    }
+  }
+
+  async function handleAssigneeChange(assigneeId) {
+    setIsAssigning(true)
+    setActionError('')
+    try {
+      const assignee = members.find((member) => member.id === Number(assigneeId)) || null
+      setIssue(await updateIssueAssignee(issue.id, assignee))
+      refreshNotifications()
+    } catch (error) {
+      setActionError(error.response?.data?.message || 'Unable to update the assignee.')
+    } finally {
+      setIsAssigning(false)
     }
   }
 
@@ -114,6 +138,7 @@ function IssueDetailPage() {
     }
 
     setIsSubmittingComment(true)
+    setActionError('')
 
     try {
       const createdComment = await createComment(issue.id, {
@@ -123,11 +148,14 @@ function IssueDetailPage() {
 
       setComments((currentComments) => [
         ...currentComments,
-        {
-          ...createdComment,
-          author: user,
-        },
+        createdComment,
       ])
+      setIssue((current) => ({ ...current, updatedAt: createdComment.createdAt }))
+      refreshNotifications()
+      return true
+    } catch (error) {
+      setActionError(error.response?.data?.message || 'Unable to add the comment. Your text has been kept.')
+      return false
     } finally {
       setIsSubmittingComment(false)
     }
@@ -138,6 +166,7 @@ function IssueDetailPage() {
       <main className="issue-detail-page">
         {isLoading ? <p className="status-message">Loading issue detail...</p> : null}
         {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
+        {actionError ? <p role="alert" className="status-message is-error">{actionError}</p> : null}
 
         {!isLoading && !errorMessage && issue ? (
           <>
@@ -180,6 +209,9 @@ function IssueDetailPage() {
                 issue={issue}
                 onStatusChange={handleStatusChange}
                 isUpdatingStatus={isUpdatingStatus}
+                members={members}
+                onAssigneeChange={handleAssigneeChange}
+                isAssigning={isAssigning}
               />
             </div>
           </>

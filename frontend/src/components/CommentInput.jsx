@@ -13,8 +13,7 @@ function CommentInput({ currentUser, onSubmit, disabled = false }) {
       return
     }
 
-    await onSubmit(trimmedContent)
-    setContent('')
+    if (await onSubmit(trimmedContent)) setContent('')
   }
 
   return (
@@ -24,6 +23,8 @@ function CommentInput({ currentUser, onSubmit, disabled = false }) {
       </div>
       <div className="comment-input-body">
         <textarea
+          aria-label="Comment"
+          maxLength={5000}
           placeholder="Add a comment..."
           value={content}
           onChange={(event) => setContent(event.target.value)}
