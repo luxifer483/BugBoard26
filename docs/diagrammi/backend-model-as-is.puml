@@ -1,5 +1,5 @@
 @startuml
-title BugBoard26 - Backend Model As-Is - Milestone 2
+title BugBoard26 - Modello persistente Sequelize - Milestone 2
 left to right direction
 skinparam classAttributeIconSize 0
 skinparam shadowing false
@@ -23,7 +23,6 @@ class Project <<Entity>> {
   -status: ProjectStatus
   -createdAt: Instant
   -updatedAt: Instant
-  +touch(): void
 }
 enum ProjectStatus {
   ACTIVE
@@ -48,9 +47,6 @@ class Issue <<Entity>> {
   -status: IssueStatus
   -createdAt: Instant
   -updatedAt: Instant
-  +getCode(): String
-  +setStatus(status): void
-  +setAssignee(user): void
 }
 enum IssueStatus {
   OPEN
@@ -83,7 +79,6 @@ class Notification <<Entity>> {
   -message: String
   -read: boolean
   -createdAt: Instant
-  +markRead(): void
 }
 Project "1" -- "0..*" Issue
 User "1" -- "0..*" Issue : reporter
@@ -109,6 +104,7 @@ note bottom of ProjectMembership
 end note
 legend bottom
   Modello corrente: milestone 1 e 2.
-  Costruttori e getter omessi per leggibilita'.
+  Sei modelli in backend/src/models/index.js.
+  Operazioni nei controller e servizi Express.
 endlegend
 @enduml

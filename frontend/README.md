@@ -15,8 +15,13 @@ Aprire l'indirizzo stampato da Vite, normalmente `http://localhost:5173`.
 Per avviare anche backend e PostgreSQL con Docker Desktop:
 
 ```powershell
-docker compose -f .\infra\docker\docker-compose.yml up -d --build
+docker compose -f .\infra\docker\docker-compose.yml build backend
+docker compose -f .\infra\docker\docker-compose.yml run --rm backend npm run db:init
+docker compose -f .\infra\docker\docker-compose.yml up -d
 ```
+
+L'inizializzazione e' esplicita e crea soltanto le tabelle mancanti. Con schema gia' completo
+basta `up -d --build`. Il backend ora usa Node.js/Express e Sequelize; gli endpoint restano gli stessi.
 
 Account iniziale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
 

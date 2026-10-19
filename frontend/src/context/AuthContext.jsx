@@ -16,10 +16,13 @@ import {
 import { setAuthToken } from '../security/tokenManager'
 import { AuthContext } from './auth-context'
 
+// Accesso automatico facoltativo, disponibile soltanto durante le prove con Vite.
+const DEV_AUTO_LOGIN = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true'
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession)
   const [isRestoringSession, setIsRestoringSession] = useState(
-    () => !USE_MOCK_API && Boolean(readStoredSession().token),
+    () => !USE_MOCK_API && (Boolean(readStoredSession().token) || DEV_AUTO_LOGIN),
   )
   const [notifications, setNotifications] = useState({
     items: [],
@@ -57,15 +60,24 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const stored = readStoredSession()
-    if (!stored.token || USE_MOCK_API) {
+    if ((!stored.token && !DEV_AUTO_LOGIN) || USE_MOCK_API) {
       return undefined
     }
     let active = true
-    getCurrentUser()
-      .then((user) => {
+    const restore = stored.token
+      ? getCurrentUser().then((user) => ({ ...stored, user }))
+      : import.meta.env.DEV
+        ? loginRequest({
+            email: import.meta.env.VITE_DEV_LOGIN_EMAIL,
+            password: import.meta.env.VITE_DEV_LOGIN_PASSWORD,
+          }).then(({ token, user }) => ({ token, user }))
+        : Promise.reject(new Error('No stored session'))
+
+    restore
+      .then((restored) => {
         if (active && readStoredSession().token === stored.token) {
-          const restored = { ...stored, user }
           writeStoredSession(restored)
+          setAuthToken(restored.token)
           startTransition(() => setSession(restored))
         }
       })

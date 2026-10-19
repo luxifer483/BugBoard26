@@ -1,5 +1,8 @@
 # Contratto API - milestone 2
 
+Il backend e' stato migrato a Node.js/Express e Sequelize mantenendo endpoint, JSON e regole qui descritte.
+La struttura e i comandi correnti sono in [backend/README.md](../../backend/README.md).
+
 Questa milestone aggiunge issue, commenti, notifiche personali e statistiche reali ai progetti.
 Restano valide autenticazione JWT, errori e regole di accesso della [milestone 1](milestone-1.md).
 Base URL locale: `http://localhost:8081/api`. Timestamp ISO 8601 UTC; liste non paginate.
@@ -128,9 +131,10 @@ Creazione issue, cambio stato/assegnatario e commenti aggiornano la data di atti
 
 ## Persistenza e frontend
 
-`db/schema.sql` aggiunge tre tabelle (`issues`, `issue_comments`, `notifications`) e relativi indici
+`backend/sql/001-initial.sql` include le tre tabelle (`issues`, `issue_comments`, `notifications`) e relativi indici
 con CREATE IF NOT EXISTS: e' compatibile con il database della milestone 1 e non elimina dati.
-Hibernate continua a validare lo schema. Non e' necessario ricreare il volume PostgreSQL.
+L'inizializzazione si esegue esplicitamente con `npm run db:init`; il server non usa sync/alter/force.
+Non e' necessario ricreare il volume PostgreSQL.
 
 Il frontend usa le API reali di default. La selezione assegnatari usa l'elenco dei membri,
 accessibile agli USER, senza richiedere l'elenco globale degli account riservato agli ADMIN.
@@ -143,10 +147,10 @@ Upload, modifica del testo delle issue, eliminazione, riapertura, email/push e p
 
 ## Verifiche riproducibili
 
-Con Java 21, Maven e Docker: `mvn test` dalla cartella backend (PostgreSQL temporaneo via Testcontainers).
-Su Windows con solo Docker: `powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1` dalla root.
-Lo script crea un database temporaneo isolato; non espone porte, non monta il socket Docker
-e rimuove container e rete al termine. Un volume dedicato conserva solo la cache Maven.
+Con Node.js 22+, dipendenze installate e Docker Desktop aperto:
+`powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1` dalla root.
+Lo script crea un PostgreSQL temporaneo su una porta locale casuale, esegue `npm test`
+e rimuove il container e il suo volume al termine. Non usa i dati di sviluppo.
 
 Copertura: regressione milestone 1, validazione, identita' server, isolamento tra progetti,
 assegnatari validi, stati e idempotenza, concorrenza, commenti, notifiche private e lette,
@@ -158,7 +162,7 @@ Prova manuale: creare progetto e due membri; creare un'issue assegnata al primo;
 con il suo login la notifica, aprirla, avanzare lo stato e commentare; verificare la notifica del reporter;
 riavviare il backend e controllare dati/stato lettura; provare accesso diretto con un utente esterno.
 
-Verifica eseguita il 18 ottobre 2026: 28 test backend passati (14 regressioni, 13 casi issue/commenti/notifiche,
+Verifica della precedente implementazione Spring, il 18 ottobre 2026: 28 test backend passati (14 regressioni, 13 casi issue/commenti/notifiche,
 1 upgrade/riavvio), lint e build frontend passati e JAR avviabile generato. Provate inoltre le API
 via HTTP con JWT reali su PostgreSQL temporaneo: login, membri, creazione, commenti, stato, notifiche
 lette, statistiche, accesso estraneo e revoca membership. La verifica visiva nel browser non e' stata eseguita.

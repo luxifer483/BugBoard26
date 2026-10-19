@@ -1,6 +1,6 @@
 # BugBoard26
 
-Applicazione React + Spring Boot + PostgreSQL.
+Applicazione React + Node.js/Express + Sequelize + PostgreSQL.
 
 La prima milestone comprende autenticazione JWT, utenti USER/ADMIN, progetti e appartenenze persistenti.
 La seconda aggiunge issue, assegnazioni, commenti, notifiche personali e statistiche.
@@ -12,18 +12,26 @@ Il frontend usa le API reali di default per entrambe le milestone.
 - [Modello backend implementato](docs/diagrammi/backend-model-as-is.puml)
 - [Diagramma frontend](docs/diagrammi/frontend-as-is.puml)
 
-Con Docker Desktop aperto, dalla root:
+Con Node.js 22+ e Docker Desktop aperto, dalla root (prima configurazione):
 
 ```powershell
 docker compose -f .\infra\docker\docker-compose.yml up -d postgres
-.\backend\run-dev.ps1
+cd backend
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+npm.cmd ci
+npm.cmd run db:init
+npm.cmd run dev
 ```
 
 In un secondo terminale:
 
 ```powershell
-npm --prefix frontend run dev
+npm.cmd --prefix frontend run dev
 ```
 
 Account locale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
+Conservare un eventuale `backend/.env` gia' configurato. Il server non modifica automaticamente lo schema:
+`db:init` crea solo tabelle mancanti; i dati PostgreSQL e gli account esistenti restano utilizzabili.
+Per i test: `powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1` dalla root.
+Struttura, migrazione da Spring e comandi Docker completi sono nel [README backend](backend/README.md).
 Per la demo con dati simulati, impostare `VITE_USE_MOCK_API=true` nel frontend e riavviare Vite.

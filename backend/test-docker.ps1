@@ -1,24 +1,17 @@
+﻿# Avvia un PostgreSQL temporaneo e lancia i test Node, senza usare i dati di sviluppo.
 $ErrorActionPreference = 'Stop'
-
-# Disposable test resources. No host ports, development DB volumes or Docker socket mounts.
-$taskTestRun = 'bugboard26-tests-' + [guid]::NewGuid().ToString('N').Substring(0, 10)
+$taskTestRun = 'bugboard26-node-tests-' + [guid]::NewGuid().ToString('N').Substring(0, 10)
 $taskTestDb = "$taskTestRun-db"
-$taskTestRunner = "$taskTestRun-maven"
-$taskBackendPath = (Resolve-Path -LiteralPath $PSScriptRoot).Path
-$taskNetworkCreated = $false
-$taskDatabaseCreated = $false
+$taskOldTestUrl = $env:TEST_DATABASE_URL
+$taskDbCreated = $false
 
 try {
-    & docker network create $taskTestRun
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot create test network. Start Docker Desktop.' }
-    $taskNetworkCreated = $true
-
-    & docker run -d --name $taskTestDb --network $taskTestRun `
+    & docker run -d --name $taskTestDb -p 127.0.0.1::5432 `
         -e POSTGRES_DB=bugboard_tests -e POSTGRES_USER=bugboard_tests -e POSTGRES_PASSWORD=test-only-password `
         --health-cmd 'pg_isready -U bugboard_tests -d bugboard_tests' --health-interval 1s --health-retries 30 `
         postgres:17-alpine
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot start disposable PostgreSQL.' }
-    $taskDatabaseCreated = $true
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot start disposable PostgreSQL. Start Docker Desktop.' }
+    $taskDbCreated = $true
 
     $taskReady = $false
     for ($taskAttempt = 0; $taskAttempt -lt 30; $taskAttempt++) {
@@ -27,18 +20,18 @@ try {
         Start-Sleep -Seconds 1
     }
     if (-not $taskReady) { throw 'Disposable PostgreSQL did not become ready.' }
+    $taskEndpoint = & docker port $taskTestDb 5432/tcp
+    if ($LASTEXITCODE -ne 0 -or $taskEndpoint -notmatch '^127\.0\.0\.1:(\d+)$') { throw 'Cannot detect test database port.' }
+    $taskPort = $Matches[1]
+    $env:TEST_DATABASE_URL = "postgresql://bugboard_tests:test-only-password@127.0.0.1:${taskPort}/bugboard_tests"
 
-    & docker run --rm --name $taskTestRunner --network $taskTestRun `
-        --mount "type=bind,source=$taskBackendPath,target=/workspace" `
-        --mount type=volume,source=bugboard26-maven-cache,target=/root/.m2 `
-        -e "BUGBOARD_TEST_DB_URL=jdbc:postgresql://${taskTestDb}:5432/bugboard_tests" `
-        -e BUGBOARD_TEST_DB_USERNAME=bugboard_tests -e BUGBOARD_TEST_DB_PASSWORD=test-only-password `
-        -w /workspace maven:3.9-eclipse-temurin-21 mvn -B -ntp test
-    if ($LASTEXITCODE -ne 0) { throw 'Backend tests failed. See backend/target/surefire-reports.' }
+    Push-Location $PSScriptRoot
+    try {
+        & npm.cmd test
+        if ($LASTEXITCODE -ne 0) { throw 'Backend tests failed.' }
+    } finally { Pop-Location }
 } finally {
-    # Only exact resource names generated for this run are removed.
-    $taskRemainingRunner = & docker container ls -aq --filter "name=^/${taskTestRunner}$"
-    if ($taskRemainingRunner) { & docker container rm -f $taskTestRunner | Out-Null }
-    if ($taskDatabaseCreated) { & docker container rm -f $taskTestDb | Out-Null }
-    if ($taskNetworkCreated) { & docker network rm $taskTestRun | Out-Null }
+    $env:TEST_DATABASE_URL = $taskOldTestUrl
+    # Elimina soltanto il container con il nome casuale creato da questa esecuzione.
+    if ($taskDbCreated) { & docker container rm -f -v $taskTestDb | Out-Null }
 }

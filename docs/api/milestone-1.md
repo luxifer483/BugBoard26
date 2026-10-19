@@ -1,5 +1,8 @@
 # Contratto API - milestone 1
 
+Il backend attuale e' Node.js/Express con Sequelize. Gli endpoint e i formati JSON restano compatibili;
+per avvio, struttura e autenticazione vedere [backend/README.md](../../backend/README.md).
+
 Documento della prima milestone. Le funzionalita' indicate qui come successive sono ora
 descritte nel [contratto della milestone 2](milestone-2.md), che aggiorna anche stati e statistiche.
 
