@@ -28,6 +28,7 @@ export function formatRelativeDate(value) {
 }
 
 export function formatEnumLabel(value) {
+  if (value === 'TODO') return 'To do'
   return value
     ? value
         .toLowerCase()
@@ -35,6 +36,10 @@ export function formatEnumLabel(value) {
         .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
         .join(' ')
     : 'Unknown'
+}
+
+export function formatPriorityLabel(value) {
+  return value ? formatEnumLabel(value) : 'Not specified'
 }
 
 export function getInitials(fullName) {

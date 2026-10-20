@@ -7,10 +7,10 @@ import CommentsList from '../components/CommentsList'
 import IssueInfoCard from '../components/IssueInfoCard'
 import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
-import { formatEnumLabel } from '../utils/formatters'
+import { formatEnumLabel, formatPriorityLabel } from '../utils/formatters'
 
 const STATUS_CLASS_MAP = {
-  OPEN: 'is-red',
+  TODO: 'is-red',
   IN_PROGRESS: 'is-orange',
   CLOSED: 'is-green',
 }
@@ -185,7 +185,7 @@ function IssueDetailContent({ issueId }) {
                   {formatEnumLabel(issue.status)}
                 </span>
                 <span className={`issue-chip ${PRIORITY_CLASS_MAP[issue.priority] || 'is-blue'}`}>
-                  Priority: {formatEnumLabel(issue.priority)}
+                  Priority: {formatPriorityLabel(issue.priority)}
                 </span>
               </div>
             </header>

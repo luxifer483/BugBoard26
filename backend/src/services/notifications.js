@@ -24,3 +24,10 @@ export function notifyAssignment(issue, actor, transaction) {
 export function notifyParticipants(issue, actor, message, transaction) {
   return notify(issue, actor, message, [issue.reporterId, issue.assigneeId], transaction);
 }
+
+// La risoluzione raggiunge sempre il reporter, anche se attore o ex membro.
+export function notifyResolution(issue, transaction) {
+  if (!transaction) throw new Error('Notifications require the operation transaction.');
+  return Notification.create({ recipientId: issue.reporterId, issueId: issue.id,
+    kind: 'RESOLUTION', message: `Issue BUG-26-${issue.id} has been resolved` }, { transaction });
+}

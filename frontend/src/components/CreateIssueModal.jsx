@@ -126,7 +126,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
         title: formState.title.trim(),
         description: formState.description.trim(),
         type: formState.type,
-        priority: formState.priority,
+        priority: formState.priority || null,
         reporter: user,
         assignee,
         project: { id: Number(projectId) },
@@ -215,14 +215,13 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
             </label>
 
             <label className="form-field">
-              <span>Priority *</span>
+              <span>Priority (optional)</span>
               <select
                 name="priority"
                 onChange={handleFieldChange}
-                required
                 value={formState.priority}
               >
-                <option value="">Select priority</option>
+                <option value="">Not specified</option>
                 {PRIORITIES.map((priority) => (
                   <option key={priority} value={priority}>
                     {priority}

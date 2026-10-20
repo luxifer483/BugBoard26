@@ -18,7 +18,7 @@ export async function projectResponse(project, transaction) {
   // In una transazione le query condividono una connessione: le eseguiamo in ordine.
   const memberCount = await Membership.count({ where: { projectId: project.id }, transaction });
   const totalIssues = await Issue.count({ where: { projectId: project.id }, transaction });
-  const openIssues = await Issue.count({ where: { projectId: project.id, status: 'OPEN' }, transaction });
+  const openIssues = await Issue.count({ where: { projectId: project.id, status: 'TODO' }, transaction });
   const closedIssues = await Issue.count({ where: { projectId: project.id, status: 'CLOSED' }, transaction });
   return { id: Number(project.id), name: project.name, description: project.description, status: project.status,
     memberCount, totalIssues, openIssues, closedIssues, createdAt: project.createdAt, updatedAt: project.updatedAt };
@@ -43,8 +43,8 @@ export function commentResponse(comment) {
     author: userResponse(comment.author), createdAt: comment.createdAt };
 }
 
-export function notificationResponse(notification) {
-  return { id: Number(notification.id), issueId: Number(notification.issueId), message: notification.message,
+export function notificationResponse(notification, canAccessIssue = true) {
+  return { id: Number(notification.id), issueId: canAccessIssue ? Number(notification.issueId) : null, message: notification.message,
     read: notification.read, createdAt: notification.createdAt };
 }
 

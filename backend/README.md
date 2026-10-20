@@ -18,8 +18,10 @@ npm.cmd run dev
 
 Copiare `.env.example` solo alla prima configurazione: non sovrascrivere un `.env` gia' personalizzato.
 Controllare DB_PORT e credenziali rispetto a `infra/docker/.env`; la porta prevista e' 5433.
-`db:init` e' un comando esplicito che crea solo tabelle/indici mancanti, anche su un DB della milestone 1.
-Se il DB ha gia' lo schema completo, basta avviare il server. L'avvio non esegue sync, alter o force.
+`db:init` crea le tabelle mancanti e applica gli aggiornamenti SQL versionati in una sola transazione.
+Eseguirlo anche sul DB esistente prima di avviare questa versione: rende facoltativa la priorita',
+converte OPEN in TODO e aggiunge il tipo delle notifiche, senza eliminare dati.
+Si puo' ripetere. L'avvio del server non modifica automaticamente lo schema.
 Per un avvio senza riavvio automatico: `npm.cmd start`.
 API: `http://localhost:8081/api`. Il frontend continua a usare gli stessi endpoint e JSON.
 
@@ -41,6 +43,7 @@ backend/
   Dockerfile, run-dev.ps1, test-docker.ps1
   scripts/init-db.js           comando esplicito di inizializzazione
   sql/001-initial.sql          schema identico alle tabelle usate da Spring
+  sql/002-issue-requirements.sql priorita' facoltativa, TODO e notifiche di risoluzione
   src/
     app.js                    prepara Express, senza metterlo in ascolto
     server.js                 controlla PostgreSQL e avvia HTTP
@@ -116,13 +119,15 @@ Gli hash BCrypt gia' presenti, incluso il formato $2a$, vengono verificati senza
 Logout e ripristino sessione restano gestiti dal frontend come prima; non e' stato aggiunto refresh o revoca token.
 
 I modelli specificano gli stessi nomi delle tabelle e colonne di Spring, con timestamp gestiti esplicitamente.
-Lo schema non cambia durante questa migrazione: `sql/001-initial.sql` conserva il vecchio SQL idempotente.
+`sql/001-initial.sql` conserva lo schema storico; `002-issue-requirements.sql` lo aggiorna ai requisiti correnti.
 Per future modifiche aggiungere script SQL versionati ed eseguirli esplicitamente dopo una copia di sicurezza;
 non usare `sequelize.sync({ force: true })` o `sync({ alter: true })` sul database esistente.
 
-Per scelta concordata restano OPEN/IN_PROGRESS/CLOSED, priorita' obbligatoria e accesso per membership.
-Anche i permessi sul cambio stato e i destinatari delle notifiche restano quelli precedenti.
-Le correzioni alla traccia e l'upload immagini sono attivita' separate. CORS ammette anche PATCH, necessario
+Gli stati sono TODO/IN_PROGRESS/CLOSED e la priorita' e' facoltativa (null se omessa).
+Restano invariati accesso per membership, permessi e transizioni in avanti.
+Alla risoluzione il reporter viene notificato anche se e' l'attore o ha lasciato il progetto;
+in quest'ultimo caso la notifica e' leggibile senza link e non riabilita l'accesso ai dati del progetto.
+L'upload immagini resta fuori ambito. CORS ammette anche PATCH, necessario
 agli endpoint gia' presenti per stato, assegnazione e lettura notifiche.
 
 ## Test
@@ -145,7 +150,10 @@ npm.cmd test
 Senza TEST_DATABASE_URL i test si fermano: non ripiegano sul DB del file .env.
 Coprono autenticazione, permessi, CRUD implementato, contratti JSON, CORS PATCH, transazioni/rollback,
 concorrenza, compatibilita' BCrypt/JWT, inizializzazione non distruttiva, bootstrap admin e riavvio del server.
-Verifica della migrazione: 33 test passati; lint/build frontend passati; immagine Docker costruita e avviata.
+Verifica corrente: 40 test backend passati su PostgreSQL 17 temporaneo; lint e build frontend passati.
+Sono coperti anche priorita' omessa/null, TODO, migrazione ripetibile dei dati precedenti,
+notifica di risoluzione al reporter-attore/ex membro, deduplicazione concorrente e rollback.
+Verifica precedente della migrazione Express: 33 test passati; immagine Docker costruita e avviata.
 Provati inoltre il vecchio JAR Spring e Express sullo stesso DB temporaneo: token e password compatibili
 in entrambe le direzioni e lettura coerente di dati, statistiche, commenti e notifiche.
 
@@ -159,7 +167,7 @@ docker compose -f .\infra\docker\docker-compose.yml run --rm backend npm run db:
 docker compose -f .\infra\docker\docker-compose.yml up -d
 ```
 
-Con schema gia' completo basta `docker compose -f .\infra\docker\docker-compose.yml up -d --build`.
+Per gli aggiornamenti, ricostruire l'immagine, eseguire db:init e poi avviare il backend come sopra.
 Il servizio backend espone 8081 sull'host; PostgreSQL conserva il volume `postgres_data` esistente.
 Non usare `down -v` per conservare i dati. Non avviare insieme backend locale e container sulla stessa porta.
 

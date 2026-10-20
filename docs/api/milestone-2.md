@@ -13,15 +13,19 @@ Base URL locale: `http://localhost:8081/api`. Timestamp ISO 8601 UTC; liste non 
 - Tutti i membri possono creare issue, assegnarle, avanzarne lo stato e commentarle.
 - Reporter e autore del commento sono ricavati dall'identita' autenticata, mai dal JSON del client.
 - L'assegnatario deve essere un membro del progetto, anche quando e' ADMIN. `assigneeId: null` significa nessuna assegnazione.
-- La rimozione di un membro revoca subito l'accesso a issue e commenti e nasconde le relative notifiche.
+- La rimozione di un membro revoca subito l'accesso a issue e commenti e nasconde le notifiche ordinarie.
+  Le notifiche personali di risoluzione al reporter rimangono visibili e possono essere marcate lette,
+  senza ripristinare l'accesso alla issue (`issueId: null` nella risposta).
   L'attribuzione storica di reporter, autore e assegnatario rimane; il frontend segnala gli assegnatari non piu' membri.
-- Stato iniziale OPEN. Transizioni consentite: OPEN -> IN_PROGRESS -> CLOSED.
+- Stato iniziale TODO. Transizioni consentite: TODO -> IN_PROGRESS -> CLOSED.
   Ripetere lo stato corrente e' idempotente; salti, ritorni indietro e riapertura restituiscono 409.
   E' possibile commentare o cambiare assegnatario anche dopo la chiusura.
 - Le scritture e le notifiche sono nella stessa transazione. Un lock sulla issue serializza commenti,
   assegnazioni e cambi di stato concorrenti; richieste identiche di stato/assegnazione non duplicano gli eventi.
 - Le notifiche di assegnazione vanno al nuovo assegnatario; quelle di commento e stato a reporter e assegnatario.
   L'attore e' escluso, i destinatari sono deduplicati e devono avere ancora accesso al progetto.
+- Alla chiusura il reporter riceve sempre una sola notifica di risoluzione, anche quando e' l'attore
+  o non e' piu' membro. Se coincide con l'assegnatario non vengono generate due notifiche.
 - Le notifiche sono personali anche per gli amministratori: non e' possibile leggere o modificare quelle altrui.
   Se una membership viene ripristinata, le precedenti notifiche tornano visibili.
 
@@ -58,15 +62,17 @@ CreateIssueRequest:
 ```
 
 `projectId` positivo e obbligatorio; `title` non vuoto, massimo 200 caratteri; `description`
-non vuota, massimo 10000 caratteri. Tipo e priorita' obbligatori; assegnatario facoltativo.
+non vuota, massimo 10000 caratteri. Tipo obbligatorio; priorita' e assegnatario facoltativi.
+Priorita' omessa o null viene salvata come null; stringa vuota e valori non ammessi restituiscono 400.
 
 | Campo | Valori |
 | --- | --- |
 | type | BUG, FEATURE, DOCUMENTATION, QUESTION |
-| priority | LOW, MEDIUM, HIGH, CRITICAL |
-| status | OPEN, IN_PROGRESS, CLOSED |
+| priority | null, LOW, MEDIUM, HIGH, CRITICAL |
+| status | TODO, IN_PROGRESS, CLOSED |
 
-I vecchi nomi TODO/DONE non sono accettati. Tipo e priorita' seguono i valori gia' presenti nel frontend.
+OPEN non e' piu' accettato dalle API; i dati esistenti sono convertiti in TODO da db:init.
+IN_PROGRESS e CLOSED mantengono il significato precedente; DONE non e' un valore previsto.
 
 IssueResponse:
 
@@ -74,7 +80,7 @@ IssueResponse:
 {
   "id": 1, "code": "BUG-26-1", "title": "Errore durante il login",
   "description": "Passaggi per riprodurre il problema...",
-  "type": "BUG", "priority": "HIGH", "status": "OPEN",
+  "type": "BUG", "priority": "HIGH", "status": "TODO",
   "project": { "id": 1, "name": "BugBoard26" },
   "reporter": { "id": 1, "fullName": "Admin", "email": "admin@example.test", "role": "ADMIN", "avatarUrl": "" },
   "assignee": { "id": 2, "fullName": "Mario", "email": "mario@example.test", "role": "USER", "avatarUrl": "" },
@@ -115,10 +121,13 @@ NotificationListResponse:
 ```
 
 La marcatura letta restituisce il singolo elemento con `read: true`. Per ID altrui o inesistenti:
-404; per una propria notifica di un progetto revocato: 403. Il conteggio include solo notifiche accessibili.
+404; per una propria notifica ordinaria di un progetto revocato: 403. La notifica di risoluzione
+del reporter resta invece leggibile con issueId null, anche dopo la revoca. Il conteggio include
+le notifiche accessibili e queste notifiche personali di risoluzione.
 
-ProjectResponse aggiunge `totalIssues`, `openIssues` (solo OPEN), `closedIssues` (solo CLOSED).
-La dashboard calcola anche IN_PROGRESS e permette filtri locali combinati su tipo, stato e priorita'.
+ProjectResponse aggiunge `totalIssues`, `openIssues` (solo TODO, nome JSON conservato per compatibilita'), `closedIssues` (solo CLOSED).
+La dashboard calcola anche IN_PROGRESS e permette filtri locali combinati su tipo, stato e priorita',
+inclusa l'opzione Not specified per le issue senza priorita'.
 Creazione issue, cambio stato/assegnatario e commenti aggiornano la data di attivita' del progetto.
 
 ## Errori aggiuntivi
@@ -133,7 +142,11 @@ Creazione issue, cambio stato/assegnatario e commenti aggiornano la data di atti
 
 `backend/sql/001-initial.sql` include le tre tabelle (`issues`, `issue_comments`, `notifications`) e relativi indici
 con CREATE IF NOT EXISTS: e' compatibile con il database della milestone 1 e non elimina dati.
-L'inizializzazione si esegue esplicitamente con `npm run db:init`; il server non usa sync/alter/force.
+L'inizializzazione si esegue esplicitamente con `npm run db:init`, anche per aggiornare un DB esistente.
+Il comando applica in transazione anche `002-issue-requirements.sql`: priorita' nullable,
+conversione OPEN -> TODO, vincoli/default aggiornati e tipo interno delle notifiche (ACTIVITY/RESOLUTION).
+Gli script sono ripetibili e conservano righe, ID, date e attributi esistenti, salvo lo stato OPEN convertito.
+Il server non aggiorna automaticamente lo schema e non usa sync/alter/force.
 Non e' necessario ricreare il volume PostgreSQL.
 
 Il frontend usa le API reali di default. La selezione assegnatari usa l'elenco dei membri,

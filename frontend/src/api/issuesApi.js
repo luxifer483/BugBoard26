@@ -42,10 +42,11 @@ export async function createIssue(payload) {
     const createdIssue = {
       id: Date.now(),
       code: `BUG-26-${mockIssues.length + 1}`,
-      status: 'OPEN',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...payload,
+      status: 'TODO',
+      priority: payload.priority ?? null,
     }
 
     mockIssues.unshift(createdIssue)
@@ -58,7 +59,7 @@ export async function createIssue(payload) {
     title: payload.title,
     description: payload.description,
     type: payload.type,
-    priority: payload.priority,
+    priority: payload.priority ?? null,
     assigneeId: payload.assignee?.id ?? null,
   })
   return data

@@ -75,7 +75,7 @@ function ProjectsPage() {
       accentClass: 'is-orange',
     },
     {
-      label: 'Open Issues',
+      label: 'To Do Issues',
       value: projects.reduce((sum, project) => sum + (project.openIssues ?? 0), 0),
       icon: 'o',
       accentClass: 'is-red',
@@ -171,7 +171,7 @@ function ProjectsPage() {
                       <strong>{project.totalIssues}</strong>
                     </div>
                     <div>
-                      <span>Open</span>
+                      <span>To do</span>
                       <strong className="project-open-count">{project.openIssues}</strong>
                     </div>
                     <div>

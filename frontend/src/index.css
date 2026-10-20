@@ -496,6 +496,20 @@ p {
   border-bottom: 0;
 }
 
+button.notification-item {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.notification-item:disabled {
+  cursor: default;
+}
+
 .notification-item:hover {
   background: #f8fafc;
 }

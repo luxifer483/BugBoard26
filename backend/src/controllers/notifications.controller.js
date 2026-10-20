@@ -5,13 +5,18 @@ import { visibleProjectIds, requireProject } from '../services/access.js';
 import { notificationResponse, listResponse } from '../services/responses.js';
 import { notFound } from '../middleware/errors.js';
 
-// Nasconde anche le notifiche dei progetti da cui l'utente e' stato rimosso.
+// Le risoluzioni restano personali e leggibili anche dopo l'uscita dal progetto.
 export async function list(req, res) {
   const ids = await visibleProjectIds(req.user);
-  const notifications = await Notification.findAll({ where: { recipientId: req.user.id },
-    include: [{ model: Issue, as: 'issue', required: true, where: ids === null ? {} : { projectId: { [Op.in]: ids } } }],
+  const notifications = await Notification.findAll({ where: { recipientId: req.user.id,
+    ...(ids === null ? {} : { [Op.or]: [
+      { '$issue.project_id$': { [Op.in]: ids } },
+      { kind: 'RESOLUTION', '$issue.reporter_id$': req.user.id },
+    ] }) },
+    include: [{ model: Issue, as: 'issue', required: true }],
     order: [['createdAt', 'DESC'], ['id', 'DESC']] });
-  const items = notifications.map(notificationResponse);
+  const items = notifications.map((notification) => notificationResponse(notification,
+    ids === null || ids.some((id) => String(id) === String(notification.issue.projectId))));
   res.json({ ...listResponse(items), unreadCount: items.filter((item) => !item.read).length });
 }
 
@@ -21,9 +26,13 @@ export async function read(req, res) {
     const notification = await Notification.findOne({ where: { id: req.params.id, recipientId: req.user.id }, transaction });
     if (!notification) throw notFound('Notification');
     const issue = await Issue.findByPk(notification.issueId, { transaction });
-    await requireProject(req.user, issue.projectId, transaction);
+    const ids = await visibleProjectIds(req.user, transaction);
+    const canAccessIssue = ids === null || ids.some((id) => String(id) === String(issue.projectId));
+    if (!(notification.kind === 'RESOLUTION' && String(issue.reporterId) === String(req.user.id))) {
+      await requireProject(req.user, issue.projectId, transaction);
+    }
     await notification.update({ read: true }, { transaction });
-    return notificationResponse(notification);
+    return notificationResponse(notification, canAccessIssue);
   });
   res.json(result);
 }

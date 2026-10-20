@@ -5,7 +5,7 @@ import { sequelize } from '../config/database.js';
 export const ROLES = ['USER', 'ADMIN'];
 export const ISSUE_TYPES = ['BUG', 'FEATURE', 'DOCUMENTATION', 'QUESTION'];
 export const ISSUE_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-export const ISSUE_STATUSES = ['OPEN', 'IN_PROGRESS', 'CLOSED'];
+export const ISSUE_STATUSES = ['TODO', 'IN_PROGRESS', 'CLOSED'];
 
 // Restituisce una nuova definizione di colonna per ciascun modello.
 function id() {
@@ -50,7 +50,8 @@ export class Issue extends Model {}
 Issue.init({
   id: id(), projectId: reference('project_id'), reporterId: reference('reporter_id'),
   assigneeId: reference('assignee_id', true), title: text(200), description: text(10000),
-  type: choice(ISSUE_TYPES), priority: choice(ISSUE_PRIORITIES), status: choice(ISSUE_STATUSES, 'OPEN'),
+  type: choice(ISSUE_TYPES), priority: { ...choice(ISSUE_PRIORITIES), allowNull: true },
+  status: choice(ISSUE_STATUSES, 'TODO'),
   createdAt: date('created_at'), updatedAt: date('updated_at'),
 }, { sequelize, tableName: 'issues', modelName: 'Issue' });
 
@@ -63,7 +64,8 @@ Comment.init({
 export class Notification extends Model {}
 Notification.init({
   id: id(), recipientId: reference('recipient_id'), issueId: reference('issue_id'),
-  message: text(500), read: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  message: text(500), kind: choice(['ACTIVITY', 'RESOLUTION'], 'ACTIVITY'),
+  read: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   createdAt: date('created_at'),
 }, { sequelize, tableName: 'notifications', modelName: 'Notification' });
 

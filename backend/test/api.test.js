@@ -22,6 +22,7 @@ const { default: app } = await import('../src/app.js');
 const { sequelize, User, Project, Membership, Issue, Comment, Notification } = await import('../src/models/index.js');
 const { createToken } = await import('../src/services/auth.js');
 const { bootstrapAdmin } = await import('../src/services/bootstrap.js');
+const { initializeSchema } = await import('../src/services/schema.js');
 const schema = process.env.TEST_DB_SCHEMA;
 const initialSql = await readFile(new URL('../sql/001-initial.sql', import.meta.url), 'utf8');
 const hash = await bcrypt.hash('Password123!', 4);
@@ -37,10 +38,19 @@ async function applySql(sql = initialSql) {
   });
 }
 
+async function runInitializer(targetSchema) {
+  const child = spawn(process.execPath, ['scripts/init-db.js'], { cwd: new URL('..', import.meta.url),
+    env: { ...process.env, TEST_DB_SCHEMA: targetSchema }, stdio: ['ignore', 'pipe', 'pipe'] });
+  let output = '';
+  child.stderr.on('data', (chunk) => { output += chunk; });
+  const [code] = await once(child, 'exit');
+  assert.equal(code, 0, output);
+}
+
 before(async () => {
   await sequelize.authenticate();
   await sequelize.getQueryInterface().createSchema(schema);
-  await applySql();
+  await initializeSchema();
   server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   base = `http://127.0.0.1:${server.address().port}/api`;
@@ -212,7 +222,7 @@ test('member creates an issue while reporter, status and dates remain server con
   const issue = await call('POST', '/issues', memberToken, { ...payload(Number(member.id)),
     reporter: { id: Number(admin.id) }, status: 'CLOSED', createdAt: '2000-01-01T00:00:00Z' }, 201);
   assert.equal(issue.reporter.id, Number(member.id));
-  assert.equal(issue.status, 'OPEN');
+  assert.equal(issue.status, 'TODO');
   assert.equal(issue.code, `BUG-26-${issue.id}`);
   assert.ok(!issue.createdAt.startsWith('2000'));
   assert.equal((await call('GET', '/notifications', memberToken)).unreadCount, 0);
@@ -225,10 +235,27 @@ test('all four issue types remain supported', async () => {
   }
 });
 
+test('priority is optional and valid explicit priorities are preserved', async () => {
+  const { priority, ...withoutPriority } = payload();
+  assert.equal(priority, 'HIGH');
+  for (const input of [withoutPriority, { ...withoutPriority, priority: null }]) {
+    const issue = await call('POST', '/issues', memberToken, input, 201);
+    assert.equal(issue.priority, null);
+    assert.equal(issue.status, 'TODO');
+    assert.equal((await call('GET', `/issues/${issue.id}`, memberToken)).priority, null);
+    assert.equal((await Issue.findByPk(issue.id)).priority, null);
+  }
+  for (const value of ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']) {
+    const issue = await call('POST', '/issues', memberToken, { ...withoutPriority, priority: value }, 201);
+    assert.equal(issue.priority, value);
+  }
+});
+
 test('invalid issue fields are rejected without writing rows', async () => {
   const before = await Issue.count();
   for (const invalid of [{ title: ' ' }, { description: 'x'.repeat(10001) }, { type: 'UNKNOWN' },
-    { priority: null }, { priority: 'UNKNOWN' }, { projectId: -1 }, { assigneeId: true }]) {
+    { priority: '' }, { priority: false }, { priority: 0 }, { priority: {} },
+    { priority: 'UNKNOWN' }, { projectId: -1 }, { assigneeId: true }]) {
     await call('POST', '/issues', memberToken, { ...payload(), ...invalid }, 400);
   }
   assert.equal(await Issue.count(), before);
@@ -261,7 +288,8 @@ test('status transitions and repeated requests preserve the current behavior', a
   for (const status of ['IN_PROGRESS', 'IN_PROGRESS', 'CLOSED', 'CLOSED']) {
     assert.equal((await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status })).status, status);
   }
-  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'OPEN' }, 409);
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'TODO' }, 409);
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'OPEN' }, 400);
   assert.equal((await call('GET', '/notifications', adminToken)).unreadCount, 2);
   assert.equal((await call('GET', '/notifications', memberToken)).unreadCount, 1);
 });
@@ -299,6 +327,60 @@ test('notifications deduplicate reporter/assignee and exclude the actor', async 
   await call('POST', `/issues/${issue.id}/comments`, reviewerToken, { content: 'Please review' }, 201);
   assert.equal((await call('GET', '/notifications', memberToken)).totalCount, 1);
   assert.equal((await call('GET', '/notifications', reviewerToken)).totalCount, 0);
+});
+
+test('resolution notifies a reporter who closes their own assigned issue exactly once', async () => {
+  const issue = await createIssue(memberToken, Number(member.id));
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
+  assert.equal((await call('GET', '/notifications', memberToken)).totalCount, 0);
+  for (let i = 0; i < 2; i++) {
+    await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' });
+  }
+  const feed = await call('GET', '/notifications', memberToken);
+  assert.equal(feed.totalCount, 1);
+  assert.equal(feed.unreadCount, 1);
+  assert.equal(feed.items[0].issueId, issue.id);
+  assert.match(feed.items[0].message, /resolved/);
+  assert.equal(await Notification.count({ where: { issueId: issue.id, kind: 'RESOLUTION' } }), 1);
+});
+
+test('former reporters receive and read resolution notices without regaining project access', async () => {
+  const issue = await createIssue(memberToken, Number(reviewer.id));
+  await call('POST', `/issues/${issue.id}/comments`, reviewerToken, { content: 'Before revocation' }, 201);
+  await call('DELETE', `/projects/${project.id}/members/${member.id}`, adminToken, undefined, 204);
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
+  assert.equal((await call('GET', '/notifications', memberToken)).totalCount, 0);
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'CLOSED' });
+  const feed = await call('GET', '/notifications', memberToken);
+  assert.equal(feed.totalCount, 1);
+  assert.equal(feed.unreadCount, 1);
+  assert.equal(feed.items[0].issueId, null);
+  assert.match(feed.items[0].message, /resolved/);
+  const notificationId = feed.items[0].id;
+  for (let i = 0; i < 2; i++) {
+    const read = await call('PATCH', `/notifications/${notificationId}/read`, memberToken);
+    assert.equal(read.read, true);
+    assert.equal(read.issueId, null);
+  }
+  assert.equal((await call('GET', '/notifications', memberToken)).unreadCount, 0);
+  await call('GET', `/issues/${issue.id}`, memberToken, undefined, 403);
+  await call('GET', `/issues/${issue.id}/comments`, memberToken, undefined, 403);
+  await call('PATCH', `/notifications/${notificationId}/read`, outsiderToken, undefined, 404);
+  await call('PATCH', `/notifications/${notificationId}/read`, adminToken, undefined, 404);
+  await call('POST', `/projects/${project.id}/members`, adminToken, { userId: Number(member.id) }, 201);
+  const restored = (await call('GET', '/notifications', memberToken)).items.find((item) => item.id === notificationId);
+  assert.equal(restored.issueId, issue.id);
+});
+
+test('resolution notice stays visible if reporter membership is revoked after closure', async () => {
+  const issue = await createIssue(memberToken, Number(reviewer.id));
+  for (const status of ['IN_PROGRESS', 'CLOSED']) {
+    await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status });
+  }
+  await call('DELETE', `/projects/${project.id}/members/${member.id}`, adminToken, undefined, 204);
+  const feed = await call('GET', '/notifications', memberToken);
+  assert.equal(feed.totalCount, 1);
+  assert.equal(feed.items[0].issueId, null);
 });
 
 test('notifications remain private and marking read is idempotent', async () => {
@@ -342,6 +424,13 @@ test('concurrent identical status updates emit only one event', async () => {
   assert.equal((await call('GET', '/notifications', adminToken)).totalCount, 1);
 });
 
+test('concurrent closures emit a single resolution notice per reporter', async () => {
+  const issue = await createIssue(memberToken, Number(member.id));
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
+  await Promise.all([1, 2].map(() => call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' })));
+  assert.equal((await call('GET', '/notifications', memberToken)).totalCount, 1);
+});
+
 test('a notification write failure rolls back issue state and project timestamp', async () => {
   const issue = await createIssue(adminToken, Number(member.id));
   const savedProject = await Project.findByPk(project.id);
@@ -350,7 +439,21 @@ test('a notification write failure rolls back issue state and project timestamp'
   try {
     await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' }, 500);
   } finally { Notification.create = original; }
-  assert.equal((await Issue.findByPk(issue.id)).status, 'OPEN');
+  assert.equal((await Issue.findByPk(issue.id)).status, 'TODO');
+  assert.equal((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
+});
+
+test('resolution notification failure rolls back closure and project timestamp', async () => {
+  const issue = await createIssue(memberToken, Number(member.id));
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
+  const savedProject = await Project.findByPk(project.id);
+  const original = Notification.create;
+  Notification.create = async () => { throw new Error('Simulated resolution failure'); };
+  try {
+    await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' }, 500);
+  } finally { Notification.create = original; }
+  assert.equal((await Issue.findByPk(issue.id)).status, 'IN_PROGRESS');
+  assert.equal(await Notification.count({ where: { issueId: issue.id } }), 0);
   assert.equal((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
 });
 
@@ -407,16 +510,63 @@ test('explicit initializer upgrades milestone 1 without deleting existing rows',
     const legacyUser = await User.schema(legacySchema).create({ fullName: 'Existing Spring user',
       email: 'legacy@example.test', role: 'ADMIN', passwordHash: hash.replace('$2b$', '$2a$') });
     const legacyProject = await Project.schema(legacySchema).create({ name: 'Existing project', description: 'Milestone 1 data' });
-    const child = spawn(process.execPath, ['scripts/init-db.js'], { cwd: new URL('..', import.meta.url),
-      env: { ...process.env, TEST_DB_SCHEMA: legacySchema }, stdio: ['ignore', 'pipe', 'pipe'] });
-    let output = '';
-    child.stderr.on('data', (chunk) => { output += chunk; });
-    const [code] = await once(child, 'exit');
-    assert.equal(code, 0, output);
+    await runInitializer(legacySchema);
     assert.equal((await User.schema(legacySchema).findByPk(legacyUser.id)).passwordHash, legacyUser.passwordHash);
     assert.equal((await Project.schema(legacySchema).findByPk(legacyProject.id)).name, 'Existing project');
     assert.equal(await Issue.schema(legacySchema).count(), 0);
     assert.equal(await Notification.schema(legacySchema).count(), 0);
+  } finally {
+    await sequelize.getQueryInterface().dropSchema(legacySchema);
+  }
+});
+
+test('requirements migration preserves legacy data, converts only OPEN and is repeatable', async () => {
+  const legacySchema = `${schema}_requirements`;
+  await sequelize.getQueryInterface().createSchema(legacySchema);
+  try {
+    await sequelize.transaction(async (transaction) => {
+      await sequelize.query("SELECT set_config('search_path', $schema, true)", { bind: { schema: legacySchema }, transaction });
+      await sequelize.query(initialSql, { transaction });
+    });
+    const user = await User.schema(legacySchema).create({ fullName: 'Legacy reporter',
+      email: 'reporter@example.test', role: 'USER', passwordHash: hash });
+    const legacyProject = await Project.schema(legacySchema).create({ name: 'Legacy project', description: 'Preserve me' });
+    await Membership.schema(legacySchema).create({ projectId: legacyProject.id, userId: user.id });
+    const rows = [];
+    for (const status of ['OPEN', 'IN_PROGRESS', 'CLOSED']) {
+      const [inserted] = await sequelize.query(`INSERT INTO "${legacySchema}".issues
+        (project_id, reporter_id, title, description, type, priority, status, created_at, updated_at)
+        VALUES ($project, $reporter, $status, 'Keep description', 'BUG', 'HIGH', $status, now(), now()) RETURNING *`,
+      { bind: { project: legacyProject.id, reporter: user.id, status } });
+      rows.push(inserted[0]);
+    }
+    await sequelize.query(`INSERT INTO "${legacySchema}".issue_comments (issue_id, author_id, content, created_at)
+      VALUES ($issue, $author, 'Keep comment', now())`, { bind: { issue: rows[0].id, author: user.id } });
+    await sequelize.query(`INSERT INTO "${legacySchema}".notifications (issue_id, recipient_id, message, read, created_at)
+      VALUES ($issue, $recipient, 'Keep notification', true, now())`, { bind: { issue: rows[0].id, recipient: user.id } });
+    await runInitializer(legacySchema);
+    await runInitializer(legacySchema);
+    const migrated = await Issue.schema(legacySchema).findAll({ order: [['id', 'ASC']] });
+    assert.deepEqual(migrated.map((issue) => issue.status), ['TODO', 'IN_PROGRESS', 'CLOSED']);
+    for (let i = 0; i < rows.length; i++) {
+      assert.equal(String(migrated[i].id), String(rows[i].id));
+      assert.equal(migrated[i].title, rows[i].title);
+      assert.equal(migrated[i].priority, 'HIGH');
+      assert.equal(migrated[i].updatedAt.toISOString(), rows[i].updated_at.toISOString());
+    }
+    assert.equal((await User.schema(legacySchema).findByPk(user.id)).passwordHash, hash);
+    assert.equal(await Membership.schema(legacySchema).count(), 1);
+    assert.equal((await Comment.schema(legacySchema).findOne()).content, 'Keep comment');
+    const notification = await Notification.schema(legacySchema).findOne();
+    assert.equal(notification.kind, 'ACTIVITY');
+    assert.equal(notification.read, true);
+    const [created] = await sequelize.query(`INSERT INTO "${legacySchema}".issues
+      (project_id, reporter_id, title, description, type, created_at, updated_at)
+      VALUES ($project, $reporter, 'Without priority', 'Description', 'BUG', now(), now()) RETURNING *`,
+    { bind: { project: legacyProject.id, reporter: user.id } });
+    assert.equal(created[0].priority, null);
+    assert.equal(created[0].status, 'TODO');
+    await assert.rejects(sequelize.query(`UPDATE "${legacySchema}".issues SET status = 'OPEN'`));
   } finally {
     await sequelize.getQueryInterface().dropSchema(legacySchema);
   }

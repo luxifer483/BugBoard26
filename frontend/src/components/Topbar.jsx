@@ -143,9 +143,10 @@ function Topbar() {
                           {content}
                         </Link>
                       ) : (
-                        <div className="notification-item" key={notification.id}>
+                        <button className="notification-item" key={notification.id} type="button"
+                          onClick={() => readNotification(notification.id)} disabled={notification.read}>
                           {content}
-                        </div>
+                        </button>
                       )
                     })
                   : null}

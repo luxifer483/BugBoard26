@@ -43,13 +43,13 @@ class Issue <<Entity>> {
   -title: String
   -description: String
   -type: IssueType
-  -priority: IssuePriority
+  -priority: IssuePriority [0..1]
   -status: IssueStatus
   -createdAt: Instant
   -updatedAt: Instant
 }
 enum IssueStatus {
-  OPEN
+  TODO
   IN_PROGRESS
   CLOSED
 }
@@ -77,6 +77,7 @@ class Notification <<Entity>> {
   -recipient: User
   -issue: Issue
   -message: String
+  -kind: ACTIVITY | RESOLUTION
   -read: boolean
   -createdAt: Instant
 }
@@ -91,9 +92,10 @@ User "1" -- "0..*" IssueComment : author
 Issue "1" -- "0..*" Notification
 User "1" -- "0..*" Notification : recipient
 note bottom of Issue
-  OPEN -> IN_PROGRESS -> CLOSED
+  TODO -> IN_PROGRESS -> CLOSED
   Assegnatario membro del progetto.
   Reporter e autore da identita' JWT.
+  Risoluzione sempre notificata al reporter.
 end note
 Project --> ProjectStatus
 User "1" -- "0..*" ProjectMembership

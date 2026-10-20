@@ -31,7 +31,8 @@ npm.cmd --prefix frontend run dev
 
 Account locale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
 Conservare un eventuale `backend/.env` gia' configurato. Il server non modifica automaticamente lo schema:
-`db:init` crea solo tabelle mancanti; i dati PostgreSQL e gli account esistenti restano utilizzabili.
+`db:init` crea le tabelle mancanti e applica gli aggiornamenti SQL versionati, inclusa la conversione OPEN -> TODO.
+Eseguirlo anche aggiornando un database esistente; dati PostgreSQL e account vengono conservati.
 Per i test: `powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1` dalla root.
 Struttura, migrazione da Spring e comandi Docker completi sono nel [README backend](backend/README.md).
 Per la demo con dati simulati, impostare `VITE_USE_MOCK_API=true` nel frontend e riavviare Vite.

@@ -1,5 +1,5 @@
 const STATUS_OPTIONS = [
-  { value: 'OPEN', label: 'Open' },
+  { value: 'TODO', label: 'To do' },
   { value: 'IN_PROGRESS', label: 'In Progress' },
   { value: 'CLOSED', label: 'Closed' },
 ]
@@ -16,7 +16,7 @@ function StatusDropdown({ value, onChange, disabled = false }) {
         {STATUS_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}
             disabled={option.value !== value && !(
-              (value === 'OPEN' && option.value === 'IN_PROGRESS') ||
+              (value === 'TODO' && option.value === 'IN_PROGRESS') ||
               (value === 'IN_PROGRESS' && option.value === 'CLOSED')
             )}>
             {option.label}

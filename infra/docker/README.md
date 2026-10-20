@@ -26,8 +26,9 @@ docker ps
 
 ## Note
 
-- `db:init` e' richiesto solo per un database nuovo o con tabelle mancanti: non altera tabelle o dati esistenti.
-- Con schema completo basta `up -d --build`; il server non esegue sincronizzazioni automatiche dello schema.
+- Eseguire `db:init` anche per aggiornare un database esistente: applica gli script SQL versionati in transazione,
+  rende facoltativa la priorita', converte OPEN in TODO e aggiunge il tipo delle notifiche senza eliminare dati.
+- Prima di un aggiornamento effettuare un backup; gli script sono ripetibili e il server non modifica automaticamente lo schema.
 - Per usare il backend con Node locale, avviare solo il DB con `up -d postgres`.
 - Il DB e' esposto sulla porta host 5433, mantenendo 5432 all'interno della rete Docker.
 - Il backend in container espone la porta host 8081 (8080 interna) e usa NODE_ENV=development; non avviare contemporaneamente quello Node locale.

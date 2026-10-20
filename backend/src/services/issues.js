@@ -2,7 +2,7 @@
 import { Issue, Project, sequelize } from '../models/index.js';
 import { requireProject, requireIssue, requireAssignee } from './access.js';
 import { loadIssueResponse } from './responses.js';
-import { notifyAssignment, notifyParticipants } from './notifications.js';
+import { notify, notifyAssignment, notifyParticipants, notifyResolution } from './notifications.js';
 import { ApiError } from '../middleware/errors.js';
 
 // Aggiorna la data di attivita' del progetto senza modificare gli altri campi.
@@ -15,7 +15,7 @@ export async function createIssue(user, input) {
   return sequelize.transaction(async (transaction) => {
     await requireProject(user, input.projectId, transaction);
     await requireAssignee(input.projectId, input.assigneeId, transaction);
-    const issue = await Issue.create({ ...input, reporterId: user.id, status: 'OPEN' }, { transaction });
+    const issue = await Issue.create({ ...input, reporterId: user.id, status: 'TODO' }, { transaction });
     await touchProject(issue.projectId, transaction);
     await notifyAssignment(issue, user, transaction);
     return loadIssueResponse(issue.id, transaction);
@@ -27,13 +27,19 @@ export async function changeStatus(user, issueId, status) {
   return sequelize.transaction(async (transaction) => {
     const issue = await requireIssue(user, issueId, transaction);
     if (issue.status === status) return loadIssueResponse(issue.id, transaction);
-    if (!((issue.status === 'OPEN' && status === 'IN_PROGRESS')
+    if (!((issue.status === 'TODO' && status === 'IN_PROGRESS')
         || (issue.status === 'IN_PROGRESS' && status === 'CLOSED'))) {
-      throw new ApiError(409, 'INVALID_STATUS_TRANSITION', 'Move an issue from OPEN to IN_PROGRESS, then to CLOSED.');
+      throw new ApiError(409, 'INVALID_STATUS_TRANSITION', 'Move an issue from TODO to IN_PROGRESS, then to CLOSED.');
     }
     await issue.update({ status, updatedAt: new Date() }, { transaction });
     await touchProject(issue.projectId, transaction);
-    await notifyParticipants(issue, user, `Issue BUG-26-${issue.id} status changed to ${status}`, transaction);
+    if (status === 'CLOSED') {
+      await notifyResolution(issue, transaction);
+      const recipients = String(issue.assigneeId) === String(issue.reporterId) ? [] : [issue.assigneeId];
+      await notify(issue, user, `Issue BUG-26-${issue.id} status changed to ${status}`, recipients, transaction);
+    } else {
+      await notifyParticipants(issue, user, `Issue BUG-26-${issue.id} status changed to ${status}`, transaction);
+    }
     return loadIssueResponse(issue.id, transaction);
   });
 }

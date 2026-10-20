@@ -4,16 +4,16 @@ import { ROUTES } from '../config/routeConfig'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { getIssues } from '../api/issuesApi'
 import { getProjectById } from '../api/projectsApi'
-import { formatEnumLabel, formatRelativeDate } from '../utils/formatters'
+import { formatEnumLabel, formatPriorityLabel, formatRelativeDate } from '../utils/formatters'
 
 const STATUS_CLASS_MAP = {
-  OPEN: 'is-red',
+  TODO: 'is-red',
   IN_PROGRESS: 'is-orange',
   CLOSED: 'is-green',
 }
 
 const ISSUE_TYPE_OPTIONS = ['BUG', 'FEATURE', 'DOCUMENTATION', 'QUESTION']
-const ISSUE_STATUS_OPTIONS = ['OPEN', 'IN_PROGRESS', 'CLOSED']
+const ISSUE_STATUS_OPTIONS = ['TODO', 'IN_PROGRESS', 'CLOSED']
 const ISSUE_PRIORITY_OPTIONS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 const EMPTY_FILTERS = {
   type: '',
@@ -101,7 +101,8 @@ function DashboardPage() {
   const filteredIssues = issues.filter((issue) => {
     const matchesType = !filters.type || issue.type === filters.type
     const matchesStatus = !filters.status || issue.status === filters.status
-    const matchesPriority = !filters.priority || issue.priority === filters.priority
+    const matchesPriority = !filters.priority || (filters.priority === 'UNSPECIFIED'
+      ? issue.priority == null : issue.priority === filters.priority)
 
     return matchesType && matchesStatus && matchesPriority
   })
@@ -116,8 +117,8 @@ function DashboardPage() {
       accentClass: 'is-blue',
     },
     {
-      label: 'Open',
-      value: filteredIssues.filter((issue) => issue.status === 'OPEN').length,
+      label: 'To do',
+      value: filteredIssues.filter((issue) => issue.status === 'TODO').length,
       icon: 'o',
       accentClass: 'is-red',
     },
@@ -234,6 +235,7 @@ function DashboardPage() {
                     disabled={isLoading || Boolean(errorMessage)}
                   >
                     <option value="">All priorities</option>
+                    <option value="UNSPECIFIED">Not specified</option>
                     {ISSUE_PRIORITY_OPTIONS.map((option) => (
                       <option key={option} value={option}>
                         {formatEnumLabel(option)}
@@ -305,7 +307,7 @@ function DashboardPage() {
                         </span>
                         <span className="issue-chip">{formatEnumLabel(issue.type)}</span>
                         <span className="issue-chip">
-                          Priority {formatEnumLabel(issue.priority)}
+                          Priority: {formatPriorityLabel(issue.priority)}
                         </span>
                       </div>
 

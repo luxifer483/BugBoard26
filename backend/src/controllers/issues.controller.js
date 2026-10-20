@@ -34,7 +34,7 @@ export async function create(req, res) {
     title: validate.text(input.title, 'title', 200),
     description: validate.text(input.description, 'description', 10000),
     type: validate.choice(input.type, 'type', ISSUE_TYPES),
-    priority: validate.choice(input.priority, 'priority', ISSUE_PRIORITIES),
+    priority: input.priority == null ? null : validate.choice(input.priority, 'priority', ISSUE_PRIORITIES),
     assigneeId: validate.id(input.assigneeId, 'assigneeId', true),
   };
   res.status(201).json(await createIssue(req.user, values));
