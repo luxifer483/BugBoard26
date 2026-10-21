@@ -1,0 +1,61 @@
+name: BugBoard26 - Test e SonarQube
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-sonar:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bugboard_tests
+          POSTGRES_USER: bugboard_tests
+          POSTGRES_PASSWORD: test-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bugboard_tests -d bugboard_tests"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+
+    env:
+      TEST_DATABASE_URL: postgresql://bugboard_tests:test-only-password@127.0.0.1:5432/bugboard_tests
+
+    steps:
+      - name: Scarica il codice
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Configura Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Installa dipendenze backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Esegui test e coverage
+        working-directory: backend
+        run: npm test
+
+      - name: Verifica report LCOV
+        run: test -s backend/coverage/lcov.info
+
+      - name: Invia analisi a SonarQube
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
