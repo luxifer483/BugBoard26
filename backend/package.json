@@ -11,10 +11,12 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "db:init": "node scripts/init-db.js",
-    "test": "node --test --test-concurrency=1 test/*.test.js"
+   "test": "c8 --all --include=\"src/**/*.js\" --reporter=text --reporter=lcov node --test --test-concurrency=1 test/*.test.js"
   },
   "overrides": {
-    "sequelize": { "uuid": "11.1.1" }
+    "sequelize": {
+      "uuid": "11.1.1"
+    }
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -22,8 +24,13 @@
     "dotenv": "^18.0.8",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
     "pg": "^8.23.1",
     "sequelize": "^6.37.8",
+    "sharp": "^0.35.5",
     "validator": "^13.15.35"
+  },
+  "devDependencies": {
+    "c8": "^12.0.0"
   }
 }
