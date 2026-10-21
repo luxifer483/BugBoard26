@@ -1,3 +1,4 @@
+// Mostra le informazioni della issue e i controlli per assegnazione e stato.
 import { getInitials } from '../utils/formatters'
 import StatusDropdown from './StatusDropdown'
 
@@ -51,7 +52,8 @@ function DateDetail({ label, value, includeTime = false }) {
   )
 }
 
-function IssueInfoCard({ issue, onStatusChange, isUpdatingStatus, members,
+// Abilita il cambio di stato solo per l'assegnatario, indicato dalla pagina del dettaglio.
+function IssueInfoCard({ issue, canChangeStatus, onStatusChange, isUpdatingStatus, members,
   onAssigneeChange, isAssigning }) {
   return (
     <aside className="issue-info-card" aria-label="Issue details">
@@ -74,8 +76,15 @@ function IssueInfoCard({ issue, onStatusChange, isUpdatingStatus, members,
       <StatusDropdown
         value={issue.status}
         onChange={onStatusChange}
-        disabled={isUpdatingStatus || isAssigning || issue.status === 'CLOSED'}
+        disabled={!canChangeStatus || isUpdatingStatus || isAssigning || issue.status === 'CLOSED'}
       />
+      {!canChangeStatus ? (
+        <p className="status-message">
+          {issue.assignee
+            ? 'Only the assigned user can change the status.'
+            : 'Assign this issue before changing its status.'}
+        </p>
+      ) : null}
     </aside>
   )
 }

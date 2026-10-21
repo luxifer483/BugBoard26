@@ -22,10 +22,13 @@ export async function createIssue(user, input) {
   });
 }
 
-// Mantiene le transizioni attuali e non duplica notifiche per lo stesso stato.
+// Consente il cambio di stato solo all'assegnatario e non duplica le notifiche.
 export async function changeStatus(user, issueId, status) {
   return sequelize.transaction(async (transaction) => {
     const issue = await requireIssue(user, issueId, transaction);
+    if (issue.assigneeId === null || String(issue.assigneeId) !== String(user.id)) {
+      throw new ApiError(403, 'NOT_ISSUE_ASSIGNEE', 'Only the assigned user can change this issue\'s status.');
+    }
     if (issue.status === status) return loadIssueResponse(issue.id, transaction);
     if (!((issue.status === 'TODO' && status === 'IN_PROGRESS')
         || (issue.status === 'IN_PROGRESS' && status === 'CLOSED'))) {

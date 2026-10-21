@@ -282,7 +282,67 @@ test('outsiders cannot read or change issues and comments', async () => {
   assert.equal((await call('GET', '/issues', memberToken)).totalCount, 1);
 });
 
-test('status transitions and repeated requests preserve the current behavior', async () => {
+test('only the assignee can update status, including when the reporter or an admin is a project member', async () => {
+  await Membership.create({ projectId: project.id, userId: admin.id });
+  const issue = await createIssue(memberToken, Number(reviewer.id));
+  const savedIssue = await Issue.findByPk(issue.id);
+  const savedProject = await Project.findByPk(project.id);
+  const notifications = await Notification.count({ where: { issueId: issue.id } });
+  for (const token of [memberToken, adminToken]) {
+    for (const status of ['TODO', 'IN_PROGRESS', 'CLOSED']) {
+      const error = await call('PATCH', `/issues/${issue.id}/status`, token,
+        { status, assigneeId: Number(member.id) }, 403);
+      assert.equal(error.code, 'NOT_ISSUE_ASSIGNEE');
+    }
+  }
+  const unchanged = await Issue.findByPk(issue.id);
+  assert.equal(unchanged.status, 'TODO');
+  assert.equal(String(unchanged.assigneeId), String(reviewer.id));
+  assert.equal(unchanged.updatedAt.toISOString(), savedIssue.updatedAt.toISOString());
+  assert.equal((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
+  assert.equal(await Notification.count({ where: { issueId: issue.id } }), notifications);
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
+});
+
+test('unassigned issues cannot change status until an assignee is chosen', async () => {
+  const issue = await createIssue(memberToken);
+  for (const token of [memberToken, reviewerToken, adminToken]) {
+    for (const status of ['TODO', 'IN_PROGRESS']) {
+      assert.equal((await call('PATCH', `/issues/${issue.id}/status`, token, { status }, 403)).code,
+        'NOT_ISSUE_ASSIGNEE');
+    }
+  }
+  assert.equal((await Issue.findByPk(issue.id)).status, 'TODO');
+  assert.equal(await Notification.count({ where: { issueId: issue.id } }), 0);
+  await call('PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
+});
+
+test('reassignment and unassignment immediately change who can update status', async () => {
+  const issue = await createIssue(memberToken, Number(member.id));
+  await call('PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 403);
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
+  await call('PATCH', `/issues/${issue.id}/assignee`, reviewerToken, { assigneeId: null });
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'CLOSED' }, 403);
+  await call('PATCH', `/issues/${issue.id}/assignee`, reviewerToken, { assigneeId: Number(member.id) });
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' }, 403);
+  await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'CLOSED' }, 403);
+  assert.equal((await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' })).status, 'CLOSED');
+});
+
+test('an administrator can change status when they are the assignee', async () => {
+  await Membership.create({ projectId: project.id, userId: admin.id });
+  const issue = await createIssue(memberToken, Number(admin.id));
+  await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 403);
+  for (const status of ['IN_PROGRESS', 'CLOSED']) {
+    assert.equal((await call('PATCH', `/issues/${issue.id}/status`, adminToken, { status })).status, status);
+  }
+  const feed = await call('GET', '/notifications', memberToken);
+  assert.equal(feed.items.filter((item) => item.issueId === issue.id && /resolved/.test(item.message)).length, 1);
+});
+
+test('the assignee can advance status with the existing transitions and idempotency', async () => {
   const issue = await createIssue(adminToken, Number(member.id));
   assert.equal((await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' }, 409)).code, 'INVALID_STATUS_TRANSITION');
   for (const status of ['IN_PROGRESS', 'IN_PROGRESS', 'CLOSED', 'CLOSED']) {
@@ -408,7 +468,7 @@ test('membership removal revokes issue/comment access and hides notifications im
 });
 
 test('project statistics reflect persistent issue states', async () => {
-  const issue = await createIssue();
+  const issue = await createIssue(adminToken, Number(member.id));
   await createIssue(memberToken);
   let result = await call('GET', `/projects/${project.id}`, memberToken);
   assert.equal(result.totalIssues, 2); assert.equal(result.openIssues, 2);
@@ -419,8 +479,8 @@ test('project statistics reflect persistent issue states', async () => {
 
 test('concurrent identical status updates emit only one event', async () => {
   const issue = await createIssue(adminToken, Number(member.id));
-  await Promise.all([1, 2].map(() => call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' })));
-  assert.equal((await call('GET', '/notifications', memberToken)).totalCount, 2);
+  await Promise.all([1, 2].map(() => call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' })));
+  assert.equal((await call('GET', '/notifications', memberToken)).totalCount, 1);
   assert.equal((await call('GET', '/notifications', adminToken)).totalCount, 1);
 });
 
@@ -437,7 +497,7 @@ test('a notification write failure rolls back issue state and project timestamp'
   const original = Notification.create;
   Notification.create = async () => { throw new Error('Simulated notification failure'); };
   try {
-    await call('PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' }, 500);
+    await call('PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 500);
   } finally { Notification.create = original; }
   assert.equal((await Issue.findByPk(issue.id)).status, 'TODO');
   assert.equal((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());

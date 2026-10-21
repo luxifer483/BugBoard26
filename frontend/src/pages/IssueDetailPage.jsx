@@ -1,3 +1,4 @@
+// Carica il dettaglio della issue e coordina commenti, assegnazione e cambio di stato.
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { createComment, getComments } from '../api/commentsApi'
@@ -52,6 +53,8 @@ function IssueDetailContent({ issueId }) {
   const [isAssigning, setIsAssigning] = useState(false)
   const [members, setMembers] = useState([])
   const [actionError, setActionError] = useState('')
+  const canChangeStatus = Boolean(user?.id && issue?.assignee?.id
+    && String(user.id) === String(issue.assignee.id))
 
   useEffect(() => {
     let isMounted = true
@@ -100,8 +103,9 @@ function IssueDetailContent({ issueId }) {
     }
   }, [issueId])
 
+  // Prepara la richiesta di cambio stato soltanto se l'utente e' l'assegnatario.
   async function handleStatusChange(nextStatus) {
-    if (!issue || nextStatus === issue.status) {
+    if (!issue || !canChangeStatus || nextStatus === issue.status) {
       return
     }
 
@@ -207,6 +211,7 @@ function IssueDetailContent({ issueId }) {
 
               <IssueInfoCard
                 issue={issue}
+                canChangeStatus={canChangeStatus}
                 onStatusChange={handleStatusChange}
                 isUpdatingStatus={isUpdatingStatus}
                 members={members}
