@@ -1,5 +1,6 @@
 // Esegue modifiche composte su issue e notifiche, usando una sola transazione PostgreSQL.
-import { Issue, Project, sequelize } from '../models/index.js';
+import { Issue, IssueImage, Project, sequelize } from '../models/index.js';
+import { prepareImage } from './images.js';
 import { requireProject, requireIssue, requireAssignee } from './access.js';
 import { loadIssueResponse } from './responses.js';
 import { notify, notifyAssignment, notifyParticipants, notifyResolution } from './notifications.js';
@@ -11,11 +12,13 @@ export function touchProject(projectId, transaction) {
 }
 
 // Salva una nuova issue: autore e stato iniziale sono stabiliti dal server.
-export async function createIssue(user, input) {
+export async function createIssue(user, input, file) {
   return sequelize.transaction(async (transaction) => {
     await requireProject(user, input.projectId, transaction);
     await requireAssignee(input.projectId, input.assigneeId, transaction);
+    const image = await prepareImage(file);
     const issue = await Issue.create({ ...input, reporterId: user.id, status: 'TODO' }, { transaction });
+    if (image) await IssueImage.create({ ...image, issueId: issue.id }, { transaction });
     await touchProject(issue.projectId, transaction);
     await notifyAssignment(issue, user, transaction);
     return loadIssueResponse(issue.id, transaction);

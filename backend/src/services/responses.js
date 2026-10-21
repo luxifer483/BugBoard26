@@ -1,8 +1,9 @@
 // Prepara gli oggetti JSON gia' attesi dal frontend; non esegue salvataggi.
-import { User, Project, Issue, Membership } from '../models/index.js';
+import { User, Project, Issue, IssueImage, Membership } from '../models/index.js';
 
 export const issueRelations = [
   { model: Project, as: 'project' }, { model: User, as: 'reporter' }, { model: User, as: 'assignee' },
+  { model: IssueImage, as: 'image', attributes: ['issueId', 'contentType'] },
 ];
 
 export function userResponse(user) {
@@ -29,6 +30,7 @@ export function issueResponse(issue) {
     type: issue.type, priority: issue.priority, status: issue.status,
     project: { id: Number(issue.project.id), name: issue.project.name },
     reporter: userResponse(issue.reporter), assignee: issue.assignee ? userResponse(issue.assignee) : null,
+    image: issue.image ? { contentType: issue.image.contentType } : null,
     createdAt: issue.createdAt, updatedAt: issue.updatedAt };
 }
 

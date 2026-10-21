@@ -1,5 +1,6 @@
 // Converte gli errori in risposte JSON compatibili con il frontend esistente.
 import { UniqueConstraintError, ValidationError, ForeignKeyConstraintError, DatabaseError } from 'sequelize';
+import { MulterError } from 'multer';
 
 export class ApiError extends Error {
   constructor(status, code, message, errors = {}) {
@@ -18,7 +19,12 @@ export function errors(error, req, res, next) {
   let code = error.code || 'INTERNAL_ERROR';
   let message = status === 500 ? 'An unexpected error occurred.' : error.message;
   let fields = error.errors instanceof Array ? {} : error.errors || {};
-  if (error instanceof UniqueConstraintError) {
+  if (error instanceof MulterError) {
+    const tooLarge = error.code === 'LIMIT_FILE_SIZE';
+    status = tooLarge ? 413 : 400;
+    code = tooLarge ? 'IMAGE_TOO_LARGE' : 'INVALID_UPLOAD';
+    message = tooLarge ? 'The image must be at most 5 MB.' : 'Send at most one image in the image field, with the issue details.';
+  } else if (error instanceof UniqueConstraintError) {
     const email = error.errors.some((item) => item.path === 'email');
     status = 409;
     code = email ? 'EMAIL_EXISTS' : 'CONFLICT';

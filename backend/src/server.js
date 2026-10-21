@@ -1,12 +1,12 @@
 // Verifica PostgreSQL, crea se necessario l'admin di sviluppo e avvia l'ascolto HTTP.
 import app from './app.js';
-import { sequelize, User, Project, Membership, Issue, Comment, Notification } from './models/index.js';
+import { sequelize, User, Project, Membership, Issue, IssueImage, Comment, Notification } from './models/index.js';
 import { bootstrapAdmin } from './services/bootstrap.js';
 
 // Legge le tabelle per rilevare uno schema mancante senza crearlo o alterarlo.
 async function start() {
   await sequelize.authenticate();
-  for (const model of [User, Project, Membership, Issue, Comment, Notification]) {
+  for (const model of [User, Project, Membership, Issue, IssueImage, Comment, Notification]) {
     await model.findOne({ limit: 1 });
   }
   await bootstrapAdmin();

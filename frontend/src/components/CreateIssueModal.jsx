@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+// Raccoglie i dati della nuova issue e un'immagine facoltativa prima di inviarli alle API.
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createIssue } from '../api/issuesApi'
 import { getProjectMembers } from '../api/projectMembersApi'
@@ -21,6 +22,9 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [image, setImage] = useState(null)
+  const [imageError, setImageError] = useState('')
+  const imageInput = useRef(null)
 
   useEffect(() => {
     if (!isOpen) {
@@ -45,6 +49,8 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
         assigneeId: '',
       })
       setErrorMessage('')
+      setImage(null)
+      setImageError('')
       return
     }
 
@@ -107,9 +113,25 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
     }
   }
 
+  // Controlla tipo e dimensione per dare un messaggio immediato; il backend ricontrolla il file.
+  function handleImageChange(event) {
+    const file = event.target.files[0] || null
+    setImage(null)
+    setImageError('')
+    if (file && (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)
+        || file.size > 5 * 1024 * 1024 || file.size === 0)) {
+      setImageError('Choose a PNG, JPEG or WebP image, up to 5 MB.')
+      event.target.value = ''
+      return
+    }
+    setImage(file)
+  }
+
+  // Prepara la richiesta; il salvataggio effettivo viene eseguito dal backend.
   async function handleSubmit(event) {
     event.preventDefault()
 
+    if (imageError) return
     if (!projectId) {
       setErrorMessage('Select a project before creating a new issue.')
       return
@@ -130,6 +152,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
         reporter: user,
         assignee,
         project: { id: Number(projectId) },
+        image,
       })
 
       onIssueCreated?.(createdIssue)
@@ -248,10 +271,28 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
             </select>
           </label>
 
+          <label className="form-field">
+            <span id="issue-image-label">Image (optional)</span>
+            <input ref={imageInput} type="file" name="image" accept="image/png,image/jpeg,image/webp"
+              onChange={handleImageChange} disabled={isSubmitting} aria-labelledby="issue-image-label"
+              aria-describedby="issue-image-help" />
+            <small id="issue-image-help">PNG, JPEG or WebP, up to 5 MB and 16 megapixels. No animated images.</small>
+          </label>
+          {image ? (
+            <div className="issue-image-selection">
+              <span>{image.name}</span>
+              <button className="secondary-button" type="button" disabled={isSubmitting} onClick={() => {
+                setImage(null)
+                if (imageInput.current) imageInput.current.value = ''
+              }}>Remove image</button>
+            </div>
+          ) : null}
+          {imageError ? <p role="alert" className="status-message is-error">{imageError}</p> : null}
+
           {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
 
           <div className="create-issue-actions">
-            <button className="primary-button" disabled={isSubmitting} type="submit">
+            <button className="primary-button" disabled={isSubmitting || Boolean(imageError)} type="submit">
               {isSubmitting ? 'Creating...' : 'Create Issue'}
             </button>
             <button

@@ -4,7 +4,7 @@ import { sequelize } from '../config/database.js';
 
 // Aggiorna schema e stati legacy in una sola transazione, senza eliminare dati.
 export async function initializeSchema() {
-  const scripts = ['001-initial.sql', '002-issue-requirements.sql'];
+  const scripts = ['001-initial.sql', '002-issue-requirements.sql', '003-issue-images.sql'];
   await sequelize.transaction(async (transaction) => {
     // Nei test anche l'inizializzazione esplicita resta nello schema isolato.
     if (sequelize.options.define.schema) {

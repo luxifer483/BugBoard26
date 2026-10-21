@@ -1,3 +1,4 @@
+// Prepara le richieste delle issue e carica gli allegati con il token della sessione.
 import apiClient from './client'
 import { USE_MOCK_API } from '../config/apiConfig'
 import { mockIssues } from './mockData'
@@ -47,6 +48,7 @@ export async function createIssue(payload) {
       ...payload,
       status: 'TODO',
       priority: payload.priority ?? null,
+      image: payload.image ? { contentType: payload.image.type, file: payload.image } : null,
     }
 
     mockIssues.unshift(createdIssue)
@@ -54,14 +56,34 @@ export async function createIssue(payload) {
     return delay(createdIssue)
   }
 
-  const { data } = await apiClient.post('/issues', {
+  const values = {
     projectId: payload.project.id,
     title: payload.title,
     description: payload.description,
     type: payload.type,
     priority: payload.priority ?? null,
     assigneeId: payload.assignee?.id ?? null,
-  })
+  }
+  // Con un file usa FormData; senza immagine conserva la richiesta JSON gia' esistente.
+  let body = values
+  if (payload.image) {
+    body = new FormData()
+    for (const [field, value] of Object.entries(values)) {
+      if (value !== null && value !== undefined) body.append(field, String(value))
+    }
+    body.append('image', payload.image)
+  }
+  const { data } = await apiClient.post('/issues', body,
+    payload.image ? { headers: { 'Content-Type': undefined } } : undefined)
+  return data
+}
+
+// Scarica un'immagine privata come Blob, cosi' il browser non deve mettere il token nell'URL.
+export async function getIssueImage(issueId) {
+  if (USE_MOCK_API) {
+    return delay(mockIssues.find((issue) => issue.id === Number(issueId))?.image?.file)
+  }
+  const { data } = await apiClient.get(`/issues/${issueId}/image`, { responseType: 'blob' })
   return data
 }
 

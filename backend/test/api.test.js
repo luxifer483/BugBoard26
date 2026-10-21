@@ -7,6 +7,7 @@ import { once } from 'node:events';
 import { spawn } from 'node:child_process';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import sharp from 'sharp';
 
 if (!process.env.TEST_DATABASE_URL) {
   throw new Error('Set TEST_DATABASE_URL to a disposable PostgreSQL database, or run backend/test-docker.ps1.');
@@ -19,13 +20,14 @@ process.env.JWT_ISSUER = 'bugboard26';
 process.env.JWT_AUDIENCE = 'bugboard26-frontend';
 
 const { default: app } = await import('../src/app.js');
-const { sequelize, User, Project, Membership, Issue, Comment, Notification } = await import('../src/models/index.js');
+const { sequelize, User, Project, Membership, Issue, IssueImage, Comment, Notification } = await import('../src/models/index.js');
 const { createToken } = await import('../src/services/auth.js');
 const { bootstrapAdmin } = await import('../src/services/bootstrap.js');
 const { initializeSchema } = await import('../src/services/schema.js');
 const schema = process.env.TEST_DB_SCHEMA;
 const initialSql = await readFile(new URL('../sql/001-initial.sql', import.meta.url), 'utf8');
 const hash = await bcrypt.hash('Password123!', 4);
+const png = await sharp({ create: { width: 8, height: 6, channels: 3, background: '#346799' } }).png().toBuffer();
 let server, base;
 let admin, member, reviewer, outsider, project;
 let adminToken, memberToken, reviewerToken, outsiderToken;
@@ -74,10 +76,11 @@ beforeEach(async () => {
 
 // Invia una vera richiesta HTTP senza simulare controller, autenticazione o database.
 async function call(method, path, token, input, expected = 200, headers = {}) {
+  const multipart = input instanceof FormData;
   const response = await fetch(base + path, { method,
     headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(input !== undefined ? { 'Content-Type': 'application/json' } : {}), ...headers },
-    ...(input === undefined ? {} : { body: JSON.stringify(input) }) });
+      ...(input !== undefined && !multipart ? { 'Content-Type': 'application/json' } : {}), ...headers },
+    ...(input === undefined ? {} : { body: multipart ? input : JSON.stringify(input) }) });
   const content = await response.text();
   assert.equal(response.status, expected, `${method} ${path}: ${content}`);
   return content ? JSON.parse(content) : null;
@@ -90,6 +93,125 @@ function payload(assigneeId = null) {
 async function createIssue(token = adminToken, assigneeId = null) {
   return call('POST', '/issues', token, payload(assigneeId), 201);
 }
+
+// Prepara una vera richiesta multipart, come il selettore di file del browser.
+function imageUpload(data = png, type = 'image/png', values = payload()) {
+  const form = new FormData();
+  for (const [name, value] of Object.entries(values)) {
+    if (value !== null && value !== undefined) form.append(name, String(value));
+  }
+  if (data !== null) form.append('image', new Blob([data], { type }), 'screenshot');
+  return form;
+}
+
+test('PNG, JPEG and WebP images are saved with the issue and downloaded through an authenticated endpoint', async () => {
+  for (const format of ['png', 'jpeg', 'webp']) {
+    const bytes = await sharp(png).toFormat(format).toBuffer();
+    const type = `image/${format}`;
+    const issue = await call('POST', '/issues', memberToken, imageUpload(bytes, type), 201);
+    assert.deepEqual(issue.image, { contentType: type });
+    assert.equal((await call('GET', `/issues/${issue.id}`, reviewerToken)).image.contentType, type);
+    const listed = (await call('GET', `/projects/${project.id}/issues`, memberToken)).items.find((item) => item.id === issue.id);
+    assert.deepEqual(listed.image, { contentType: type });
+    const response = await fetch(`${base}/issues/${issue.id}/image`, { headers: { Authorization: `Bearer ${reviewerToken}` } });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('content-type'), type);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+    const downloaded = Buffer.from(await response.arrayBuffer());
+    const metadata = await sharp(downloaded).metadata();
+    assert.equal(metadata.format, format);
+    assert.equal(metadata.width, 8);
+    assert.equal(metadata.height, 6);
+    assert.deepEqual((await IssueImage.findByPk(issue.id)).data, downloaded);
+  }
+});
+
+test('the image is optional for both JSON and multipart requests', async () => {
+  const { priority, ...withoutPriority } = payload();
+  assert.equal(priority, 'HIGH');
+  for (const input of [withoutPriority, imageUpload(null, 'image/png', withoutPriority)]) {
+    const issue = await call('POST', '/issues', memberToken, input, 201);
+    assert.equal(issue.image, null);
+    assert.equal(issue.priority, null);
+    assert.equal(await IssueImage.findByPk(issue.id), null);
+    assert.equal((await call('GET', `/issues/${issue.id}/image`, memberToken, undefined, 404)).code, 'NOT_FOUND');
+  }
+});
+
+test('image uploads and downloads require login and project access, including after membership revocation', async () => {
+  const before = await Issue.count();
+  await call('POST', '/issues', null, imageUpload(), 401);
+  await call('POST', '/issues', outsiderToken, imageUpload(), 403);
+  assert.equal(await Issue.count(), before);
+  const issue = await call('POST', '/issues', memberToken, imageUpload(), 201);
+  await call('GET', `/issues/${issue.id}/image`, null, undefined, 401);
+  await call('GET', `/issues/${issue.id}/image`, outsiderToken, undefined, 403);
+  const adminResponse = await fetch(`${base}/issues/${issue.id}/image`, { headers: { Authorization: `Bearer ${adminToken}` } });
+  assert.equal(adminResponse.status, 200);
+  await adminResponse.arrayBuffer();
+  await call('DELETE', `/projects/${project.id}/members/${member.id}`, adminToken, undefined, 204);
+  await call('GET', `/issues/${issue.id}/image`, memberToken, undefined, 403);
+});
+
+test('fake, corrupt, unsupported and mismatched image files do not create issues or images', async () => {
+  const before = await Issue.count();
+  const images = await IssueImage.count();
+  for (const [data, type] of [[Buffer.from('not an image'), 'image/png'], [png, 'image/jpeg'],
+    [Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"/>'), 'image/png'],
+    [png.subarray(0, 40), 'image/png'], [Buffer.alloc(0), 'image/png'], [png, 'image/gif'], [png, 'text/html']]) {
+    assert.equal((await call('POST', '/issues', memberToken, imageUpload(data, type), 400)).code, 'INVALID_IMAGE');
+  }
+  assert.equal(await Issue.count(), before);
+  assert.equal(await IssueImage.count(), images);
+});
+
+test('images over 5 MB and requests with multiple or unexpected files are rejected before saving', async () => {
+  const before = await Issue.count();
+  assert.equal((await call('POST', '/issues', memberToken, imageUpload(Buffer.alloc(5 * 1024 * 1024 + 1)), 413)).code,
+    'IMAGE_TOO_LARGE');
+  const multiple = imageUpload();
+  multiple.append('image', new Blob([png], { type: 'image/png' }), 'second.png');
+  await call('POST', '/issues', memberToken, multiple, 400);
+  const wrongField = imageUpload(null);
+  wrongField.append('attachment', new Blob([png], { type: 'image/png' }), 'unexpected.png');
+  await call('POST', '/issues', memberToken, wrongField, 400);
+  assert.equal(await Issue.count(), before);
+});
+
+test('image decoding enforces the pixel limit and removes private metadata', async () => {
+  const large = await sharp({ create: { width: 4001, height: 4000, channels: 3, background: '#ffffff' } }).png().toBuffer();
+  await call('POST', '/issues', memberToken, imageUpload(large), 400);
+  const tagged = await sharp(png).withMetadata({ exif: { IFD0: { Artist: 'Private author' } } }).png().toBuffer();
+  assert.ok((await sharp(tagged).metadata()).exif);
+  const issue = await call('POST', '/issues', memberToken, imageUpload(tagged), 201);
+  const metadata = await sharp((await IssueImage.findByPk(issue.id)).data).metadata();
+  assert.equal(metadata.exif, undefined);
+});
+
+test('invalid issue fields and notification failures leave no orphan image or partial issue', async () => {
+  const issues = await Issue.count();
+  const images = await IssueImage.count();
+  const savedProject = await Project.findByPk(project.id);
+  await call('POST', '/issues', memberToken, imageUpload(png, 'image/png', { ...payload(), title: ' ' }), 400);
+  const original = Notification.create;
+  Notification.create = async () => { throw new Error('Simulated image issue notification failure'); };
+  try {
+    await call('POST', '/issues', memberToken, imageUpload(png, 'image/png', payload(Number(reviewer.id))), 500);
+  } finally { Notification.create = original; }
+  assert.equal(await Issue.count(), issues);
+  assert.equal(await IssueImage.count(), images);
+  assert.equal((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
+});
+
+test('repeated initialization preserves the existing image bytes and issue data', async () => {
+  const issue = await call('POST', '/issues', memberToken, imageUpload(), 201);
+  const saved = await IssueImage.findByPk(issue.id);
+  await initializeSchema();
+  await initializeSchema();
+  assert.deepEqual((await IssueImage.findByPk(issue.id)).data, saved.data);
+  assert.equal((await Issue.findByPk(issue.id)).title, issue.title);
+});
 
 test('login normalizes email and returns a signed token and safe account', async () => {
   const result = await call('POST', '/auth/login', null, { email: admin.email.toUpperCase(), password: 'Password123!' });
@@ -660,7 +782,8 @@ async function stopChild(child) {
 }
 
 test('server restarts preserve users, projects, issue, comment and read notification', async () => {
-  const issue = await createIssue(adminToken, Number(member.id));
+  const issue = await call('POST', '/issues', adminToken, imageUpload(png, 'image/png', payload(Number(member.id))), 201);
+  const savedImage = (await IssueImage.findByPk(issue.id)).data;
   await call('POST', `/issues/${issue.id}/comments`, memberToken, { content: 'Persistent comment' }, 201);
   const notification = (await call('GET', '/notifications', memberToken)).items[0];
   await call('PATCH', `/notifications/${notification.id}/read`, memberToken);
@@ -670,6 +793,9 @@ test('server restarts preserve users, projects, issue, comment and read notifica
       const detail = await fetch(`${url}/issues/${issue.id}`, { headers: { Authorization: `Bearer ${memberToken}` } });
       assert.equal(detail.status, 200);
       assert.equal((await detail.json()).title, issue.title);
+      const image = await fetch(`${url}/issues/${issue.id}/image`, { headers: { Authorization: `Bearer ${memberToken}` } });
+      assert.equal(image.status, 200);
+      assert.deepEqual(Buffer.from(await image.arrayBuffer()), savedImage);
       const feed = await fetch(`${url}/notifications`, { headers: { Authorization: `Bearer ${memberToken}` } });
       assert.equal((await feed.json()).items.find((item) => item.id === notification.id).read, true);
     } finally { await stopChild(child); }

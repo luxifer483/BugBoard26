@@ -1,6 +1,7 @@
 // Associa metodi e percorsi HTTP ai controller, indicando autenticazione e permessi richiesti.
 import { Router } from 'express';
 import { authenticate, requireAdmin } from './middleware/auth.js';
+import { uploadImage } from './middleware/upload.js';
 import { id } from './services/validation.js';
 import * as auth from './controllers/auth.controller.js';
 import * as users from './controllers/users.controller.js';
@@ -34,8 +35,9 @@ routes.post('/projects/:projectId/members', requireAdmin, members.add);
 routes.delete('/projects/:projectId/members/:userId', requireAdmin, members.remove);
 routes.get('/projects/:projectId/issues', issues.list);
 routes.get('/issues', issues.list);
-routes.post('/issues', issues.create);
+routes.post('/issues', uploadImage, issues.create);
 routes.get('/issues/:id', issues.get);
+routes.get('/issues/:id/image', issues.image);
 routes.patch('/issues/:id/status', issues.status);
 routes.patch('/issues/:id/assignee', issues.assign);
 routes.get('/issues/:issueId/comments', comments.list);

@@ -1,4 +1,4 @@
-// Definisce campi e relazioni delle sei tabelle esistenti; qui non viene salvato alcun dato.
+// Definisce campi e relazioni delle tabelle; qui non viene salvato alcun dato.
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
@@ -55,6 +55,15 @@ Issue.init({
   createdAt: date('created_at'), updatedAt: date('updated_at'),
 }, { sequelize, tableName: 'issues', modelName: 'Issue' });
 
+// Tiene i byte separati dalla issue: le liste caricano soltanto i metadati dell'immagine.
+export class IssueImage extends Model {}
+IssueImage.init({
+  issueId: { ...reference('issue_id'), primaryKey: true },
+  contentType: choice(['image/png', 'image/jpeg', 'image/webp']),
+  data: { type: DataTypes.BLOB, allowNull: false },
+}, { sequelize, tableName: 'issue_images', modelName: 'IssueImage',
+  underscored: true });
+
 export class Comment extends Model {}
 Comment.init({
   id: id(), issueId: reference('issue_id'), authorId: reference('author_id'),
@@ -76,6 +85,8 @@ Project.hasMany(Membership, { as: 'memberships', foreignKey: 'projectId' });
 Issue.belongsTo(Project, { as: 'project', foreignKey: 'projectId' });
 Issue.belongsTo(User, { as: 'reporter', foreignKey: 'reporterId' });
 Issue.belongsTo(User, { as: 'assignee', foreignKey: 'assigneeId' });
+Issue.hasOne(IssueImage, { as: 'image', foreignKey: 'issueId' });
+IssueImage.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId' });
 Comment.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId' });
 Comment.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
 Notification.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId' });

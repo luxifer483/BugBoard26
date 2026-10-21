@@ -6,6 +6,7 @@ import { getIssueById, updateIssueStatus, updateIssueAssignee } from '../api/iss
 import { getProjectMembers } from '../api/projectMembersApi'
 import CommentsList from '../components/CommentsList'
 import IssueInfoCard from '../components/IssueInfoCard'
+import IssueImage from '../components/IssueImage'
 import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { formatEnumLabel, formatPriorityLabel } from '../utils/formatters'
@@ -200,6 +201,8 @@ function IssueDetailContent({ issueId }) {
                   <h2>Description</h2>
                   <p>{issue.description}</p>
                 </section>
+
+                {issue.image ? <IssueImage key={issue.id} issueId={issue.id} /> : null}
 
                 <CommentsList
                   comments={comments}

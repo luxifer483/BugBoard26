@@ -1,6 +1,7 @@
 // Riceve i dati delle issue e usa i modelli per le letture e i servizi per le modifiche composte.
 import { Op } from 'sequelize';
-import { Issue, ISSUE_TYPES, ISSUE_PRIORITIES, ISSUE_STATUSES } from '../models/index.js';
+import { Issue, IssueImage, ISSUE_TYPES, ISSUE_PRIORITIES, ISSUE_STATUSES } from '../models/index.js';
+import { notFound } from '../middleware/errors.js';
 import { visibleProjectIds, requireProject, requireIssue } from '../services/access.js';
 import { issueResponse, issueRelations, loadIssueResponse, listResponse } from '../services/responses.js';
 import { createIssue, changeStatus, changeAssignee } from '../services/issues.js';
@@ -37,7 +38,17 @@ export async function create(req, res) {
     priority: input.priority == null ? null : validate.choice(input.priority, 'priority', ISSUE_PRIORITIES),
     assigneeId: validate.id(input.assigneeId, 'assigneeId', true),
   };
-  res.status(201).json(await createIssue(req.user, values));
+  res.status(201).json(await createIssue(req.user, values, req.file));
+}
+
+// Invia i byte solo dopo il controllo dell'accesso, senza una cartella pubblica di allegati.
+export async function image(req, res) {
+  await requireIssue(req.user, req.params.id);
+  const image = await IssueImage.findByPk(req.params.id);
+  if (!image) throw notFound('Image');
+  res.set({ 'Content-Type': image.contentType, 'Cache-Control': 'private, no-store',
+    'X-Content-Type-Options': 'nosniff' });
+  res.send(image.data);
 }
 
 // Valida il nome dello stato e delega il controllo della transizione al servizio.

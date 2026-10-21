@@ -1162,6 +1162,34 @@ button.notification-item:disabled {
   text-transform: uppercase;
 }
 
+.issue-image-panel {
+  padding: 24px;
+  border: 1px solid #e3e8ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.issue-image-panel h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.issue-image-panel img {
+  display: block;
+  max-width: 100%;
+  max-height: 480px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.issue-image-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
 .issue-description-panel p {
   color: #334155;
   font-size: 0.95rem;
