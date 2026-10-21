@@ -1,0 +1,32 @@
+digraph G {
+ graph [rankdir=LR, bgcolor="white", nodesep=.22, ranksep=.8];
+ node [fontname="DejaVu Sans", fontsize=12]; edge [color="#53647d"];
+ member [shape=box,label="«actor»
+Utente autorizzato"];
+ assigned [shape=box,label="«actor»
+Assegnatario"];
+ admin [shape=box,label="«actor»
+Amministratore"];
+ assigned -> member [arrowhead=empty]; admin -> member [arrowhead=empty];
+ subgraph cluster_app { label="BugBoard26"; fontname="DejaVu Sans"; color="#a0afc8";
+ node [shape=ellipse,style=filled,fillcolor="#edf2fc",color="#8796b2"];
+ login [label="Autenticarsi"];
+ create [label="Segnalare una issue
+con immagine facoltativa"];
+ list [label="Consultare e filtrare
+le issue"];
+ assign [label="Assegnare una issue"];
+ status [label="Avanzare lo stato"];
+ comments [label="Leggere e inserire
+commenti"];
+ notices [label="Consultare le proprie
+notifiche"];
+ users [label="Creare utenti"];
+ projects [label="Creare progetti
+e gestire membri"];
+ }
+ member -> login [arrowhead=none]; member -> create [arrowhead=none];
+ member -> list [arrowhead=none]; member -> assign [arrowhead=none];
+ member -> comments [arrowhead=none]; member -> notices [arrowhead=none];
+ assigned -> status [arrowhead=none]; admin -> users [arrowhead=none]; admin -> projects [arrowhead=none];
+}

@@ -1,0 +1,20 @@
+digraph G {
+ graph [rankdir=TB, bgcolor="white", nodesep=.45, ranksep=.8, splines=polyline];
+ node [shape=record, fontname="DejaVu Sans", fontsize=11, style=filled, fillcolor="#f4f6fc", color="#7c8eaf", margin=".12,.08"];
+ edge [fontname="DejaVu Sans", fontsize=10, color="#415474", arrowhead=none];
+ user [label="{User|id : BIGINT\lfullName : string\lemail : string unique\lpasswordHash : string\lrole : USER / ADMIN\l}"];
+ mem [label="{Membership|id : BIGINT\lprojectId : FK\luserId : FK\ljoinedAt : date\l}"];
+ project [label="{Project|id : BIGINT\lname : string\ldescription : string\lstatus : string\l}"];
+ issue [label="{Issue|id : BIGINT\lprojectId : FK\lreporterId : FK\lassigneeId : FK nullable\ltitle e description\ltype, priority nullable, status\l}"];
+ image [label="{IssueImage|issueId : PK e FK\lcontentType : string\ldata : BYTEA\l}"];
+ comment [label="{Comment|id : BIGINT\lissueId : FK\lauthorId : FK\lcontent : string\l}"];
+ notice [label="{Notification|id : BIGINT\lrecipientId : FK\lissueId : FK\lmessage e kind\lread : boolean\l}"];
+ { rank=same; image; comment; notice; }
+ user -> mem [taillabel="1",headlabel="0..*"]; project -> mem [taillabel="1",headlabel="0..*"];
+ project -> issue [taillabel="1",headlabel="0..*"];
+ user -> issue [label="reporter 1 / issue 0..*\nassegnatario 0..1 / issue 0..*"];
+ issue -> image [taillabel="1",headlabel="0..1"];
+ issue -> comment [taillabel="1",headlabel="0..*"];
+ issue -> notice [taillabel="1",headlabel="0..*"];
+ user -> comment [label="autore 1",constraint=false]; user -> notice [label="destinatario 1",constraint=false];
+}

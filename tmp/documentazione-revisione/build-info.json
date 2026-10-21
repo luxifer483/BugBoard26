@@ -1,0 +1,746 @@
+{
+  "headings": [
+    {
+      "level": 1,
+      "outlineLevel": 1,
+      "text": "Parte I  Documento dei Requisiti Software",
+      "anchor": "revsec1"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "1 Glossario",
+      "anchor": "revsec2"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "2 Introduzione",
+      "anchor": "revsec3"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "3 Requirement Elicitation and Analysis",
+      "anchor": "revsec4"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "3.1 Individuazione del target degli utenti tramite Personas",
+      "anchor": "revsec5"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "4 Requirement Specification",
+      "anchor": "revsec6"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "4.1 Use Case Diagram",
+      "anchor": "revsec7"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "4.2 Requisiti Funzionali",
+      "anchor": "revsec8"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "4.3 Requisiti Non Funzionali",
+      "anchor": "revsec9"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "4.4 Requisiti di Dominio",
+      "anchor": "revsec10"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "4.5 Rappresentazione Tabellare Modello di A.Cockburn",
+      "anchor": "revsec11"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 1,
+      "text": "Parte II  Documento di Design del Sistema",
+      "anchor": "revsec12"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "5 Progettazione Architetturale e Scelte Tecnologiche",
+      "anchor": "revsec13"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "5.1 Descrizione dell’Architettura",
+      "anchor": "revsec14"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "5.1.1 Controller",
+      "anchor": "revsec15"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "5.1.2 Service",
+      "anchor": "revsec16"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "5.1.3 Model e accesso ai dati",
+      "anchor": "revsec17"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "5.2 Architettura del Frontend",
+      "anchor": "revsec18"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "5.3 Criteri di Design e Motivazioni",
+      "anchor": "revsec19"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "5.4 Tecnologie Utilizzate",
+      "anchor": "revsec20"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "5.5 Schema della Persistenza dei Dati",
+      "anchor": "revsec21"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "5.5.1 Descrizione delle entità e delle relazioni",
+      "anchor": "revsec22"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "6 Design dell’interfaccia utente",
+      "anchor": "revsec23"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.1 Progettazione Cromatica dell’Interfaccia",
+      "anchor": "revsec24"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.1.1 Obiettivi della Progettazione Cromatica",
+      "anchor": "revsec25"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.1.2 Palette Cromatica Adottata",
+      "anchor": "revsec26"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.1.3 Applicazione della Regola 60–30–10",
+      "anchor": "revsec27"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.1.4 Accessibilità e Contrasto Cromatico",
+      "anchor": "revsec28"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.2 Tipografia",
+      "anchor": "revsec29"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.2.1 Obiettivi della Progettazione Tipografica",
+      "anchor": "revsec30"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.2.2 Scelta del Font",
+      "anchor": "revsec31"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.2.3 Gerarchia Tipografica",
+      "anchor": "revsec32"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.2.4 Spaziatura e Allineamento",
+      "anchor": "revsec33"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.2.5 Accessibilità e Conformità alle WCAG",
+      "anchor": "revsec34"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "6.2.6 Coerenza con l’Identità Visiva",
+      "anchor": "revsec35"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.3 Principles of Proximity and Connectedness",
+      "anchor": "revsec36"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.4 Applicazione del modello F-Pattern",
+      "anchor": "revsec37"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.5 Labor Perception Bias",
+      "anchor": "revsec38"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.6 Gestione del Feedback Utente e Feedback Persistence",
+      "anchor": "revsec39"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "6.7 Prevenire gli Errori",
+      "anchor": "revsec40"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "7 Diagrammi delle classi di Design",
+      "anchor": "revsec41"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "7.1 Classi di Design del Backend",
+      "anchor": "revsec42"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.1.1 Architettura Controller–Service–Model",
+      "anchor": "revsec43"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.1.2 DTO",
+      "anchor": "revsec44"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.1.3 Entità di Dominio e sicurezza",
+      "anchor": "revsec45"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "7.2 Classi di Design del Frontend",
+      "anchor": "revsec46"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.2.1 Utility, Config e Security",
+      "anchor": "revsec47"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "7.3 Gestione della navigazione tra le pagine",
+      "anchor": "revsec48"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "7.4 Sequenze di Design per gli Use Case",
+      "anchor": "revsec49"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.4.1 UC1 – Creazione issue",
+      "anchor": "revsec50"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.4.2 UC2 – Cambio stato",
+      "anchor": "revsec51"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.4.3 UC3 – Commento",
+      "anchor": "revsec52"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "7.4.4 UC4 – Creazione account e appartenenza",
+      "anchor": "revsec53"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 1,
+      "text": "Parte III  Documentazione del Processo di Sviluppo",
+      "anchor": "revsec54"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "8 File di build automatica",
+      "anchor": "revsec55"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "8.1 DockerFile (Backend)",
+      "anchor": "revsec56"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "8.2 DockerFile (Frontend)",
+      "anchor": "revsec57"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "8.3 Docker Compose",
+      "anchor": "revsec58"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "9 Strumento di Versioning",
+      "anchor": "revsec59"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "10 Qualità del codice",
+      "anchor": "revsec60"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "10.1 Grafico di Duplicazione del Codice",
+      "anchor": "revsec61"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "10.2 Grafico delle Issues",
+      "anchor": "revsec62"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "10.3 Grafico della Coverage dei Test",
+      "anchor": "revsec63"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 1,
+      "text": "Parte IV  Testing e Valutazione dell’Usabilità",
+      "anchor": "revsec64"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "11 Unit Testing",
+      "anchor": "revsec65"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "11.1 Test di createIssue (issues service)",
+      "anchor": "revsec66"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "11.2 Test di changeStatus (issues service)",
+      "anchor": "revsec67"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "11.3 Test di requireAssignee (access service)",
+      "anchor": "revsec68"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "11.4 Test di notify (notifications service)",
+      "anchor": "revsec69"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "11.5 Strategie adottate",
+      "anchor": "revsec70"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "11.5.1 Controller",
+      "anchor": "revsec71"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "11.5.2 Service",
+      "anchor": "revsec72"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "11.5.3 Model / persistenza",
+      "anchor": "revsec73"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "11.5.4 Security e Utils",
+      "anchor": "revsec74"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "11.6 Test plan di una funzionalità: risoluzione issue",
+      "anchor": "revsec75"
+    },
+    {
+      "level": 1,
+      "outlineLevel": 2,
+      "text": "12 Valutazione dell’Usabilità",
+      "anchor": "revsec76"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "12.1 Expert Review",
+      "anchor": "revsec77"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.1.1 Obiettivo del Test",
+      "anchor": "revsec78"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.1.2 Istruzioni per l’Uso della Checklist",
+      "anchor": "revsec79"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.1.3 Risultati",
+      "anchor": "revsec80"
+    },
+    {
+      "level": 2,
+      "outlineLevel": 3,
+      "text": "12.2 Relazione Sperimentale",
+      "anchor": "revsec81"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.2.1 Descrizione dei Partecipanti",
+      "anchor": "revsec82"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.2.2 Procedura Sperimentale",
+      "anchor": "revsec83"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.2.3 Dati Raccolti",
+      "anchor": "revsec84"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.2.4 Valutazione post-task",
+      "anchor": "revsec85"
+    },
+    {
+      "level": 3,
+      "outlineLevel": 4,
+      "text": "12.2.5 Conclusioni",
+      "anchor": "revsec86"
+    }
+  ],
+  "figures": [
+    {
+      "number": "3.1",
+      "caption": "Persona di riferimento: Giulia Bianchi",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p11-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "3.2",
+      "caption": "Persona di riferimento: Marco Ferri",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p12-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "3.3",
+      "caption": "Persona di riferimento: Luca Lauro",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p13-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "4.1",
+      "caption": "Diagramma dei casi d’uso del progetto",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p15-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "4.2",
+      "caption": "Mockup progettuale del flusso UC1; le regole applicate sono descritte nella scheda",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p21-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "4.3",
+      "caption": "Realizzazione di UC1: creazione con immagine facoltativa",
+      "file": "tmp/documentazione/screens/05-creazione.png",
+      "source": "app verificata"
+    },
+    {
+      "number": "4.4",
+      "caption": "Mockup progettuale del flusso UC2; le regole applicate sono descritte nella scheda",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p23-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "4.5",
+      "caption": "Realizzazione di UC2: dettaglio e controllo dello stato",
+      "file": "tmp/documentazione/screens/06-dettaglio.png",
+      "source": "app verificata"
+    },
+    {
+      "number": "4.6",
+      "caption": "Mockup progettuale del flusso UC4; le regole applicate sono descritte nella scheda",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p26-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "4.7",
+      "caption": "Realizzazione di UC4: gestione account e appartenenze",
+      "file": "tmp/documentazione/screens/08-utenti.png",
+      "source": "app verificata"
+    },
+    {
+      "number": "5.1",
+      "caption": "Pagina di accesso della SPA con API reali",
+      "file": "tmp/documentazione/screens/01-login.png",
+      "source": "app verificata"
+    },
+    {
+      "number": "5.2",
+      "caption": "Schema tecnologico della progettazione iniziale",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p31-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "5.3",
+      "caption": "Diagramma di dominio della progettazione iniziale",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p32-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.1",
+      "caption": "Distribuzione cromatica proposta nel progetto",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p36-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.2",
+      "caption": "Esempio progettuale del principio di prossimità",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p39-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.3",
+      "caption": "Esempio progettuale del principio di connectedness",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p40-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.4",
+      "caption": "Raggruppamento della navigazione nella sidebar",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p40-fig02.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "6.5",
+      "caption": "Card dei progetti nel design dell’interfaccia",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p41-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.6",
+      "caption": "Raggruppamento dei dati nelle righe delle issue",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p41-fig02.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.7",
+      "caption": "Mockup dei gruppi di campi del modulo Create Issue",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p42-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "6.8",
+      "caption": "Mockup dei gruppi di azioni in User Management",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p43-fig01.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "6.9",
+      "caption": "Percorso F-pattern proposto per la dashboard",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p44-fig01.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "6.10",
+      "caption": "Dashboard attuale filtrata per tipo di issue",
+      "file": "tmp/documentazione/screens/04-filtro.png",
+      "source": "app verificata"
+    },
+    {
+      "number": "6.11",
+      "caption": "Mockup della conferma di successo",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p45-fig01.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "6.12",
+      "caption": "Mockup della segnalazione di errore",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p45-fig02.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "6.13",
+      "caption": "Feedback persistente tramite notifiche personali dell’app",
+      "file": "tmp/documentazione/screens/07-notifiche.png",
+      "source": "app verificata"
+    },
+    {
+      "number": "6.14",
+      "caption": "Proposta di conferma eliminazione progetto: funzione non implementata",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p46-fig01.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "6.15",
+      "caption": "Proposta di conferma rimozione membro",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p47-fig01.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "7.1",
+      "caption": "Diagramma dei DTO di richiesta, dominio e risposta",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p49-fig01.jpeg",
+      "source": "collega"
+    },
+    {
+      "number": "7.2",
+      "caption": "Diagramma completo delle classi di design frontend del progetto",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p51-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "7.3",
+      "caption": "Dettaglio 1/4 del diagramma frontend originale",
+      "file": "tmp/documentazione-revisione/frontend-dettaglio-1.png",
+      "source": "collega, ritaglio"
+    },
+    {
+      "number": "7.4",
+      "caption": "Dettaglio 2/4 del diagramma frontend originale",
+      "file": "tmp/documentazione-revisione/frontend-dettaglio-2.png",
+      "source": "collega, ritaglio"
+    },
+    {
+      "number": "7.5",
+      "caption": "Dettaglio 3/4 del diagramma frontend originale",
+      "file": "tmp/documentazione-revisione/frontend-dettaglio-3.png",
+      "source": "collega, ritaglio"
+    },
+    {
+      "number": "7.6",
+      "caption": "Dettaglio 4/4 del diagramma frontend originale",
+      "file": "tmp/documentazione-revisione/frontend-dettaglio-4.png",
+      "source": "collega, ritaglio"
+    },
+    {
+      "number": "7.7",
+      "caption": "Diagramma originale Utility, Config e Security del frontend",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p53-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "7.8",
+      "caption": "Navigazione progettuale USER / Developer",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p55-fig01.png",
+      "source": "collega"
+    },
+    {
+      "number": "7.9",
+      "caption": "Navigazione progettuale ADMIN",
+      "file": "tmp/documentazione-revisione/figure-collega/native-p56-fig01.png",
+      "source": "collega"
+    }
+  ],
+  "sourceOutlineEntries": 86,
+  "outlineMatch": true
+}

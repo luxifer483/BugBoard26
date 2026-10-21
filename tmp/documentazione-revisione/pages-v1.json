@@ -1,0 +1,1037 @@
+[
+  {
+    "page": 1,
+    "chars": 287,
+    "first": [
+      "Università degli Studi di Napoli Federico II",
+      "Corso di Ingegneria del Software"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 2,
+    "chars": 5551,
+    "first": [
+      "BugBoard26  |  2",
+      "Indice"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 3,
+    "chars": 5840,
+    "first": [
+      "BugBoard26  |  3",
+      "7.1.1 Architettura Controller–Service–Model..........................................................................37"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 4,
+    "chars": 1885,
+    "first": [
+      "BugBoard26  |  4",
+      "Parte I  Documento dei Requisiti Software"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 5,
+    "chars": 1941,
+    "first": [
+      "BugBoard26  |  5",
+      "2 Introduzione"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 6,
+    "chars": 588,
+    "first": [
+      "BugBoard26  |  6",
+      "3 Requirement Elicitation and Analysis"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 7,
+    "chars": 156,
+    "first": [
+      "BugBoard26  |  7",
+      "Marco Ferri"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 8,
+    "chars": 170,
+    "first": [
+      "BugBoard26  |  8",
+      "Luca Lauro"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 9,
+    "chars": 737,
+    "first": [
+      "BugBoard26  |  9",
+      "4 Requirement Specification"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 10,
+    "chars": 2205,
+    "first": [
+      "BugBoard26  |  10",
+      "4.2 Requisiti Funzionali"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 11,
+    "chars": 1130,
+    "first": [
+      "BugBoard26  |  11",
+      "ID"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 12,
+    "chars": 1340,
+    "first": [
+      "BugBoard26  |  12",
+      "4.3 Requisiti Non Funzionali"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 13,
+    "chars": 1418,
+    "first": [
+      "BugBoard26  |  13",
+      "4.4 Requisiti di Dominio"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 14,
+    "chars": 1573,
+    "first": [
+      "BugBoard26  |  14",
+      "4.5 Rappresentazione Tabellare Modello di A.Cockburn"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 15,
+    "chars": 182,
+    "first": [
+      "BugBoard26  |  15",
+      "Figura 4.2  Mockup progettuale del flusso UC1; le regole applicate sono descritte nella scheda"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 16,
+    "chars": 1124,
+    "first": [
+      "BugBoard26  |  16",
+      "UC2 - Modificare stato bug"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 17,
+    "chars": 181,
+    "first": [
+      "BugBoard26  |  17",
+      "Figura 4.4  Mockup progettuale del flusso UC2; le regole applicate sono descritte nella scheda"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 18,
+    "chars": 1035,
+    "first": [
+      "BugBoard26  |  18",
+      "UC3 - Inserire un commento"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 19,
+    "chars": 1165,
+    "first": [
+      "BugBoard26  |  19",
+      "UC4 - Creare utenze"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 20,
+    "chars": 179,
+    "first": [
+      "BugBoard26  |  20",
+      "Figura 4.6  Mockup progettuale del flusso UC4; le regole applicate sono descritte nella scheda"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 21,
+    "chars": 1546,
+    "first": [
+      "BugBoard26  |  21",
+      "Parte II  Documento di Design del Sistema"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 22,
+    "chars": 1032,
+    "first": [
+      "BugBoard26  |  22",
+      "5.2 Architettura del Frontend"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 23,
+    "chars": 1359,
+    "first": [
+      "BugBoard26  |  23",
+      "5.3 Criteri di Design e Motivazioni"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 24,
+    "chars": 966,
+    "first": [
+      "BugBoard26  |  24",
+      "5.4 Tecnologie Utilizzate"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 25,
+    "chars": 353,
+    "first": [
+      "BugBoard26  |  25",
+      "5.5 Schema della Persistenza dei Dati"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 26,
+    "chars": 1904,
+    "first": [
+      "BugBoard26  |  26",
+      "5.5.1 Descrizione delle entità e delle relazioni"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 27,
+    "chars": 968,
+    "first": [
+      "BugBoard26  |  27",
+      "6 Design dell’interfaccia utente"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 28,
+    "chars": 688,
+    "first": [
+      "BugBoard26  |  28",
+      "6.1.3 Applicazione della Regola 60–30–10"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 29,
+    "chars": 1811,
+    "first": [
+      "BugBoard26  |  29",
+      "6.2 Tipografia"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 30,
+    "chars": 392,
+    "first": [
+      "BugBoard26  |  30",
+      "6.3 Principles of Proximity and Connectedness"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 31,
+    "chars": 444,
+    "first": [
+      "BugBoard26  |  31",
+      "Applicazione ai componenti di BugBoard26"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 32,
+    "chars": 608,
+    "first": [
+      "BugBoard26  |  32",
+      "Raggruppamento dei campi e delle azioni"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 33,
+    "chars": 425,
+    "first": [
+      "BugBoard26  |  33",
+      "6.4 Applicazione del modello F-Pattern"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 34,
+    "chars": 804,
+    "first": [
+      "BugBoard26  |  34",
+      "6.5 Labor Perception Bias"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 35,
+    "chars": 301,
+    "first": [
+      "BugBoard26  |  35",
+      "Figura 6.13  Feedback persistente tramite notifiche personali dell’app"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 36,
+    "chars": 773,
+    "first": [
+      "BugBoard26  |  36",
+      "6.7 Prevenire gli Errori"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 37,
+    "chars": 1247,
+    "first": [
+      "BugBoard26  |  37",
+      "7 Diagrammi delle classi di Design"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 38,
+    "chars": 745,
+    "first": [
+      "BugBoard26  |  38",
+      "7.1.2 DTO"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 39,
+    "chars": 1205,
+    "first": [
+      "BugBoard26  |  39",
+      "Request DTO e richieste effettive"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 40,
+    "chars": 1189,
+    "first": [
+      "BugBoard26  |  40",
+      "Domain DTO e serializzazione pubblica"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 41,
+    "chars": 1277,
+    "first": [
+      "BugBoard26  |  41",
+      "Response DTO ed errori"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 42,
+    "chars": 1236,
+    "first": [
+      "BugBoard26  |  42",
+      "7.1.3 Entità di Dominio e sicurezza"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 43,
+    "chars": 557,
+    "first": [
+      "BugBoard26  |  43",
+      "7.2 Classi di Design del Frontend"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 44,
+    "chars": 94,
+    "first": [
+      "BugBoard26  |  44",
+      "Figura 7.2  Diagramma completo delle classi di design frontend del progetto"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      841.8897705078125,
+      595.303955078125
+    ]
+  },
+  {
+    "page": 45,
+    "chars": 258,
+    "first": [
+      "BugBoard26  |  45",
+      "Figura 7.3  Dettaglio 1/4 del diagramma frontend originale"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 46,
+    "chars": 258,
+    "first": [
+      "BugBoard26  |  46",
+      "Figura 7.4  Dettaglio 2/4 del diagramma frontend originale"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 47,
+    "chars": 244,
+    "first": [
+      "BugBoard26  |  47",
+      "Figura 7.5  Dettaglio 3/4 del diagramma frontend originale"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 48,
+    "chars": 294,
+    "first": [
+      "BugBoard26  |  48",
+      "Figura 7.6  Dettaglio 4/4 del diagramma frontend originale"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 49,
+    "chars": 1559,
+    "first": [
+      "BugBoard26  |  49",
+      "Corrispondenza tra diagramma e sorgenti"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 50,
+    "chars": 302,
+    "first": [
+      "BugBoard26  |  50",
+      "7.2.1 Utility, Config e Security"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 51,
+    "chars": 90,
+    "first": [
+      "BugBoard26  |  51",
+      "Figura 7.7  Diagramma originale Utility, Config e Security del frontend"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      841.8897705078125,
+      595.303955078125
+    ]
+  },
+  {
+    "page": 52,
+    "chars": 1044,
+    "first": [
+      "BugBoard26  |  52",
+      "Area"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 53,
+    "chars": 355,
+    "first": [
+      "BugBoard26  |  53",
+      "7.3 Gestione della navigazione tra le pagine"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 54,
+    "chars": 71,
+    "first": [
+      "BugBoard26  |  54",
+      "Figura 7.8  Navigazione progettuale USER / Developer"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      841.8897705078125,
+      595.303955078125
+    ]
+  },
+  {
+    "page": 55,
+    "chars": 18,
+    "first": [
+      "BugBoard26  |  55"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 56,
+    "chars": 60,
+    "first": [
+      "BugBoard26  |  56",
+      "Figura 7.9  Navigazione progettuale ADMIN"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      841.8897705078125,
+      595.303955078125
+    ]
+  },
+  {
+    "page": 57,
+    "chars": 686,
+    "first": [
+      "BugBoard26  |  57",
+      "Percorso React"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 58,
+    "chars": 1476,
+    "first": [
+      "BugBoard26  |  58",
+      "7.4 Sequenze di Design per gli Use Case"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 59,
+    "chars": 1095,
+    "first": [
+      "BugBoard26  |  59",
+      "7.4.3 UC3 – Commento"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 60,
+    "chars": 1024,
+    "first": [
+      "BugBoard26  |  60",
+      "Parte III  Documentazione del Processo di Sviluppo"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 61,
+    "chars": 1965,
+    "first": [
+      "BugBoard26  |  61",
+      "8.3 Docker Compose"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 62,
+    "chars": 1472,
+    "first": [
+      "BugBoard26  |  62",
+      "9 Strumento di Versioning"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 63,
+    "chars": 1796,
+    "first": [
+      "BugBoard26  |  63",
+      "10 Qualità del codice"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 64,
+    "chars": 2226,
+    "first": [
+      "BugBoard26  |  64",
+      "Parte IV  Testing e Valutazione dell’Usabilità"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 65,
+    "chars": 1486,
+    "first": [
+      "BugBoard26  |  65",
+      "11.2 Test di changeStatus (issues service)"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 66,
+    "chars": 1247,
+    "first": [
+      "BugBoard26  |  66",
+      "11.3 Test di requireAssignee (access service)"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 67,
+    "chars": 1275,
+    "first": [
+      "BugBoard26  |  67",
+      "11.4 Test di notify (notifications service)"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 68,
+    "chars": 1727,
+    "first": [
+      "BugBoard26  |  68",
+      "11.5 Strategie adottate"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 69,
+    "chars": 1492,
+    "first": [
+      "BugBoard26  |  69",
+      "11.6 Test plan di una funzionalità: risoluzione issue"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 70,
+    "chars": 1313,
+    "first": [
+      "BugBoard26  |  70",
+      "12 Valutazione dell’Usabilità"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 71,
+    "chars": 1092,
+    "first": [
+      "BugBoard26  |  71",
+      "Checklist dell’Expert Review"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 72,
+    "chars": 1322,
+    "first": [
+      "BugBoard26  |  72",
+      "12.2 Relazione Sperimentale"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 73,
+    "chars": 1372,
+    "first": [
+      "BugBoard26  |  73",
+      "12.2.3 Dati Raccolti"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  },
+  {
+    "page": 74,
+    "chars": 1824,
+    "first": [
+      "BugBoard26  |  74",
+      "12.2.5 Conclusioni"
+    ],
+    "size": [
+      0.0,
+      0.0,
+      595.303955078125,
+      841.8897705078125
+    ]
+  }
+]

@@ -1,0 +1,383 @@
+{
+  "pages": 70,
+  "size": [
+    0.0,
+    0.0,
+    595.2760009765625,
+    841.8900146484375
+  ],
+  "toc": [
+    [
+      1,
+      "yellowDocumento dei Requisiti Software",
+      1
+    ],
+    [
+      1,
+      "Glossario",
+      4
+    ],
+    [
+      1,
+      "Introduzione",
+      6
+    ],
+    [
+      1,
+      "Requirement Elicitation and Analysis",
+      8
+    ],
+    [
+      2,
+      "Individuazione del target degli utenti tramite Personas",
+      8
+    ],
+    [
+      1,
+      "Requirement Specification",
+      10
+    ],
+    [
+      2,
+      "Use Case Diagrams",
+      10
+    ],
+    [
+      2,
+      "Requisiti Funzionali",
+      10
+    ],
+    [
+      2,
+      "Requisiti non Funzionali",
+      11
+    ],
+    [
+      2,
+      "Requisiti di Dominio",
+      12
+    ],
+    [
+      2,
+      "Rappresentazione Tabellare: Modello di A. Cockburn",
+      13
+    ],
+    [
+      1,
+      "yellowDocumento di Design del Sistema",
+      19
+    ],
+    [
+      1,
+      "Progettazione Architetturale e Scelte Tecnologiche",
+      21
+    ],
+    [
+      2,
+      "Descrizione dell'Architettura",
+      21
+    ],
+    [
+      2,
+      "Criteri di Design e Motivazioni",
+      22
+    ],
+    [
+      2,
+      "Tecnologie Adottate",
+      22
+    ],
+    [
+      2,
+      "Schema per la Persistenza dei Dati",
+      25
+    ],
+    [
+      3,
+      "Descrizione delle entità e delle relazioni",
+      25
+    ],
+    [
+      1,
+      "Design dell'Interfaccia Utente",
+      27
+    ],
+    [
+      2,
+      "Colori",
+      27
+    ],
+    [
+      2,
+      "Tipografia",
+      28
+    ],
+    [
+      2,
+      "Labor Perception Bias",
+      29
+    ],
+    [
+      2,
+      "Principles of Proximity and Connecttedness",
+      29
+    ],
+    [
+      2,
+      "F-Pattern",
+      31
+    ],
+    [
+      2,
+      "Feedback Persistence",
+      31
+    ],
+    [
+      2,
+      "Prevenire gli Errori",
+      32
+    ],
+    [
+      1,
+      "Diagrammi delle classi di Design",
+      34
+    ],
+    [
+      2,
+      "Classi di Design del Backend",
+      34
+    ],
+    [
+      3,
+      "Architettura Controller-Service-Repository",
+      34
+    ],
+    [
+      3,
+      "DTO",
+      34
+    ],
+    [
+      3,
+      "Utility, Config e Security",
+      35
+    ],
+    [
+      3,
+      "Entità di Dominio (Model)",
+      35
+    ],
+    [
+      2,
+      "Classi di Design del Frontend",
+      36
+    ],
+    [
+      2,
+      "Diagrammi di Sequenza di Design per gli Use Case",
+      38
+    ],
+    [
+      1,
+      "yellowDocumentazione del Processo di Sviluppo",
+      39
+    ],
+    [
+      1,
+      "File di build automatica",
+      40
+    ],
+    [
+      2,
+      "DockerFile (Backend)",
+      40
+    ],
+    [
+      2,
+      "DockerFile (Frontend)",
+      40
+    ],
+    [
+      2,
+      "Docker Compose",
+      40
+    ],
+    [
+      1,
+      "Strumento di Versioning",
+      41
+    ],
+    [
+      1,
+      "Qualità del codice",
+      42
+    ],
+    [
+      2,
+      "Grafico di Duplicazione del Codice",
+      42
+    ],
+    [
+      2,
+      "Grafico delle Issues",
+      43
+    ],
+    [
+      2,
+      "Grafico della Coverage dei Test",
+      44
+    ],
+    [
+      1,
+      "yellowTesting e Valutazione dell'Usabilità",
+      44
+    ],
+    [
+      1,
+      "Unit Testing",
+      45
+    ],
+    [
+      2,
+      "Test di loadNewRealEstate (EstateAgentService)",
+      45
+    ],
+    [
+      2,
+      "Test di bookVisit (BuyerService)",
+      49
+    ],
+    [
+      2,
+      "Test di registerBuyerWithGoogle (BuyerService)",
+      52
+    ],
+    [
+      2,
+      "Test di getWeatherForecast (WeatherApiService)",
+      55
+    ],
+    [
+      2,
+      "Strategie adottate",
+      58
+    ],
+    [
+      3,
+      "Controller",
+      58
+    ],
+    [
+      3,
+      "Service",
+      59
+    ],
+    [
+      3,
+      "Repository",
+      59
+    ],
+    [
+      3,
+      "Security e Utils",
+      60
+    ],
+    [
+      1,
+      "Valutazione dell'Usabilità",
+      62
+    ],
+    [
+      2,
+      "Expert Review",
+      62
+    ],
+    [
+      3,
+      "Obiettivo del Test",
+      62
+    ],
+    [
+      3,
+      "Istruzioni per l'Uso della Checklist",
+      62
+    ],
+    [
+      3,
+      "Risultati",
+      63
+    ],
+    [
+      2,
+      "Relazione Sperimentale",
+      64
+    ],
+    [
+      3,
+      "Descrizione dei Partecipanti",
+      64
+    ],
+    [
+      3,
+      "Procedura Sperimentale",
+      64
+    ],
+    [
+      3,
+      "Dati Raccolti",
+      65
+    ],
+    [
+      3,
+      "Valutazione post-task",
+      66
+    ],
+    [
+      3,
+      "Conclusioni",
+      70
+    ]
+  ],
+  "fonts": [
+    [
+      "SFRM1200 12.0 0",
+      59832
+    ],
+    [
+      "SFBX1200 12.0 0",
+      2248
+    ],
+    [
+      "SFBX1440 14.3 5276370",
+      1004
+    ],
+    [
+      "SFBX1728 17.2 1981610",
+      318
+    ],
+    [
+      "SFTT1200 12.0 0",
+      290
+    ],
+    [
+      "SFBX1200 12.0 16777215",
+      169
+    ],
+    [
+      "SFBX1200 12.0 16711680",
+      138
+    ],
+    [
+      "SFTI1200 12.0 0",
+      112
+    ],
+    [
+      "SFRM1728 17.2 0",
+      35
+    ],
+    [
+      "SFBX2074 20.7 0",
+      14
+    ]
+  ]
+}

@@ -1,0 +1,497 @@
+[
+  {
+    "page": 1,
+    "chars": 369,
+    "first": [
+      "UNIVERSITÀ DEGLI STUDI DI NAPOLI FEDERICO II",
+      "Scuola Politecnica e delle Scienze di Base",
+      "Dipartimento di Ingegneria Elettrica e delle Tecnologie dell’Informazione"
+    ],
+    "outside": []
+  },
+  {
+    "page": 2,
+    "chars": 4919,
+    "first": [
+      "BugBoard26  |  2",
+      "Indice",
+      "1 Glossario............................................................................................................................................4"
+    ],
+    "outside": []
+  },
+  {
+    "page": 3,
+    "chars": 3712,
+    "first": [
+      "BugBoard26  |  3",
+      "7.6 Sequenza di risoluzione.....................................................................................................38",
+      "8 Build e avvio del sistema.................................................................................................................39"
+    ],
+    "outside": []
+  },
+  {
+    "page": 4,
+    "chars": 1561,
+    "first": [
+      "BugBoard26  |  4",
+      "Documento dei Requisiti Software",
+      "1 Glossario"
+    ],
+    "outside": []
+  },
+  {
+    "page": 5,
+    "chars": 2189,
+    "first": [
+      "BugBoard26  |  5",
+      "2 Introduzione",
+      "BugBoard26 è un’applicazione web per la gestione collaborativa delle issue di progetti software. Il "
+    ],
+    "outside": []
+  },
+  {
+    "page": 6,
+    "chars": 2143,
+    "first": [
+      "BugBoard26  |  6",
+      "3 Raccolta e analisi dei requisiti",
+      "L’analisi parte dai punti funzionali della traccia e dalle regole di accesso concordate per il progetto. "
+    ],
+    "outside": []
+  },
+  {
+    "page": 7,
+    "chars": 384,
+    "first": [
+      "BugBoard26  |  7",
+      "4 Specifica dei requisiti",
+      "4.1 Diagramma dei casi di uso"
+    ],
+    "outside": []
+  },
+  {
+    "page": 8,
+    "chars": 2354,
+    "first": [
+      "BugBoard26  |  8",
+      "4.2 Requisiti funzionali",
+      "ID"
+    ],
+    "outside": []
+  },
+  {
+    "page": 9,
+    "chars": 389,
+    "first": [
+      "BugBoard26  |  9",
+      "ID",
+      "Requisito"
+    ],
+    "outside": []
+  },
+  {
+    "page": 10,
+    "chars": 1621,
+    "first": [
+      "BugBoard26  |  10",
+      "4.4 Requisiti di dominio",
+      "RD01. Ogni issue appartiene a un solo progetto e ha un solo reporter. Il reporter deriva dall’identità "
+    ],
+    "outside": []
+  },
+  {
+    "page": 11,
+    "chars": 1114,
+    "first": [
+      "BugBoard26  |  11",
+      "4.5 Casi di uso nel modello di Cockburn",
+      "Le schede seguenti descrivono obiettivo, attori, precondizioni, scenario principale ed estensioni. Le "
+    ],
+    "outside": []
+  },
+  {
+    "page": 12,
+    "chars": 835,
+    "first": [
+      "BugBoard26  |  12",
+      "UC02 Creare un account",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 13,
+    "chars": 978,
+    "first": [
+      "BugBoard26  |  13",
+      "UC03 Creare un progetto e gestirne i membri",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 14,
+    "chars": 1079,
+    "first": [
+      "BugBoard26  |  14",
+      "UC04 Segnalare una issue con immagine facoltativa",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 15,
+    "chars": 980,
+    "first": [
+      "BugBoard26  |  15",
+      "UC05 Consultare e filtrare le issue",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 16,
+    "chars": 1011,
+    "first": [
+      "BugBoard26  |  16",
+      "UC06 Assegnare o riassegnare una issue",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 17,
+    "chars": 921,
+    "first": [
+      "BugBoard26  |  17",
+      "UC07 Commentare una issue",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 18,
+    "chars": 1077,
+    "first": [
+      "BugBoard26  |  18",
+      "UC08 Avanzare lo stato e notificare la risoluzione",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 19,
+    "chars": 990,
+    "first": [
+      "BugBoard26  |  19",
+      "UC09 Consultare e leggere le notifiche",
+      "Campo"
+    ],
+    "outside": []
+  },
+  {
+    "page": 20,
+    "chars": 899,
+    "first": [
+      "BugBoard26  |  20",
+      "Documento di Design del Sistema",
+      "5 Progettazione architetturale e scelte "
+    ],
+    "outside": []
+  },
+  {
+    "page": 21,
+    "chars": 2406,
+    "first": [
+      "BugBoard26  |  21",
+      "5.2 Criteri di design e motivazioni",
+      "La scelta di JavaScript con import/export rende uniforme il linguaggio tra i due lati dell’app e "
+    ],
+    "outside": []
+  },
+  {
+    "page": 22,
+    "chars": 1013,
+    "first": [
+      "BugBoard26  |  22",
+      "5.4 Persistenza dei dati",
+      "Figura 4  Modello delle sette entità persistenti con cardinalità principali"
+    ],
+    "outside": []
+  },
+  {
+    "page": 23,
+    "chars": 686,
+    "first": [
+      "BugBoard26  |  23",
+      "Tabella",
+      "Dati e vincoli rilevanti"
+    ],
+    "outside": []
+  },
+  {
+    "page": 24,
+    "chars": 2427,
+    "first": [
+      "BugBoard26  |  24",
+      "5.6 Autenticazione sessione e autorizzazione",
+      "Il login confronta la password inviata con l’hash BCrypt. In caso di successo genera un JWT HS256 "
+    ],
+    "outside": []
+  },
+  {
+    "page": 25,
+    "chars": 1454,
+    "first": [
+      "BugBoard26  |  25",
+      "6 Design della interfaccia utente",
+      "L’interfaccia distingue pagina di accesso, selezione del progetto, dashboard e dettaglio. Sidebar e "
+    ],
+    "outside": []
+  },
+  {
+    "page": 26,
+    "chars": 136,
+    "first": [
+      "BugBoard26  |  26",
+      "Figura 5  Pagina di accesso con i campi di autenticazione",
+      "Figura 6  Elenco progetti e creazione disponibile per ADMIN"
+    ],
+    "outside": []
+  },
+  {
+    "page": 27,
+    "chars": 422,
+    "first": [
+      "BugBoard26  |  27",
+      "6.3 Dashboard e filtri",
+      "La dashboard presenta i filtri prima dell’elenco delle issue. Tipo, stato e priorità si combinano; Clear "
+    ],
+    "outside": []
+  },
+  {
+    "page": 28,
+    "chars": 76,
+    "first": [
+      "BugBoard26  |  28",
+      "Figura 8  Filtro per il tipo BUG applicato alla dashboard"
+    ],
+    "outside": []
+  },
+  {
+    "page": 29,
+    "chars": 774,
+    "first": [
+      "BugBoard26  |  29",
+      "6.4 Creazione e prevenzione degli errori",
+      "Create Issue è un dialogo che mantiene il contesto del progetto. Titolo, descrizione e tipo sono "
+    ],
+    "outside": []
+  },
+  {
+    "page": 30,
+    "chars": 735,
+    "first": [
+      "BugBoard26  |  30",
+      "6.5 Dettaglio commenti e assegnazione",
+      "Il dettaglio raggruppa titolo, tipo, priorità e stato nella parte superiore. La descrizione e l’immagine "
+    ],
+    "outside": []
+  },
+  {
+    "page": 31,
+    "chars": 658,
+    "first": [
+      "BugBoard26  |  31",
+      "6.6 Feedback e notifiche",
+      "Gli stati di caricamento indicano che una richiesta è in corso; i messaggi di errore restano visibili "
+    ],
+    "outside": []
+  },
+  {
+    "page": 32,
+    "chars": 770,
+    "first": [
+      "BugBoard26  |  32",
+      "6.7 Amministrazione e limiti da verificare",
+      "Figura 12  Gestione degli account e dei membri di progetto riservata agli amministratori"
+    ],
+    "outside": []
+  },
+  {
+    "page": 33,
+    "chars": 1154,
+    "first": [
+      "BugBoard26  |  33",
+      "7 Moduli e diagrammi di design",
+      "7.1 Design del backend"
+    ],
+    "outside": []
+  },
+  {
+    "page": 34,
+    "chars": 18,
+    "first": [
+      "BugBoard26  |  34"
+    ],
+    "outside": []
+  },
+  {
+    "page": 35,
+    "chars": 1215,
+    "first": [
+      "BugBoard26  |  35",
+      "7.2 Design del frontend",
+      "Figura 14  Componenti e moduli del frontend React"
+    ],
+    "outside": []
+  },
+  {
+    "page": 36,
+    "chars": 943,
+    "first": [
+      "BugBoard26  |  36",
+      "Metodo e percorso con prefisso /api",
+      "Uso e permesso"
+    ],
+    "outside": []
+  },
+  {
+    "page": 37,
+    "chars": 786,
+    "first": [
+      "BugBoard26  |  37",
+      "7.4 Sequenza di autenticazione",
+      "Figura 15  Sequenza di login e creazione del token"
+    ],
+    "outside": []
+  },
+  {
+    "page": 38,
+    "chars": 454,
+    "first": [
+      "BugBoard26  |  38",
+      "7.6 Sequenza di risoluzione",
+      "Figura 17  Cambio stato e notifica di risoluzione al reporter"
+    ],
+    "outside": []
+  },
+  {
+    "page": 39,
+    "chars": 2578,
+    "first": [
+      "BugBoard26  |  39",
+      "Documentazione del Processo di Sviluppo",
+      "8 Build e avvio del sistema"
+    ],
+    "outside": []
+  },
+  {
+    "page": 40,
+    "chars": 1517,
+    "first": [
+      "BugBoard26  |  40",
+      "9 Strumento di versionamento",
+      "Il progetto è versionato con Git e dispone di un repository remoto su GitHub. I commit distinguono "
+    ],
+    "outside": []
+  },
+  {
+    "page": 41,
+    "chars": 2043,
+    "first": [
+      "BugBoard26  |  41",
+      "10 Qualità del codice",
+      "Le verifiche disponibili riguardano comportamento, compilazione e coerenza dei moduli. Non è "
+    ],
+    "outside": []
+  },
+  {
+    "page": 42,
+    "chars": 1688,
+    "first": [
+      "BugBoard26  |  42",
+      "Testing e Valutazione della Usabilità",
+      "11 Testing automatico"
+    ],
+    "outside": []
+  },
+  {
+    "page": 43,
+    "chars": 1494,
+    "first": [
+      "BugBoard26  |  43",
+      "11.3 Test selezionati del cambio di stato",
+      "Metodo esaminato: changeStatus in backend/src/services/issues.js. La funzione verifica l’accesso "
+    ],
+    "outside": []
+  },
+  {
+    "page": 44,
+    "chars": 1352,
+    "first": [
+      "BugBoard26  |  44",
+      "11.4 Test selezionati delle immagini",
+      "Il percorso controllato comprende uploadImage, prepareImage, creazione in transazione e GET "
+    ],
+    "outside": []
+  },
+  {
+    "page": 45,
+    "chars": 1954,
+    "first": [
+      "BugBoard26  |  45",
+      "11.5 Test frontend",
+      "File"
+    ],
+    "outside": []
+  },
+  {
+    "page": 46,
+    "chars": 1949,
+    "first": [
+      "BugBoard26  |  46",
+      "12 Valutazione della usabilità",
+      "La valutazione con utenti e i questionari devono ancora essere svolti. Questo capitolo definisce il "
+    ],
+    "outside": []
+  },
+  {
+    "page": 47,
+    "chars": 2243,
+    "first": [
+      "BugBoard26  |  47",
+      "12.2 Piano delle prove con utenti",
+      "Si propone di coinvolgere cinque utenti reali o potenziali, numero indicativo da adattare alle "
+    ],
+    "outside": []
+  },
+  {
+    "page": 48,
+    "chars": 18,
+    "first": [
+      "BugBoard26  |  48"
+    ],
+    "outside": []
+  },
+  {
+    "page": 49,
+    "chars": 1502,
+    "first": [
+      "BugBoard26  |  49",
+      "12.4 Scheda di osservazione",
+      "Partecipante: __________    Data: __________    Osservatore: __________"
+    ],
+    "outside": []
+  },
+  {
+    "page": 50,
+    "chars": 1634,
+    "first": [
+      "BugBoard26  |  50",
+      "12.6 Risultati e conclusioni da integrare",
+      "Al termine delle sessioni, questa sezione dovrà riportare numero e profili effettivi dei partecipanti, "
+    ],
+    "outside": []
+  }
+]

@@ -1,0 +1,9 @@
+digraph G {
+ graph [rankdir=LR,bgcolor="white",ranksep=.55]; node [shape=box,style="rounded,filled",fillcolor="#edf2fc",fontname="DejaVu Sans",fontsize=14,color="#8796b2"];
+ edge [fontname="DejaVu Sans",fontsize=11,color="#415474"];
+ start [shape=point]; todo [label="TODO"]; progress [label="IN_PROGRESS"]; closed [label="CLOSED"];
+ start -> todo [label="Creazione"];
+ todo -> progress [label="Solo assegnatario"];
+ progress -> closed [label="Solo assegnatario
+Notifica al reporter"];
+}

@@ -1,0 +1,50 @@
+// Acquisisce schermate reali della copia locale dell'app in un profilo Chromium temporaneo.
+import { chromium } from 'playwright-core';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+const root = fileURLToPath(new URL('..', import.meta.url));
+const info = JSON.parse(await readFile(new URL('../demo-info.json', import.meta.url), 'utf8'));
+const browser = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
+const page = await browser.newPage({ viewport: { width: 1160, height: 860 }, deviceScaleFactor: 1.5 });
+page.on('pageerror', (error) => console.log('PAGE ERROR:', error.message));
+const screenshot = (name) => page.screenshot({ path: `${root}/screens/${name}.png`, fullPage: false });
+try {
+  await page.goto('http://127.0.0.1:8082/login');
+  await page.getByRole('button', { name: 'Login', exact: true }).waitFor();
+  await screenshot('01-login');
+  await page.getByPlaceholder('your.email@example.com').fill('admin@example.test');
+  await page.getByPlaceholder('Enter your password').fill('DemoPassword123!');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await page.waitForURL('**/projects');
+  await page.getByRole('heading', { name: 'Projects', exact: true }).waitFor();
+  await page.getByText('Portale studenti', { exact: true }).waitFor();
+  await screenshot('02-progetti');
+  await page.goto(`http://127.0.0.1:8082/dashboard/${info.projectId}`);
+  await page.getByText('Il login non mostra il messaggio di errore', { exact: true }).waitFor();
+  await screenshot('03-dashboard');
+  const selects = page.locator('.issues-filters select');
+  await selects.nth(0).selectOption('BUG');
+  await screenshot('04-filtro');
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await page.getByRole('button', { name: 'Create Issue', exact: true }).click();
+  await page.getByRole('dialog').waitFor();
+  await page.getByLabel('Title *').fill('Errore nel messaggio di accesso');
+  await page.getByLabel('Description *').fill('Dopo una password errata, il messaggio deve aiutare a riprovare senza perdere i dati.');
+  await page.getByLabel('Issue Type *').selectOption('BUG');
+  await page.getByLabel('Image (optional)').setInputFiles(`${root}/screens/allegato-demo.png`);
+  await page.setViewportSize({ width: 1160, height: 1100 });
+  await screenshot('05-creazione');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.setViewportSize({ width: 1160, height: 860 });
+  await page.goto(`http://127.0.0.1:8082/issues/${info.issueId}`);
+  await page.getByRole('img', { name: 'Image attached to this issue' }).waitFor();
+  await screenshot('06-dettaglio');
+  await page.getByRole('button', { name: 'Notifications', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Notifications panel' }).waitFor();
+  await screenshot('07-notifiche');
+  await page.goto(`http://127.0.0.1:8082/projects/${info.projectId}/users`);
+  await page.getByText('anna@example.test', { exact: true }).first().waitFor();
+  await screenshot('08-utenti');
+  console.log('Captured 8 application screenshots.');
+} finally { await browser.close(); }

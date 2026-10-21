@@ -1,0 +1,771 @@
+[
+  {
+    "page": 1,
+    "chars": 287,
+    "first": [
+      "Corso di Ingegneria del Software",
+      "BugBoard26"
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 2,
+    "chars": 5551,
+    "first": [
+      "Indice",
+      "Parte I  Documento dei Requisiti Software............................................................................................4"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 3,
+    "chars": 5840,
+    "first": [
+      "7.1.1 Architettura Controller–Service–Model..........................................................................37",
+      "7.1.2 DTO.............................................................................................................................38"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 4,
+    "chars": 1885,
+    "first": [
+      "Parte I  Documento dei Requisiti Software",
+      "1 Glossario"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 5,
+    "chars": 1941,
+    "first": [
+      "2 Introduzione",
+      "BugBoard26 è una piattaforma web per la gestione collaborativa delle issue nei progetti software. Il "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 6,
+    "chars": 588,
+    "first": [
+      "3 Requirement Elicitation and Analysis",
+      "3.1 Individuazione del target degli utenti tramite "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 7,
+    "chars": 156,
+    "first": [
+      "Marco Ferri",
+      "Amministratore: crea account, organizza i progetti e mantiene le appartenenze."
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 8,
+    "chars": 170,
+    "first": [
+      "Luca Lauro",
+      "Utente e segnalatore: descrive il problema, allega una schermata e segue la risposta del team."
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 9,
+    "chars": 737,
+    "first": [
+      "4 Requirement Specification",
+      "4.1 Use Case Diagram"
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 10,
+    "chars": 2205,
+    "first": [
+      "4.2 Requisiti Funzionali",
+      "ID"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 11,
+    "chars": 1130,
+    "first": [
+      "ID",
+      "Denominazione"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 12,
+    "chars": 1340,
+    "first": [
+      "4.3 Requisiti Non Funzionali",
+      "Denominazione"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 13,
+    "chars": 1418,
+    "first": [
+      "4.4 Requisiti di Dominio",
+      "Vincolo"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 14,
+    "chars": 1573,
+    "first": [
+      "4.5 Rappresentazione Tabellare Modello di A.Cockburn",
+      "Le quattro schede seguono gli identificativi UC1-UC4 del progetto. I mockup descrivono il design "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 15,
+    "chars": 182,
+    "first": [
+      "Figura 4.2  Mockup progettuale del flusso UC1; le regole applicate sono descritte nella scheda",
+      "Figura 4.3  Realizzazione di UC1: creazione con immagine facoltativa"
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 16,
+    "chars": 1124,
+    "first": [
+      "UC2 - Modificare stato bug",
+      "Campo"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 17,
+    "chars": 181,
+    "first": [
+      "Figura 4.4  Mockup progettuale del flusso UC2; le regole applicate sono descritte nella scheda",
+      "Figura 4.5  Realizzazione di UC2: dettaglio e controllo dello stato"
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 18,
+    "chars": 1035,
+    "first": [
+      "UC3 - Inserire un commento",
+      "Campo"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 19,
+    "chars": 1165,
+    "first": [
+      "UC4 - Creare utenze",
+      "Campo"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 20,
+    "chars": 179,
+    "first": [
+      "Figura 4.6  Mockup progettuale del flusso UC4; le regole applicate sono descritte nella scheda",
+      "Figura 4.7  Realizzazione di UC4: gestione account e appartenenze"
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 21,
+    "chars": 1546,
+    "first": [
+      "Parte II  Documento di Design del Sistema",
+      "5 Progettazione Architetturale e Scelte "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 22,
+    "chars": 1032,
+    "first": [
+      "5.2 Architettura del Frontend",
+      "Il frontend è una SPA React con componenti funzione. main.jsx inizializza l’applicazione; App e "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 23,
+    "chars": 1359,
+    "first": [
+      "5.3 Criteri di Design e Motivazioni",
+      "Separazione delle responsabilità"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 24,
+    "chars": 966,
+    "first": [
+      "5.4 Tecnologie Utilizzate",
+      "Figura 5.2  Schema tecnologico della progettazione iniziale"
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 25,
+    "chars": 353,
+    "first": [
+      "5.5 Schema della Persistenza dei Dati",
+      "Figura 5.3  Diagramma di dominio della progettazione iniziale"
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 26,
+    "chars": 1904,
+    "first": [
+      "5.5.1 Descrizione delle entità e delle relazioni",
+      "Modello e tabella"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 27,
+    "chars": 968,
+    "first": [
+      "6 Design dell’interfaccia utente",
+      "6.1 Progettazione Cromatica dell’Interfaccia"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 28,
+    "chars": 688,
+    "first": [
+      "6.1.3 Applicazione della Regola 60–30–10",
+      "Il modello 60–30–10 esprime una guida progettuale: prevalenza dei neutri, blu come colore "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 29,
+    "chars": 1811,
+    "first": [
+      "6.2 Tipografia",
+      "La tipografia separa titoli, azioni e metadati e favorisce la consultazione di descrizioni e discussioni. "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 30,
+    "chars": 392,
+    "first": [
+      "6.3 Principles of Proximity and Connectedness",
+      "La prossimità raggruppa gli elementi vicini; la connectedness li associa attraverso un contenitore o un "
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 31,
+    "chars": 444,
+    "first": [
+      "Applicazione ai componenti di BugBoard26",
+      "Sidebar e contesto del progetto formano un insieme riconoscibile; le card dei progetti raggruppano "
+    ],
+    "outside": [],
+    "images": 3,
+    "landscape": false
+  },
+  {
+    "page": 32,
+    "chars": 608,
+    "first": [
+      "Raggruppamento dei campi e delle azioni",
+      "Il modulo di creazione avvicina dati principali, assegnazione e immagine. La gestione utenti mantiene "
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 33,
+    "chars": 425,
+    "first": [
+      "6.4 Applicazione del modello F-Pattern",
+      "Il disegno evidenzia una scansione proposta del titolo, del contesto e delle righe delle issue. Il "
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 34,
+    "chars": 804,
+    "first": [
+      "6.5 Labor Perception Bias",
+      "Il sistema rende percepibile l’elaborazione con messaggi di caricamento e pulsanti come Creating... o "
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 35,
+    "chars": 301,
+    "first": [
+      "Figura 6.13  Feedback persistente tramite notifiche personali dell’app",
+      "Il contesto AuthContext aggiorna notifiche e conteggio non lette dopo le operazioni e periodicamente. "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 36,
+    "chars": 773,
+    "first": [
+      "6.7 Prevenire gli Errori",
+      "La UI anticipa errori con campi obbligatori, controllo del file, azioni disabilitate durante l’invio e "
+    ],
+    "outside": [],
+    "images": 2,
+    "landscape": false
+  },
+  {
+    "page": 37,
+    "chars": 1247,
+    "first": [
+      "7 Diagrammi delle classi di Design",
+      "7.1 Classi di Design del Backend"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 38,
+    "chars": 745,
+    "first": [
+      "7.1.2 DTO",
+      "Un DTO descrive quali dati attraversano il confine tra frontend e backend. Non è necessario "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 39,
+    "chars": 1205,
+    "first": [
+      "Request DTO e richieste effettive",
+      "Contratto nel diagramma"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 40,
+    "chars": 1189,
+    "first": [
+      "Domain DTO e serializzazione pubblica",
+      "Funzione in responses.js"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 41,
+    "chars": 1277,
+    "first": [
+      "Response DTO ed errori",
+      "Risposta"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 42,
+    "chars": 1236,
+    "first": [
+      "7.1.3 Entità di Dominio e sicurezza",
+      "Le entità persistenti sono le sette classi del capitolo 5.5. La configurazione Sequelize usa variabili "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 43,
+    "chars": 630,
+    "first": [
+      "7.2 Classi di Design del Frontend",
+      "Il diagramma raccoglie Core Frontend, Pages e Shared Components. Le caselle rappresentano responsabilità e comportamenti: nel codice React sono "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": true
+  },
+  {
+    "page": 44,
+    "chars": 258,
+    "first": [
+      "Figura 7.3  Dettaglio 1/4 del diagramma frontend originale",
+      "Core Frontend: App, router, controllo delle rotte e provider di autenticazione. Le caselle laterali "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 45,
+    "chars": 258,
+    "first": [
+      "Figura 7.4  Dettaglio 2/4 del diagramma frontend originale",
+      "Pagine e componenti di dettaglio: il contenuto della issue, i commenti e i controlli sono composti "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 46,
+    "chars": 244,
+    "first": [
+      "Figura 7.5  Dettaglio 3/4 del diagramma frontend originale",
+      "Pagine amministrative e form: creazione account, selezione ruolo e azioni sul progetto sono "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 47,
+    "chars": 294,
+    "first": [
+      "Figura 7.6  Dettaglio 4/4 del diagramma frontend originale",
+      "Navigazione e tabella: nel codice attuale alcune parti sono renderizzate direttamente dalle pagine. Le "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": false
+  },
+  {
+    "page": 48,
+    "chars": 1559,
+    "first": [
+      "Corrispondenza tra diagramma e sorgenti",
+      "Elemento progettuale"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 49,
+    "chars": 373,
+    "first": [
+      "7.2.1 Utility, Config e Security",
+      "I moduli trasversali supportano le pagine senza rappresentare schermate autonome. La figura mette in relazione configurazione, sicurezza, context, utility e "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": true
+  },
+  {
+    "page": 50,
+    "chars": 1044,
+    "first": [
+      "Area",
+      "Moduli reali e compito"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 51,
+    "chars": 407,
+    "first": [
+      "7.3 Gestione della navigazione tra le pagine",
+      "I diagrammi distinguono percorsi USER e ADMIN. Il flusso comune parte dal login, passa ai progetti e apre dashboard e dettaglio. CreateIssuePage va "
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": true
+  },
+  {
+    "page": 52,
+    "chars": 60,
+    "first": [
+      "Figura 7.9  Navigazione progettuale ADMIN"
+    ],
+    "outside": [],
+    "images": 1,
+    "landscape": true
+  },
+  {
+    "page": 53,
+    "chars": 686,
+    "first": [
+      "Percorso React",
+      "Pagina e comportamento"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 54,
+    "chars": 1476,
+    "first": [
+      "7.4 Sequenze di Design per gli Use Case",
+      "Le sequenze seguenti descrivono i quattro flussi del capitolo 4.5 attraverso componenti e API reali. "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 55,
+    "chars": 1095,
+    "first": [
+      "7.4.3 UC3 – Commento",
+      ""
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 56,
+    "chars": 1024,
+    "first": [
+      "Parte III  Documentazione del Processo di Sviluppo",
+      "8 File di build automatica"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 57,
+    "chars": 2200,
+    "first": [
+      "8.3 Docker Compose",
+      "infra/docker/docker-compose.yml definisce backend e postgres. Il backend attende l’healthcheck del "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 58,
+    "chars": 1472,
+    "first": [
+      "9 Strumento di Versioning",
+      "Git conserva il codice di frontend, backend, SQL e infrastruttura nello stesso repository. Il remoto "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 59,
+    "chars": 1796,
+    "first": [
+      "10 Qualità del codice",
+      "Le verifiche eseguite il 21 ottobre 2026 comprendono 52 test backend e 17 frontend superati, lint e "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 60,
+    "chars": 2226,
+    "first": [
+      "Parte IV  Testing e Valutazione dell’Usabilità",
+      "11 Unit Testing"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 61,
+    "chars": 1486,
+    "first": [
+      "11.2 Test di changeStatus (issues service)",
+      "Unità: changeStatus(user,issueId,status). Le partizioni comprendono identità dell’attore, "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 62,
+    "chars": 1247,
+    "first": [
+      "11.3 Test di requireAssignee (access service)",
+      "Unità: requireAssignee(projectId,userId,transaction). La funzione verifica l’idoneità del destinatario "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 63,
+    "chars": 1326,
+    "first": [
+      "11.4 Test di notify (notifications service)",
+      "Unità: notify(issue,actor,message,recipientIds,transaction). La funzione salva notifiche ordinarie "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 64,
+    "chars": 1727,
+    "first": [
+      "11.5 Strategie adottate",
+      "11.5.1 Controller"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 65,
+    "chars": 1492,
+    "first": [
+      "11.6 Test plan di una funzionalità: risoluzione issue",
+      "Elemento"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 66,
+    "chars": 1313,
+    "first": [
+      "12 Valutazione dell’Usabilità",
+      "La valutazione con persone e i questionari devono ancora essere svolti. Le sezioni seguenti "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 67,
+    "chars": 1092,
+    "first": [
+      "Checklist dell’Expert Review",
+      "Regola"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 68,
+    "chars": 1322,
+    "first": [
+      "12.2 Relazione Sperimentale",
+      "12.2.1 Descrizione dei Partecipanti"
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 69,
+    "chars": 1372,
+    "first": [
+      "12.2.3 Dati Raccolti",
+      "Non sono ancora presenti osservazioni sperimentali. La scheda deve contenere una riga per ogni task "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  },
+  {
+    "page": 70,
+    "chars": 1824,
+    "first": [
+      "12.2.5 Conclusioni",
+      "Da completare dopo expert review e sessioni con utenti. Il tasso di completamento sarà calcolato sui "
+    ],
+    "outside": [],
+    "images": 0,
+    "landscape": false
+  }
+]

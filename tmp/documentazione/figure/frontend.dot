@@ -1,0 +1,18 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",nodesep=.3,ranksep=.5]; node [shape=component,style=filled,fillcolor="#edf2fc",fontname="DejaVu Sans",fontsize=12,color="#8796b2"]; edge [fontname="DejaVu Sans",fontsize=10,color="#415474"];
+ router [label="AppRouter e RouteGuard"];
+ auth [label="AuthContext e useAuth
+Sessione e notifiche"];
+ pages [label="pages
+Projects, Dashboard, IssueDetail
+UserManagement e Login"];
+ components [label="components
+CreateIssueModal, IssueInfoCard
+IssueImage, CommentsList, Topbar"];
+ api [label="api
+Adapter delle richieste HTTP"];
+ client [label="client.js
+Axios, Bearer token, errori 401"];
+ router -> pages; auth -> pages [style=dashed,label="stato condiviso"]; pages -> components;
+ pages -> api; components -> api; api -> client;
+}

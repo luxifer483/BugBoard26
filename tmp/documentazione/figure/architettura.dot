@@ -1,0 +1,20 @@
+digraph G {
+ graph [rankdir=TB, bgcolor="white", nodesep=.5, ranksep=.6];
+ node [shape=box, style="rounded,filled", fillcolor="#edf2fc", color="#8796b2", fontname="DejaVu Sans", fontsize=13, margin=".22,.15"];
+ edge [fontname="DejaVu Sans", fontsize=11, color="#415474"];
+ ui [label="Browser
+React 19 e React Router
+Pagine, componenti e AuthContext"];
+ api [label="Backend Node.js ed Express
+Rotte e middleware
+Controller e servizi"];
+ orm [label="Modelli Sequelize
+Query e transazioni"];
+ db [shape=cylinder,label="PostgreSQL 17
+Sette tabelle
+Immagini BYTEA"];
+ ui -> api [label="HTTP JSON / multipart
+Authorization Bearer JWT"];
+ api -> orm [label="Operazioni sui modelli"];
+ orm -> db [label="SQL tramite driver pg"];
+}

@@ -1,0 +1,432 @@
+[
+  [
+    1,
+    "I Documento dei Requisiti Software",
+    5
+  ],
+  [
+    2,
+    "Glossario",
+    6
+  ],
+  [
+    2,
+    "Introduzione",
+    8
+  ],
+  [
+    2,
+    "Requirement Elicitation and Analysis",
+    10
+  ],
+  [
+    3,
+    "Individuazione del target degli utenti tramite Personas",
+    10
+  ],
+  [
+    2,
+    "Requirement Specification",
+    14
+  ],
+  [
+    3,
+    "Use Case Diagram",
+    14
+  ],
+  [
+    3,
+    "Requisiti Funzionali",
+    15
+  ],
+  [
+    3,
+    "Requisiti Non Funzionali",
+    17
+  ],
+  [
+    3,
+    "Requisiti di Dominio",
+    18
+  ],
+  [
+    3,
+    "Rappresentazione Tabellare Modello di A.Cockburn",
+    20
+  ],
+  [
+    1,
+    "II Documento di Design del Sistema",
+    27
+  ],
+  [
+    2,
+    "Progettazione Architetturale e Scelte Tecnologiche",
+    28
+  ],
+  [
+    3,
+    "Descrizione dell’Architettura",
+    28
+  ],
+  [
+    4,
+    "Controller",
+    28
+  ],
+  [
+    4,
+    "Service",
+    28
+  ],
+  [
+    4,
+    "Model e accesso ai dati",
+    28
+  ],
+  [
+    3,
+    "Architettura del Frontend",
+    28
+  ],
+  [
+    3,
+    "Criteri di Design e Motivazioni",
+    30
+  ],
+  [
+    3,
+    "Tecnologie Utilizzate",
+    30
+  ],
+  [
+    3,
+    "Schema della Persistenza dei Dati",
+    32
+  ],
+  [
+    4,
+    "Descrizione delle entità e delle relazioni",
+    32
+  ],
+  [
+    2,
+    "Design dell'interfaccia utente",
+    34
+  ],
+  [
+    3,
+    "Progettazione Cromatica dell’Interfaccia",
+    34
+  ],
+  [
+    4,
+    "Obiettivi della Progettazione Cromatica",
+    34
+  ],
+  [
+    4,
+    "Palette Cromatica Adottata",
+    34
+  ],
+  [
+    4,
+    "Applicazione della Regola 60–30–10",
+    35
+  ],
+  [
+    4,
+    "Accessibilità e Contrasto Cromatico",
+    36
+  ],
+  [
+    3,
+    "Tipografia",
+    37
+  ],
+  [
+    4,
+    "Obiettivi della Progettazione Tipografica",
+    37
+  ],
+  [
+    4,
+    "Scelta del Font",
+    37
+  ],
+  [
+    4,
+    "Gerarchia Tipografica",
+    37
+  ],
+  [
+    4,
+    "Spaziatura e Allineamento",
+    38
+  ],
+  [
+    4,
+    "Accessibilità e Conformità alle WCAG",
+    38
+  ],
+  [
+    4,
+    "Coerenza con l’Identità Visiva",
+    38
+  ],
+  [
+    3,
+    "Principles of Proximity and Connectedness",
+    38
+  ],
+  [
+    3,
+    "Applicazione del modello F-Pattern",
+    43
+  ],
+  [
+    3,
+    "Labor Perception Bias",
+    44
+  ],
+  [
+    3,
+    "Gestione del Feedback Utente e Feedback Persistence",
+    44
+  ],
+  [
+    3,
+    "Prevenire gli Errori",
+    45
+  ],
+  [
+    2,
+    "Diagrammi delle classi di Design",
+    48
+  ],
+  [
+    3,
+    "Classi di Design del Backend",
+    48
+  ],
+  [
+    4,
+    "Architettura Controller–Service–Model",
+    48
+  ],
+  [
+    4,
+    "DTO",
+    48
+  ],
+  [
+    4,
+    "Entità di Dominio e sicurezza",
+    49
+  ],
+  [
+    3,
+    "Classi di Design del Frontend",
+    50
+  ],
+  [
+    4,
+    "Utility, Config e Security",
+    52
+  ],
+  [
+    3,
+    "Gestione della navigazione tra le pagine",
+    54
+  ],
+  [
+    3,
+    "Sequenze di Design per gli Use Case",
+    57
+  ],
+  [
+    4,
+    "UC1 – Creazione issue",
+    57
+  ],
+  [
+    4,
+    "UC2 – Cambio stato",
+    57
+  ],
+  [
+    4,
+    "UC3 – Commento",
+    57
+  ],
+  [
+    4,
+    "UC4 – Creazione account e appartenenza",
+    57
+  ],
+  [
+    1,
+    "III Documentazione del Processo di Sviluppo",
+    58
+  ],
+  [
+    2,
+    "File di build automatica",
+    59
+  ],
+  [
+    3,
+    "DockerFile (Backend)",
+    59
+  ],
+  [
+    3,
+    "DockerFile (Frontend)",
+    59
+  ],
+  [
+    3,
+    "Docker Compose",
+    59
+  ],
+  [
+    2,
+    "Strumento di Versioning",
+    61
+  ],
+  [
+    2,
+    "Qualità del codice",
+    62
+  ],
+  [
+    3,
+    "Grafico di Duplicazione del Codice",
+    62
+  ],
+  [
+    3,
+    "Grafico delle Issues",
+    63
+  ],
+  [
+    3,
+    "Grafico della Coverage dei Test",
+    63
+  ],
+  [
+    1,
+    "IV Testing e Valutazione dell’Usabilità",
+    64
+  ],
+  [
+    2,
+    "Unit Testing",
+    65
+  ],
+  [
+    3,
+    "Test di createIssue (issues service)",
+    65
+  ],
+  [
+    3,
+    "Test di changeStatus (issues service)",
+    66
+  ],
+  [
+    3,
+    "Test di requireAssignee (access service)",
+    67
+  ],
+  [
+    3,
+    "Test di notify (notifications service)",
+    67
+  ],
+  [
+    3,
+    "Strategie adottate",
+    68
+  ],
+  [
+    4,
+    "Controller",
+    68
+  ],
+  [
+    4,
+    "Service",
+    68
+  ],
+  [
+    4,
+    "Model / persistenza",
+    68
+  ],
+  [
+    4,
+    "Security e Utils",
+    68
+  ],
+  [
+    3,
+    "Test plan di una funzionalità: risoluzione issue",
+    69
+  ],
+  [
+    2,
+    "Valutazione dell’Usabilità",
+    70
+  ],
+  [
+    3,
+    "Expert Review",
+    70
+  ],
+  [
+    4,
+    "Obiettivo del Test",
+    70
+  ],
+  [
+    4,
+    "Istruzioni per l’Uso della Checklist",
+    70
+  ],
+  [
+    4,
+    "Risultati",
+    70
+  ],
+  [
+    3,
+    "Relazione Sperimentale",
+    71
+  ],
+  [
+    4,
+    "Descrizione dei Partecipanti",
+    71
+  ],
+  [
+    4,
+    "Procedura Sperimentale",
+    71
+  ],
+  [
+    4,
+    "Dati Raccolti",
+    72
+  ],
+  [
+    4,
+    "Valutazione post-task",
+    72
+  ],
+  [
+    4,
+    "Conclusioni",
+    72
+  ]
+]
