@@ -98,3 +98,62 @@ test('keeps entered text and the image when the backend rejects the request', as
   expect(onClose).not.toHaveBeenCalled()
   expect(screen.getByRole('button', { name: 'Create Issue' })).toBeEnabled()
 })
+
+function renderModal(properties = {}) {
+  const props = { isOpen: true, projectId: 3, onClose: vi.fn(), ...properties }
+  const element = (next) => <MemoryRouter><AuthContext.Provider value={{ user: { id: 1 } }}>
+    <CreateIssueModal {...next} />
+  </AuthContext.Provider></MemoryRouter>
+  const view = render(element(props))
+  return { ...view, props, update: (next) => view.rerender(element({ ...props, ...next })) }
+}
+
+test('reports member-loading errors instead of offering stale assignees', async () => {
+  getProjectMembers.mockRejectedValueOnce(new Error('Forbidden'))
+  renderModal()
+  await screen.findByText('Unable to load project members. Close this dialog and try again.')
+  expect(screen.getByLabelText('Assignee')).toBeEnabled()
+  expect(screen.queryByRole('option', { name: 'Team member' })).not.toBeInTheDocument()
+})
+
+test('requires a project and does not send an issue without it', () => {
+  renderModal({ projectId: null })
+  fireEvent.submit(screen.getByRole('button', { name: 'Create Issue' }).closest('form'))
+  expect(screen.getByText('Select a project before creating a new issue.')).toBeInTheDocument()
+  expect(createIssue).not.toHaveBeenCalled()
+  expect(getProjectMembers).not.toHaveBeenCalled()
+})
+
+test('only clicking the backdrop closes the dialog', async () => {
+  const { props } = renderModal()
+  await screen.findByRole('option', { name: 'Team member' })
+  const dialog = screen.getByRole('dialog')
+  fireEvent.click(dialog)
+  expect(props.onClose).not.toHaveBeenCalled()
+  fireEvent.click(dialog.parentElement)
+  expect(props.onClose).toHaveBeenCalledOnce()
+})
+
+test('closing and reopening clears the selected file and form fields', async () => {
+  const { update } = renderModal()
+  await screen.findByRole('option', { name: 'Team member' })
+  fireEvent.change(screen.getByLabelText('Title *'), { target: { value: 'Old title' } })
+  fireEvent.change(screen.getByLabelText('Image (optional)'), {
+    target: { files: [new File(['image'], 'old.png', { type: 'image/png' })] },
+  })
+  update({ isOpen: false })
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  update({ isOpen: true })
+  await screen.findByRole('option', { name: 'Team member' })
+  expect(screen.getByLabelText('Title *')).toHaveValue('')
+  expect(screen.queryByText('old.png')).not.toBeInTheDocument()
+})
+
+test('clearing the file chooser removes the selection without an error', async () => {
+  await openForm()
+  const input = screen.getByLabelText('Image (optional)')
+  fireEvent.change(input, { target: { files: [new File(['image'], 'a.png', { type: 'image/png' })] } })
+  fireEvent.change(input, { target: { files: [] } })
+  expect(screen.queryByText('a.png')).not.toBeInTheDocument()
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})

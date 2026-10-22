@@ -43,3 +43,14 @@ test('does not create an object URL if a pending download finishes after unmount
   resolveDownload(new Blob(['image'], { type: 'image/png' }))
   await waitFor(() => expect(URL.createObjectURL).not.toHaveBeenCalled())
 })
+
+test('ignores a download error after the component has been unmounted', async () => {
+  let rejectDownload
+  getIssueImage.mockReturnValueOnce(new Promise((resolve, reject) => { rejectDownload = reject }))
+  const { unmount } = render(<IssueImage issueId={12} />)
+  unmount()
+  rejectDownload(new Error('Network unavailable'))
+  await Promise.resolve()
+  await Promise.resolve()
+  expect(URL.createObjectURL).not.toHaveBeenCalled()
+})

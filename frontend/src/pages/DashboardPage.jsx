@@ -78,7 +78,7 @@ function DashboardPage() {
       }
     }
 
-    loadDashboard()
+    void loadDashboard()
 
     return () => {
       isMounted = false

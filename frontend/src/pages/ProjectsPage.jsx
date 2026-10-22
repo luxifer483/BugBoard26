@@ -39,7 +39,7 @@ function ProjectsPage() {
       }
     }
 
-    loadProjects()
+    void loadProjects()
 
     return () => {
       isMounted = false

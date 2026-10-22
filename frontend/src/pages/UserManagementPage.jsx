@@ -67,7 +67,7 @@ function UserManagementPage() {
       }
     }
 
-    loadUserManagement()
+    void loadUserManagement()
 
     return () => {
       isMounted = false

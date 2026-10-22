@@ -30,6 +30,7 @@ function Topbar() {
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
+        if (isProfileOpen) profileRef.current?.querySelector('button')?.focus()
         setIsNotificationsOpen(false)
         setIsProfileOpen(false)
       }
@@ -161,7 +162,7 @@ function Topbar() {
         <div className="topbar-profile" ref={profileRef}>
           <button
             aria-expanded={isProfileOpen}
-            aria-haspopup="menu"
+            aria-controls="profile-panel"
             className={`topbar-user-button${isProfileOpen ? ' is-active' : ''}`}
             onClick={handleToggleProfile}
             type="button"
@@ -178,7 +179,7 @@ function Topbar() {
           </button>
 
           {isProfileOpen ? (
-            <section aria-label="Profile menu" className="profile-dropdown" role="menu">
+            <section id="profile-panel" aria-label="Profile menu" className="profile-dropdown">
               <div className="profile-dropdown-header">
                 <div className="profile-dropdown-avatar" aria-hidden="true">
                   {getInitials(user?.fullName)}

@@ -53,7 +53,7 @@ function Sidebar({ activeProjectId = '' }) {
       }
     }
 
-    loadProjectNavigation()
+    void loadProjectNavigation()
 
     return () => {
       isMounted = false

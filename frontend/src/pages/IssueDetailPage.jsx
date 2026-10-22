@@ -97,7 +97,7 @@ function IssueDetailContent({ issueId }) {
       }
     }
 
-    loadIssueDetail()
+    void loadIssueDetail()
 
     return () => {
       isMounted = false

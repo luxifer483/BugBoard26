@@ -6,3 +6,5 @@ backend/.env.local
 .idea/
 *.log
 
+
+backend/coverage-images-unit/

@@ -87,7 +87,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
       }
     }
 
-    loadAssignableUsers()
+    void loadAssignableUsers()
 
     return () => {
       isMounted = false

@@ -42,7 +42,9 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
       - name: Installa dipendenze backend
         working-directory: backend
@@ -52,8 +54,24 @@ jobs:
         working-directory: backend
         run: npm test
 
+      - name: Installa dipendenze frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Esegui test e coverage frontend
+        working-directory: frontend
+        run: npm run test:coverage
+
+      - name: Verifica frontend
+        working-directory: frontend
+        run: |
+          npm run lint
+          npm run build
+
       - name: Verifica report LCOV
-        run: test -s backend/coverage/lcov.info
+        run: |
+          test -s backend/coverage/lcov.info
+          test -s frontend/coverage/lcov.info
 
       - name: Invia analisi a SonarQube
         uses: SonarSource/sonarqube-scan-action@v8.3.0

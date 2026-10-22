@@ -56,3 +56,12 @@ Contratti: [milestone 1](../docs/api/milestone-1.md), [milestone 2](../docs/api/
 npm.cmd --prefix frontend run lint
 npm.cmd --prefix frontend run build
 ```
+
+## Copertura test e SonarQube
+
+Eseguire `npm run test:coverage` dalla cartella frontend. Vitest misura tutti i file
+JavaScript/JSX in `src`, anche quelli non importati dai test, e produce
+`coverage/lcov.info` oltre al riepilogo. Il workflow SonarQube esegue le suite
+backend e frontend e importa entrambi i report LCOV. I test frontend sono
+classificati come test, non come codice applicativo. Nessun file applicativo viene
+escluso per aumentare artificialmente la copertura.

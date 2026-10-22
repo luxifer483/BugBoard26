@@ -136,7 +136,7 @@ export function AuthProvider({ children }) {
       }
     }
 
-    loadNotifications()
+    void loadNotifications()
     const interval = window.setInterval(loadNotifications, 30000)
     window.addEventListener('bugboard26:refresh-notifications', loadNotifications)
 
