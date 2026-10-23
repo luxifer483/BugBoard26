@@ -49,7 +49,7 @@ backend/
     server.js                 controlla PostgreSQL e avvia HTTP
     routes.js                 elenco centrale degli endpoint e relativi middleware
     config/database.js        configurazione Sequelize
-    models/index.js           sei modelli e relazioni, senza scritture automatiche
+    models/index.js           sette modelli e relazioni, senza scritture automatiche
     middleware/
       auth.js                 JWT e permesso ADMIN
       errors.js               risposte JSON uniformi per gli errori
@@ -70,10 +70,18 @@ backend/
       validation.js           controlli dei dati ricevuti
       bootstrap.js            admin iniziale di sviluppo
       schema.js               inizializzazione richiesta da db:init
-  test/api.test.js            test HTTP su PostgreSQL isolato
+  test/
+    setup.js                  ambiente e configurazione QUnit
+    unit/                     38 test unitari, senza PostgreSQL
+      requireProject.test.js  controllo accesso al progetto
+      requireAssignee.test.js controllo assegnatario
+      matchesPassword.test.js confronto BCrypt
+      notify.test.js          destinatari delle notifiche
+      images.test.js          decodifica e controlli immagini
+    integration/api.test.js   52 test HTTP su PostgreSQL isolato
 ```
 
-`models/index.js` e' abbastanza piccolo per tenere insieme le sei tabelle.
+`models/index.js` e' abbastanza piccolo per tenere insieme le sette tabelle.
 I modelli descrivono i dati; `create`, `update` e `destroy` eseguono le scritture.
 Non sono stati introdotti repository o classi DTO. I controller semplici usano direttamente i modelli;
 le operazioni composte e i controlli condivisi stanno nei servizi.
@@ -127,7 +135,8 @@ Gli stati sono TODO/IN_PROGRESS/CLOSED e la priorita' e' facoltativa (null se om
 Restano invariati accesso per membership, permessi e transizioni in avanti.
 Alla risoluzione il reporter viene notificato anche se e' l'attore o ha lasciato il progetto;
 in quest'ultimo caso la notifica e' leggibile senza link e non riabilita l'accesso ai dati del progetto.
-L'upload immagini resta fuori ambito. CORS ammette anche PATCH, necessario
+Le immagini facoltative delle issue sono coperte dai test di upload, download e validazione.
+CORS ammette anche PATCH, necessario
 agli endpoint gia' presenti per stato, assegnazione e lettura notifiche.
 
 ## Test
@@ -139,7 +148,7 @@ powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1
 ```
 
 Lo script crea un PostgreSQL temporaneo su porta casuale e lo rimuove alla fine, incluso il volume temporaneo.
-La suite Node usa richieste HTTP reali, uno schema casuale e non punta al database di sviluppo.
+La suite di integrazione QUnit usa richieste HTTP reali, uno schema casuale e non punta al database di sviluppo.
 In alternativa, dalla cartella backend, predisporre un PostgreSQL di test:
 
 ```powershell
@@ -147,15 +156,32 @@ $env:TEST_DATABASE_URL = 'postgresql://utente:password@127.0.0.1:5432/bugboard_t
 npm.cmd test
 ```
 
-Senza TEST_DATABASE_URL i test si fermano: non ripiegano sul DB del file .env.
+Senza TEST_DATABASE_URL la suite completa e quella di integrazione si fermano: non ripiegano sul DB del file .env.
 Coprono autenticazione, permessi, CRUD implementato, contratti JSON, CORS PATCH, transazioni/rollback,
 concorrenza, compatibilita' BCrypt/JWT, inizializzazione non distruttiva, bootstrap admin e riavvio del server.
-Verifica corrente: 40 test backend passati su PostgreSQL 17 temporaneo; lint e build frontend passati.
+Verifica del 23 ottobre 2026: 90 test backend QUnit passati (38 unitari e 52 di integrazione)
+con PostgreSQL 17 temporaneo. I precedenti 52 casi API e 4 casi immagini sono stati conservati.
 Sono coperti anche priorita' omessa/null, TODO, migrazione ripetibile dei dati precedenti,
 notifica di risoluzione al reporter-attore/ex membro, deduplicazione concorrente e rollback.
 Verifica precedente della migrazione Express: 33 test passati; immagine Docker costruita e avviata.
 Provati inoltre il vecchio JAR Spring e Express sullo stesso DB temporaneo: token e password compatibili
 in entrambe le direzioni e lettura coerente di dati, statistiche, commenti e notifiche.
+
+Per i soli test unitari non serve PostgreSQL. Dalla root:
+
+```powershell
+npm.cmd --prefix backend run test:unit
+```
+
+Con TEST_DATABASE_URL configurata, `npm.cmd run test:integration` dalla cartella backend
+esegue soltanto le API. `npm.cmd test` esegue tutto. Ogni comando raccoglie la copertura con c8:
+`coverage/` per l'intera suite, `coverage-unit/` per gli unitari e `coverage-integration/` per le API.
+I report contengono LCOV, JSON e HTML; GitHub Actions e SonarQube continuano a usare `coverage/lcov.info`.
+
+I quattro metodi scelti per la consegna sono `requireProject`, `requireAssignee`, `matchesPassword`
+e `notify`: ciascuno ha almeno due parametri. I loro 34 test sono isolati da HTTP e database;
+i 4 test di `prepareImage` sono aggiuntivi. Tutti i test backend hanno un commento nella riga precedente.
+Test plan, casi identificati, R-WECT/white-box e limiti delle misure sono in [docs/testing.md](../docs/testing.md).
 
 ## Docker completo
 

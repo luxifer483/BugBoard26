@@ -8,3 +8,5 @@ backend/.env.local
 
 
 backend/coverage-images-unit/
+backend/coverage-unit/
+backend/coverage-integration/

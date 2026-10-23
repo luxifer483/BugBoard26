@@ -7,6 +7,7 @@ La seconda aggiunge issue, assegnazioni, commenti, notifiche personali e statist
 Il frontend usa le API reali di default per entrambe le milestone.
 
 - [Avvio e test backend](backend/README.md)
+- [Test plan, metodi selezionati e strategie di testing](docs/testing.md)
 - [Contratto API e regole di accesso](docs/api/milestone-1.md)
 - [Issue, commenti e notifiche: contratto e verifiche](docs/api/milestone-2.md)
 - [Modello backend implementato](docs/diagrammi/backend-model-as-is.puml)

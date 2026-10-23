@@ -1,6 +1,6 @@
-﻿# Avvia un PostgreSQL temporaneo e lancia i test Node, senza usare i dati di sviluppo.
+﻿# Avvia un PostgreSQL temporaneo e lancia tutti i test QUnit, senza usare i dati di sviluppo.
 $ErrorActionPreference = 'Stop'
-$taskTestRun = 'bugboard26-node-tests-' + [guid]::NewGuid().ToString('N').Substring(0, 10)
+$taskTestRun = 'bugboard26-qunit-tests-' + [guid]::NewGuid().ToString('N').Substring(0, 10)
 $taskTestDb = "$taskTestRun-db"
 $taskOldTestUrl = $env:TEST_DATABASE_URL
 $taskDbCreated = $false
