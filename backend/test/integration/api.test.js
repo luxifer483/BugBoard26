@@ -19,6 +19,9 @@ let server, base;
 let admin, member, reviewer, outsider, project;
 let adminToken, memberToken, reviewerToken, outsiderToken;
 
+// Mantiene i test QUnit riconoscibili anche all'analisi statica SonarQube.
+const { test } = QUnit;
+
 QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   // Installa lo stesso SQL di Spring nello schema isolato, mai nel database di sviluppo.
   async function applySql(sql = initialSql) {
@@ -107,7 +110,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   }
 
   // Verifica il salvataggio e il download protetto dei tre formati di immagine consentiti.
-  QUnit.test('PNG, JPEG and WebP images are saved with the issue and downloaded through an authenticated endpoint', async (assert) => {
+  test('PNG, JPEG and WebP images are saved with the issue and downloaded through an authenticated endpoint', async (assert) => {
     for (const format of ['png', 'jpeg', 'webp']) {
       const bytes = await sharp(png).toFormat(format).toBuffer();
       const type = `image/${format}`;
@@ -131,7 +134,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che immagine e priorita possano essere omesse nelle richieste JSON e multipart.
-  QUnit.test('the image is optional for both JSON and multipart requests', async (assert) => {
+  test('the image is optional for both JSON and multipart requests', async (assert) => {
     const { priority, ...withoutPriority } = payload();
     assert.strictEqual(priority, 'HIGH');
     for (const input of [withoutPriority, imageUpload(null, 'image/png', withoutPriority)]) {
@@ -144,7 +147,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che accesso e revoca dell'appartenenza proteggano anche gli allegati.
-  QUnit.test('image uploads and downloads require login and project access, including after membership revocation', async (assert) => {
+  test('image uploads and downloads require login and project access, including after membership revocation', async (assert) => {
     const before = await Issue.count();
     await call(assert, 'POST', '/issues', null, imageUpload(), 401);
     await call(assert, 'POST', '/issues', outsiderToken, imageUpload(), 403);
@@ -160,7 +163,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che file falsi, corrotti o con formato non coerente non vengano salvati.
-  QUnit.test('fake, corrupt, unsupported and mismatched image files do not create issues or images', async (assert) => {
+  test('fake, corrupt, unsupported and mismatched image files do not create issues or images', async (assert) => {
     const before = await Issue.count();
     const images = await IssueImage.count();
     for (const [data, type] of [[Buffer.from('not an image'), 'image/png'], [png, 'image/jpeg'],
@@ -173,7 +176,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica il limite di 5 MB e il rifiuto di file multipli o campi inattesi.
-  QUnit.test('images over 5 MB and requests with multiple or unexpected files are rejected before saving', async (assert) => {
+  test('images over 5 MB and requests with multiple or unexpected files are rejected before saving', async (assert) => {
     const before = await Issue.count();
     assert.strictEqual((await call(assert, 'POST', '/issues', memberToken, imageUpload(Buffer.alloc(5 * 1024 * 1024 + 1)), 413)).code,
       'IMAGE_TOO_LARGE');
@@ -187,7 +190,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica il limite di pixel e la rimozione dei metadati privati dalle immagini.
-  QUnit.test('image decoding enforces the pixel limit and removes private metadata', async (assert) => {
+  test('image decoding enforces the pixel limit and removes private metadata', async (assert) => {
     const large = await sharp({ create: { width: 4001, height: 4000, channels: 3, background: '#ffffff' } }).png().toBuffer();
     await call(assert, 'POST', '/issues', memberToken, imageUpload(large), 400);
     const tagged = await sharp(png).withMetadata({ exif: { IFD0: { Artist: 'Private author' } } }).png().toBuffer();
@@ -198,7 +201,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che errori nei dati o nelle notifiche non lascino issue o immagini parziali.
-  QUnit.test('invalid issue fields and notification failures leave no orphan image or partial issue', async (assert) => {
+  test('invalid issue fields and notification failures leave no orphan image or partial issue', async (assert) => {
     const issues = await Issue.count();
     const images = await IssueImage.count();
     const savedProject = await Project.findByPk(project.id);
@@ -214,7 +217,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che ripetere l'inizializzazione conservi i dati e i byte degli allegati.
-  QUnit.test('repeated initialization preserves the existing image bytes and issue data', async (assert) => {
+  test('repeated initialization preserves the existing image bytes and issue data', async (assert) => {
     const issue = await call(assert, 'POST', '/issues', memberToken, imageUpload(), 201);
     const saved = await IssueImage.findByPk(issue.id);
     await initializeSchema();
@@ -224,7 +227,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica la normalizzazione della email e la restituzione di una sessione senza password.
-  QUnit.test('login normalizes email and returns a signed token and safe account', async (assert) => {
+  test('login normalizes email and returns a signed token and safe account', async (assert) => {
     const result = await call(assert, 'POST', '/auth/login', null, { email: admin.email.toUpperCase(), password: 'Password123!' });
     assert.strictEqual(result.user.id, Number(admin.id));
     assert.strictEqual(result.user.role, 'ADMIN');
@@ -235,7 +238,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che password errata e account inesistente producano lo stesso errore.
-  QUnit.test('wrong password and unknown email return the same failure', async (assert) => {
+  test('wrong password and unknown email return the same failure', async (assert) => {
     for (const email of [admin.email, 'missing@example.test']) {
       const error = await call(assert, 'POST', '/auth/login', null, { email, password: 'wrong' }, 401);
       assert.strictEqual(error.code, 'INVALID_CREDENTIALS');
@@ -243,13 +246,13 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica il rifiuto di password multibyte oltre il limite di BCrypt.
-  QUnit.test('login rejects a multibyte password beyond the BCrypt byte limit', async (assert) => {
+  test('login rejects a multibyte password beyond the BCrypt byte limit', async (assert) => {
     const error = await call(assert, 'POST', '/auth/login', null, { email: admin.email, password: 'é'.repeat(40) }, 401);
     assert.strictEqual(error.code, 'INVALID_CREDENTIALS');
   });
 
   // Verifica la compatibilita con gli hash e i token del precedente backend Spring.
-  QUnit.test('existing BCrypt 2a hashes and Spring-shaped HS256 tokens remain usable', async (assert) => {
+  test('existing BCrypt 2a hashes and Spring-shaped HS256 tokens remain usable', async (assert) => {
     await member.update({ passwordHash: hash.replace('$2b$', '$2a$') });
     const session = await call(assert, 'POST', '/auth/login', null, { email: member.email, password: 'Password123!' });
     assert.strictEqual(session.user.id, Number(member.id));
@@ -262,7 +265,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica il rifiuto di token assenti, alterati, scaduti o con firma e destinatario errati.
-  QUnit.test('missing, altered, expired and wrongly signed tokens are rejected', async (assert) => {
+  test('missing, altered, expired and wrongly signed tokens are rejected', async (assert) => {
     for (const token of [undefined, `${adminToken}invalid`, jwt.sign({ sub: String(admin.id) }, 'wrong-key')]) {
       assert.strictEqual((await call(assert, 'GET', '/projects', token, undefined, 401)).code, 'UNAUTHORIZED');
     }
@@ -274,7 +277,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che i permessi seguano il ruolo corrente nel database anche con lo stesso token.
-  QUnit.test('current user and privileges are reloaded from the database on each request', async (assert) => {
+  test('current user and privileges are reloaded from the database on each request', async (assert) => {
     await call(assert, 'GET', '/users', memberToken, undefined, 403);
     await member.update({ role: 'ADMIN' });
     await call(assert, 'GET', '/users', memberToken);
@@ -283,7 +286,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che l'amministratore crei utenti con password salvata come hash e email univoca normalizzata.
-  QUnit.test('admin creates users with hashed passwords and unique normalized email', async (assert) => {
+  test('admin creates users with hashed passwords and unique normalized email', async (assert) => {
     const input = { fullName: 'New user', email: `NEW-${randomUUID()}@example.test`, password: 'Password123!', role: 'USER' };
     const result = await call(assert, 'POST', '/users', adminToken, input, 201);
     assert.strictEqual(result.email, input.email.toLowerCase());
@@ -294,14 +297,14 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che un utente normale non possa elencare account o creare utenti e progetti.
-  QUnit.test('normal users cannot enumerate accounts or create users or projects', async (assert) => {
+  test('normal users cannot enumerate accounts or create users or projects', async (assert) => {
     await call(assert, 'GET', '/users', memberToken, undefined, 403);
     await call(assert, 'POST', '/users', memberToken, { fullName: 'Escalation', email: 'x@example.test', password: 'Password123!', role: 'ADMIN' }, 403);
     await call(assert, 'POST', '/projects', memberToken, { name: 'Forbidden', description: 'Description' }, 403);
   });
 
   // Verifica separatamente gli errori di nome, email, password e ruolo nella creazione utente.
-  QUnit.test('user validation rejects blank names, invalid email, roles and BCrypt truncation', async (assert) => {
+  test('user validation rejects blank names, invalid email, roles and BCrypt truncation', async (assert) => {
     const valid = { fullName: 'User', email: `${randomUUID()}@example.test`, password: 'Password123!', role: 'USER' };
     for (const invalid of [{ fullName: ' ' }, { email: 'invalid' }, { password: 'short' },
       { password: 'é'.repeat(40) }, { role: 'QA' }]) {
@@ -312,7 +315,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che creare un progetto aggiunga anche l'amministratore ai suoi membri.
-  QUnit.test('project creation also creates the administrator membership', async (assert) => {
+  test('project creation also creates the administrator membership', async (assert) => {
     const created = await call(assert, 'POST', '/projects', adminToken, { name: ' New project ', description: ' Description ' }, 201);
     assert.strictEqual(created.name, 'New project');
     assert.strictEqual(created.memberCount, 1);
@@ -322,7 +325,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica la visibilita dei progetti per membri e amministratori.
-  QUnit.test('project lists and direct access enforce membership; admin access is global', async (assert) => {
+  test('project lists and direct access enforce membership; admin access is global', async (assert) => {
     const other = await Project.create({ name: 'Private project', description: 'Description' });
     const visible = await call(assert, 'GET', '/projects', memberToken);
     assert.deepEqual(visible.items.map((item) => item.id), [Number(project.id)]);
@@ -332,7 +335,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica aggiunta, duplicazione e revoca immediata dell'appartenenza al progetto.
-  QUnit.test('membership creation, duplicate detection and immediate revocation work', async (assert) => {
+  test('membership creation, duplicate detection and immediate revocation work', async (assert) => {
     await call(assert, 'POST', `/projects/${project.id}/members`, memberToken, { userId: Number(outsider.id) }, 403);
     await call(assert, 'POST', `/projects/${project.id}/members`, adminToken, { userId: Number(outsider.id) }, 201);
     assert.strictEqual((await call(assert, 'POST', `/projects/${project.id}/members`, adminToken, { userId: Number(outsider.id) }, 409)).code, 'ALREADY_MEMBER');
@@ -343,7 +346,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che identificatori malformati o oltre il limite non provochino errori SQL.
-  QUnit.test('malformed and out-of-range identifiers are handled without SQL errors', async (assert) => {
+  test('malformed and out-of-range identifiers are handled without SQL errors', async (assert) => {
     for (const value of ['not-a-number', '0', '-1', '1.5', '9223372036854775808']) {
       await call(assert, 'GET', `/projects/${value}`, adminToken, undefined, 400);
     }
@@ -352,7 +355,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che CORS consenta il frontend e PATCH e rifiuti origini estranee.
-  QUnit.test('CORS allows the frontend and PATCH, and rejects an unrelated origin', async (assert) => {
+  test('CORS allows the frontend and PATCH, and rejects an unrelated origin', async (assert) => {
     const allowed = await fetch(`${base}/issues/1/status`, { method: 'OPTIONS', headers: {
       Origin: 'http://localhost:5173', 'Access-Control-Request-Method': 'PATCH',
       'Access-Control-Request-Headers': 'authorization,content-type',
@@ -365,7 +368,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che autore, stato iniziale e date della nuova issue siano stabiliti dal server.
-  QUnit.test('member creates an issue while reporter, status and dates remain server controlled', async (assert) => {
+  test('member creates an issue while reporter, status and dates remain server controlled', async (assert) => {
     const issue = await call(assert, 'POST', '/issues', memberToken, { ...payload(Number(member.id)),
       reporter: { id: Number(admin.id) }, status: 'CLOSED', createdAt: '2000-01-01T00:00:00Z' }, 201);
     assert.strictEqual(issue.reporter.id, Number(member.id));
@@ -376,7 +379,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che si possano creare issue di tutti i quattro tipi previsti.
-  QUnit.test('all four issue types remain supported', async (assert) => {
+  test('all four issue types remain supported', async (assert) => {
     for (const type of ['BUG', 'QUESTION', 'DOCUMENTATION', 'FEATURE']) {
       const issue = await call(assert, 'POST', '/issues', memberToken, { ...payload(), type }, 201);
       assert.strictEqual(issue.type, type);
@@ -384,7 +387,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che la priorita sia facoltativa e conservi tutti i valori espliciti consentiti.
-  QUnit.test('priority is optional and valid explicit priorities are preserved', async (assert) => {
+  test('priority is optional and valid explicit priorities are preserved', async (assert) => {
     const { priority, ...withoutPriority } = payload();
     assert.strictEqual(priority, 'HIGH');
     for (const input of [withoutPriority, { ...withoutPriority, priority: null }]) {
@@ -401,7 +404,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che campi della issue non validi non producano scritture nel database.
-  QUnit.test('invalid issue fields are rejected without writing rows', async (assert) => {
+  test('invalid issue fields are rejected without writing rows', async (assert) => {
     const before = await Issue.count();
     for (const invalid of [{ title: ' ' }, { description: 'x'.repeat(10001) }, { type: 'UNKNOWN' },
       { priority: '' }, { priority: false }, { priority: 0 }, { priority: {} },
@@ -412,7 +415,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che l'assegnatario esista e sia membro del progetto anche se amministratore.
-  QUnit.test('assignee must belong to the project, including administrator accounts', async (assert) => {
+  test('assignee must belong to the project, including administrator accounts', async (assert) => {
     for (const user of [outsider, admin]) {
       const error = await call(assert, 'POST', '/issues', memberToken, payload(Number(user.id)), 400);
       assert.strictEqual(error.code, 'ASSIGNEE_NOT_MEMBER');
@@ -421,7 +424,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che un utente esterno non possa leggere, commentare o modificare issue.
-  QUnit.test('outsiders cannot read or change issues and comments', async (assert) => {
+  test('outsiders cannot read or change issues and comments', async (assert) => {
     const issue = await createIssue(assert);
     for (const path of [`/projects/${project.id}/issues`, `/issues/${issue.id}`, `/issues/${issue.id}/comments`]) {
       await call(assert, 'GET', path, outsiderToken, undefined, 403);
@@ -435,7 +438,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che solo l'assegnatario cambi stato, senza eccezioni per autore o amministratore.
-  QUnit.test('only the assignee can update status, including when the reporter or an admin is a project member', async (assert) => {
+  test('only the assignee can update status, including when the reporter or an admin is a project member', async (assert) => {
     await Membership.create({ projectId: project.id, userId: admin.id });
     const issue = await createIssue(assert, memberToken, Number(reviewer.id));
     const savedIssue = await Issue.findByPk(issue.id);
@@ -458,7 +461,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che una issue senza assegnatario non possa avanzare di stato.
-  QUnit.test('unassigned issues cannot change status until an assignee is chosen', async (assert) => {
+  test('unassigned issues cannot change status until an assignee is chosen', async (assert) => {
     const issue = await createIssue(assert, memberToken);
     for (const token of [memberToken, reviewerToken, adminToken]) {
       for (const status of ['TODO', 'IN_PROGRESS']) {
@@ -473,7 +476,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che riassegnazione e rimozione trasferiscano subito il permesso di cambiare stato.
-  QUnit.test('reassignment and unassignment immediately change who can update status', async (assert) => {
+  test('reassignment and unassignment immediately change who can update status', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(member.id));
     await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 403);
@@ -487,7 +490,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che un amministratore assegnatario possa risolvere la issue e notificare il reporter.
-  QUnit.test('an administrator can change status when they are the assignee', async (assert) => {
+  test('an administrator can change status when they are the assignee', async (assert) => {
     await Membership.create({ projectId: project.id, userId: admin.id });
     const issue = await createIssue(assert, memberToken, Number(admin.id));
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 403);
@@ -499,7 +502,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica passaggi di stato consentiti, richieste ripetute e rifiuto dei passaggi vietati.
-  QUnit.test('the assignee can advance status with the existing transitions and idempotency', async (assert) => {
+  test('the assignee can advance status with the existing transitions and idempotency', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' }, 409)).code, 'INVALID_STATUS_TRANSITION');
     for (const status of ['IN_PROGRESS', 'IN_PROGRESS', 'CLOSED', 'CLOSED']) {
@@ -512,7 +515,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che riassegnazioni ripetute non duplichino le notifiche.
-  QUnit.test('reassignment and unassignment are saved without duplicate notifications', async (assert) => {
+  test('reassignment and unassignment are saved without duplicate notifications', async (assert) => {
     const issue = await createIssue(assert);
     for (let i = 0; i < 2; i++) {
       const result = await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
@@ -525,7 +528,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica autore autenticato, ordinamento e controlli sul contenuto dei commenti.
-  QUnit.test('comments use the authenticated author, are ordered and validate content', async (assert) => {
+  test('comments use the authenticated author, are ordered and validate content', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     const first = await call(assert, 'POST', `/issues/${issue.id}/comments`, reviewerToken,
       { content: ' First comment ', author: { id: Number(admin.id) } }, 201);
@@ -542,7 +545,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che le notifiche escludano l'attore e non duplichino reporter e assegnatario.
-  QUnit.test('notifications deduplicate reporter/assignee and exclude the actor', async (assert) => {
+  test('notifications deduplicate reporter/assignee and exclude the actor', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(member.id));
     await call(assert, 'POST', `/issues/${issue.id}/comments`, reviewerToken, { content: 'Please review' }, 201);
     assert.strictEqual((await call(assert, 'GET', '/notifications', memberToken)).totalCount, 1);
@@ -550,7 +553,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica la notifica unica anche quando il reporter risolve la propria issue.
-  QUnit.test('resolution notifies a reporter who closes their own assigned issue exactly once', async (assert) => {
+  test('resolution notifies a reporter who closes their own assigned issue exactly once', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(member.id));
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
     assert.strictEqual((await call(assert, 'GET', '/notifications', memberToken)).totalCount, 0);
@@ -566,7 +569,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che un ex membro riceva la risoluzione senza riottenere accesso al progetto.
-  QUnit.test('former reporters receive and read resolution notices without regaining project access', async (assert) => {
+  test('former reporters receive and read resolution notices without regaining project access', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(reviewer.id));
     await call(assert, 'POST', `/issues/${issue.id}/comments`, reviewerToken, { content: 'Before revocation' }, 201);
     await call(assert, 'DELETE', `/projects/${project.id}/members/${member.id}`, adminToken, undefined, 204);
@@ -595,7 +598,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che la notifica di risoluzione resti leggibile dopo la revoca dell'appartenenza.
-  QUnit.test('resolution notice stays visible if reporter membership is revoked after closure', async (assert) => {
+  test('resolution notice stays visible if reporter membership is revoked after closure', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(reviewer.id));
     for (const status of ['IN_PROGRESS', 'CLOSED']) {
       await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status });
@@ -607,7 +610,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che le notifiche siano private e possano essere segnate lette senza duplicazioni.
-  QUnit.test('notifications remain private and marking read is idempotent', async (assert) => {
+  test('notifications remain private and marking read is idempotent', async (assert) => {
     await createIssue(assert, adminToken, Number(member.id));
     const feed = await call(assert, 'GET', '/notifications', memberToken);
     const id = feed.items[0].id;
@@ -618,7 +621,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che rimuovere un membro revochi subito accesso, commenti e cambio di stato.
-  QUnit.test('membership removal revokes issue/comment access and hides notifications immediately', async (assert) => {
+  test('membership removal revokes issue/comment access and hides notifications immediately', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     const notification = (await call(assert, 'GET', '/notifications', memberToken)).items[0];
     await call(assert, 'DELETE', `/projects/${project.id}/members/${member.id}`, adminToken, undefined, 204);
@@ -633,7 +636,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che le statistiche del progetto riflettano gli stati salvati delle issue.
-  QUnit.test('project statistics reflect persistent issue states', async (assert) => {
+  test('project statistics reflect persistent issue states', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     await createIssue(assert, memberToken);
     let result = await call(assert, 'GET', `/projects/${project.id}`, memberToken);
@@ -644,7 +647,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che due cambi di stato contemporanei identici non duplichino gli eventi.
-  QUnit.test('concurrent identical status updates emit only one event', async (assert) => {
+  test('concurrent identical status updates emit only one event', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     await Promise.all([1, 2].map(() => call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' })));
     assert.strictEqual((await call(assert, 'GET', '/notifications', memberToken)).totalCount, 1);
@@ -652,7 +655,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che due chiusure contemporanee generino una sola notifica di risoluzione.
-  QUnit.test('concurrent closures emit a single resolution notice per reporter', async (assert) => {
+  test('concurrent closures emit a single resolution notice per reporter', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(member.id));
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
     await Promise.all([1, 2].map(() => call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' })));
@@ -660,7 +663,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che un errore di notifica annulli stato della issue e data del progetto.
-  QUnit.test('a notification write failure rolls back issue state and project timestamp', async (assert) => {
+  test('a notification write failure rolls back issue state and project timestamp', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     const savedProject = await Project.findByPk(project.id);
     const original = Notification.create;
@@ -673,7 +676,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che un errore della notifica di risoluzione annulli la chiusura.
-  QUnit.test('resolution notification failure rolls back closure and project timestamp', async (assert) => {
+  test('resolution notification failure rolls back closure and project timestamp', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(member.id));
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
     const savedProject = await Project.findByPk(project.id);
@@ -688,7 +691,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica risposte JSON uniformi per richieste malformate e percorsi inesistenti.
-  QUnit.test('malformed JSON and unknown endpoints return JSON errors', async (assert) => {
+  test('malformed JSON and unknown endpoints return JSON errors', async (assert) => {
     const response = await fetch(`${base}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{invalid' });
     assert.strictEqual(response.status, 400);
     assert.strictEqual((await response.json()).code, 'INVALID_REQUEST');
@@ -697,7 +700,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che ripetere lo script SQL conservi righe, identificatori e password esistenti.
-  QUnit.test('initial SQL is repeatable and preserves rows, IDs and existing BCrypt hashes', async (assert) => {
+  test('initial SQL is repeatable and preserves rows, IDs and existing BCrypt hashes', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     const oldHash = (await User.findByPk(member.id)).passwordHash;
     await applySql();
@@ -707,7 +710,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica che l'amministratore iniziale venga creato una sola volta senza reimpostare password.
-  QUnit.test('development admin is created once and existing credentials are not reset', async (assert) => {
+  test('development admin is created once and existing credentials are not reset', async (assert) => {
     const names = ['NODE_ENV', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'ADMIN_FULL_NAME'];
     const saved = Object.fromEntries(names.map((name) => [name, process.env[name]]));
     try {
@@ -733,7 +736,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica la migrazione dalla prima milestone senza perdita di utenti e progetti.
-  QUnit.test('explicit initializer upgrades milestone 1 without deleting existing rows', async (assert) => {
+  test('explicit initializer upgrades milestone 1 without deleting existing rows', async (assert) => {
     const legacySchema = `${schema}_legacy`;
     await sequelize.getQueryInterface().createSchema(legacySchema);
     try {
@@ -755,7 +758,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   });
 
   // Verifica la migrazione ripetibile di OPEN e della priorita senza perdita dei dati storici.
-  QUnit.test('requirements migration preserves legacy data, converts only OPEN and is repeatable', async (assert) => {
+  test('requirements migration preserves legacy data, converts only OPEN and is repeatable', async (assert) => {
     const legacySchema = `${schema}_requirements`;
     await sequelize.getQueryInterface().createSchema(legacySchema);
     try {
@@ -835,7 +838,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   }
 
   // Verifica la persistenza di account, issue, immagini, commenti e notifiche dopo veri riavvii.
-  QUnit.test('server restarts preserve users, projects, issue, comment and read notification', async (assert) => {
+  test('server restarts preserve users, projects, issue, comment and read notification', async (assert) => {
     const issue = await call(assert, 'POST', '/issues', adminToken, imageUpload(png, 'image/png', payload(Number(member.id))), 201);
     const savedImage = (await IssueImage.findByPk(issue.id)).data;
     await call(assert, 'POST', `/issues/${issue.id}/comments`, memberToken, { content: 'Persistent comment' }, 201);
