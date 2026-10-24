@@ -30,7 +30,7 @@ function LoginPage() {
 
     try {
       await login(formState)
-      navigate(ROUTES.projects)
+      void navigate(ROUTES.projects)
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'Unable to reach the backend. Check that it is running.')
     } finally {

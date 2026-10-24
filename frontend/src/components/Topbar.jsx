@@ -136,7 +136,7 @@ function Topbar() {
                             event.preventDefault()
                             if (notification.read || await readNotification(notification.id)) {
                               setIsNotificationsOpen(false)
-                              navigate(`/issues/${notification.issueId}`)
+                              void navigate(`/issues/${notification.issueId}`)
                             }
                           }}
                           to={`/issues/${notification.issueId}`}

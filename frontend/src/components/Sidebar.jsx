@@ -73,7 +73,7 @@ function Sidebar({ activeProjectId = '' }) {
     const searchParams = new URLSearchParams(location.search)
     searchParams.set('modal', 'create-issue')
 
-    navigate({
+    void navigate({
       pathname: location.pathname,
       search: searchParams.toString(),
     })

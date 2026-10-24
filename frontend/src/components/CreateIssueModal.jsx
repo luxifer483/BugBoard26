@@ -157,7 +157,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
 
       onIssueCreated?.(createdIssue)
       onClose()
-      navigate(`/issues/${createdIssue.id}`)
+      void navigate(`/issues/${createdIssue.id}`)
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'Unable to create the issue right now.')
     } finally {
