@@ -22,7 +22,7 @@ I test di integrazione avviano Express su una porta temporanea, inviano vere ric
 | `backend/test/unit/notify.test.js` | Unitario | 11 | Selezione destinatari e richiesta di salvataggio, white-box |
 | `backend/test/unit/images.test.js` | Unitario aggiuntivo | 4 | Decodifica e controlli delle immagini; il metodo ha un solo parametro e non e tra i quattro scelti |
 | `backend/test/integration/api.test.js` | Integrazione | 57 | API, autenticazione, permessi, transizioni, persistenza, concorrenza e rollback |
-| `frontend/test/*.test.js` e `*.test.jsx` | Componenti e moduli frontend | 57, suite Vitest separata | Rendering, interazioni, azioni consentite e contratti HTTP con risposte simulate |
+| `frontend/test/*.test.js` e `*.test.jsx` | Componenti e moduli frontend | 55, suite Vitest separata | Rendering, interazioni, azioni consentite, sessione e contratti HTTP con risposte simulate |
 
 `backend/test/setup.js` prepara soltanto ambiente e configurazione QUnit: non contiene casi di test. Sopra ciascun test backend e presente un commento che ne descrive lo scopo.
 
@@ -171,7 +171,8 @@ La percentuale dell'intero file puo essere inferiore a quella del metodo: `acces
 Verifica del 25 ottobre 2026, Node.js e PostgreSQL 17 temporaneo:
 
 - 95/95 test backend QUnit superati nel comando completo: 38 unitari e 57 di integrazione, senza test saltati o `todo`.
-- 57/57 test frontend Vitest superati; lint e build completati.
+- 55/55 test frontend Vitest superati; lint e build completati.
+- `frontend/test/AuthSession.test.jsx` verifica login/logout, invio del token, ripristino della sessione e pulizia dopo HTTP 401, conservando il client Axios e gli interceptor dell'applicazione.
 - I casi di integrazione verificano autenticazione, progetti e membri, issue, assegnazioni, commenti, immagini e notifiche.
 - Verificata la concorrenza con vere richieste HTTP e il lock PostgreSQL: un successo e un conflitto, senza sovrascritture.
 - Verificate notifiche di risoluzione al solo reporter, deduplicazione e rollback delle operazioni applicative.

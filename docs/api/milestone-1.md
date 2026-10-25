@@ -123,13 +123,11 @@ Tutte le liste hanno forma `{ "items": [...], "totalCount": 2 }` e in questa mil
 
 Il frontend elimina la sessione al logout e quando riceve 401 da una rotta protetta.
 Il token stateless resta tecnicamente valido fino alla scadenza (1 ora); questa milestone non implementa revoca/refresh token.
-Le sessioni mock vengono invalidate passando alla modalita' reale.
 
 ## Funzionalita' successive
 
 Issue, commenti, notifiche, profilo modificabile, statistiche issue e upload non sono ancora API implementate.
 Il frontend reale mostra la panoramica del progetto e disabilita i controlli dipendenti dalle API mancanti.
-La demo completa precedente resta disponibile con `VITE_USE_MOCK_API=true`.
 Gli stati issue TODO/IN_PROGRESS/DONE e la priorita' facoltativa vanno uniformati nella milestone issue.
 
 Creazione account e aggiunta al progetto sono due operazioni distinte: se la seconda fallisce,

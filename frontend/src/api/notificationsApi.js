@@ -1,37 +1,14 @@
+// Prepara le richieste delle notifiche personali dell'utente autenticato.
 import apiClient from './client'
-import { USE_MOCK_API } from '../config/apiConfig'
-import { mockNotifications } from './mockData'
 
-// Anche le notifiche possono arrivare da mock o da API reale in base alla env.
-function delay(data) {
-  // Piccolo ritardo artificiale per mantenere realistico il comportamento UI.
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(data), 200)
-  })
-}
-
+// Richiede al server le notifiche accessibili e il numero di quelle non lette.
 export async function getNotifications() {
-  // In mock restituisce l'elenco completo e calcola il numero di notifiche non lette.
-  if (USE_MOCK_API) {
-    const unreadCount = mockNotifications.filter((notification) => !notification.read).length
-
-    return delay({
-      items: mockNotifications,
-      unreadCount,
-    })
-  }
-
-  // In produzione/sviluppo con backend chiama l'endpoint dedicato alle notifiche.
   const { data } = await apiClient.get('/notifications')
   return data
 }
 
+// Richiede al server di segnare una notifica come letta.
 export async function markNotificationRead(id) {
-  if (USE_MOCK_API) {
-    const notification = mockNotifications.find((item) => item.id === id)
-    notification.read = true
-    return delay(notification)
-  }
   const { data } = await apiClient.patch(`/notifications/${id}/read`)
   return data
 }

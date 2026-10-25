@@ -161,7 +161,6 @@ Gli errori delle operazioni vengono mostrati e il testo del commento viene conse
 Le notifiche si aggiornano al login, ogni 30 secondi, all'apertura del pannello e dopo un'operazione.
 Aprire una notifica la marca come letta prima di navigare alla issue.
 
-Demo mock disponibile con `VITE_USE_MOCK_API=true`; i cambiamenti della demo restano solo in memoria.
 Upload, modifica del testo delle issue, eliminazione, riapertura, email/push e paginazione restano fuori ambito.
 
 ## Verifiche riproducibili

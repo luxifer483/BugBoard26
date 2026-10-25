@@ -10,7 +10,7 @@ const apiClient = axios.create({
   timeout: 10000,
 })
 
-// Read storage per request so child effects also have a token on a page reload.
+// Unico punto che aggiunge il token alle richieste, leggendolo dalla sessione anche dopo un ricaricamento.
 apiClient.interceptors.request.use((request) => {
   const token = readStoredSession().token
   if (token && request.url !== '/auth/login') {

@@ -26,15 +26,12 @@ Account iniziale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
 
 ## Configurazione
 
-Le API reali sono attive di default. Per personalizzarle creare `frontend/.env.local`:
+Il frontend richiede il backend attivo. Per configurarne l'indirizzo creare `frontend/.env.local`:
 
 ```dotenv
 VITE_API_BASE_URL=http://localhost:8081/api
-VITE_USE_MOCK_API=false
 ```
 
-Per la demo senza backend impostare `VITE_USE_MOCK_API=true` e riavviare Vite.
-I dati mock modificati restano in memoria fino al ricaricamento della pagina.
 
 ## Funzionalita'
 
@@ -51,8 +48,9 @@ all'apertura del pannello e dopo le operazioni. Le issue ammettono una immagine 
 Il profilo mostra i dati dell'account autenticato; la modifica del profilo non e implementata.
 
 `pages/` contiene le schermate, `components/` gli elementi riutilizzabili,
-`layouts/` la struttura comune, `api/` gli adapter HTTP/mock, `context/` e `hooks/`
+`layouts/` la struttura comune, `api/` le chiamate HTTP al backend, `context/` e `hooks/`
 l'autenticazione condivisa, `security/` sessione e protezione delle rotte.
+`api/client.js` aggiunge il token alle richieste leggendo la sessione salvata e gestisce gli errori 401.
 
 Contratti: [milestone 1](../docs/api/milestone-1.md), [milestone 2](../docs/api/milestone-2.md).
 

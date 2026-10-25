@@ -4,7 +4,6 @@ import apiClient from '../src/api/client'
 import { createIssue, getIssueImage, getIssues, getIssueById, updateIssueStatus, updateIssueAssignee } from '../src/api/issuesApi'
 
 vi.mock('../src/api/client', () => ({ default: { post: vi.fn(), get: vi.fn(), patch: vi.fn() } }))
-vi.mock('../src/config/apiConfig', () => ({ USE_MOCK_API: false }))
 
 const payload = { title: 'Bug', description: 'Steps', type: 'BUG', priority: null,
   project: { id: 3 }, assignee: null }

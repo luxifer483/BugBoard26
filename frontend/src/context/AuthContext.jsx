@@ -1,3 +1,4 @@
+// Condivide account, sessione verificata dal backend e notifiche fra i componenti.
 import {
   startTransition,
   useCallback,
@@ -6,23 +7,22 @@ import {
   useState,
 } from 'react'
 import { getCurrentUser, login as loginRequest } from '../api/authApi'
-import { USE_MOCK_API } from '../config/apiConfig'
 import { getNotifications, markNotificationRead } from '../api/notificationsApi'
 import {
   clearStoredSession,
   readStoredSession,
   writeStoredSession,
 } from '../security/authStorage'
-import { setAuthToken } from '../security/tokenManager'
 import { AuthContext } from './auth-context'
 
 // Accesso automatico facoltativo, disponibile soltanto durante le prove con Vite.
 const DEV_AUTO_LOGIN = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true'
 
+// Ripristina l'accesso e rende disponibili login, logout e notifiche.
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession)
   const [isRestoringSession, setIsRestoringSession] = useState(
-    () => !USE_MOCK_API && (Boolean(readStoredSession().token) || DEV_AUTO_LOGIN),
+    () => Boolean(readStoredSession().token) || DEV_AUTO_LOGIN,
   )
   const [notifications, setNotifications] = useState({
     items: [],
@@ -48,7 +48,6 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     function handleSessionExpired() {
-      setAuthToken('')
       startTransition(() => {
         setSession({ token: '', user: null })
         setIsRestoringSession(false)
@@ -60,7 +59,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const stored = readStoredSession()
-    if ((!stored.token && !DEV_AUTO_LOGIN) || USE_MOCK_API) {
+    if (!stored.token && !DEV_AUTO_LOGIN) {
       return undefined
     }
     let active = true
@@ -77,14 +76,12 @@ export function AuthProvider({ children }) {
       .then((restored) => {
         if (active && readStoredSession().token === stored.token) {
           writeStoredSession(restored)
-          setAuthToken(restored.token)
           startTransition(() => setSession(restored))
         }
       })
       .catch(() => {
         if (active && readStoredSession().token === stored.token) {
           clearStoredSession()
-          setAuthToken('')
           startTransition(() => setSession({ token: '', user: null }))
         }
       })
@@ -151,7 +148,6 @@ export function AuthProvider({ children }) {
     const response = await loginRequest(credentials)
     const nextSession = { token: response.token, user: response.user }
     writeStoredSession(nextSession)
-    setAuthToken(response.token)
 
     startTransition(() => {
       setSession({
@@ -165,7 +161,6 @@ export function AuthProvider({ children }) {
 
   function logout() {
     clearStoredSession()
-    setAuthToken('')
     startTransition(() => {
       setSession({
         token: '',

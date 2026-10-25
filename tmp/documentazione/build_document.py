@@ -557,7 +557,7 @@ p('Il Dockerfile del backend usa Node 24 Alpine, installa le dipendenze del lock
 h('8.2 Build del frontend',2)
 p('Il frontend usa gli script di Vite per sviluppo e build. npm run build produce dist con gli asset statici; npm run dev avvia il server di sviluppo, normalmente sulla porta 5173. Nel repository non è presente un Dockerfile frontend: il Compose attuale avvia PostgreSQL e backend, mentre il frontend viene avviato separatamente.')
 h('8.3 Docker Compose e configurazione',2)
-p('Compose espone il backend su 8081 e PostgreSQL sulla porta host configurata, prevista come 5433. Tra container PostgreSQL resta sulla porta 5432. Il volume postgres_data conserva i dati. Le variabili del backend sono documentate in backend/.env.example; il client può configurare VITE_API_BASE_URL e VITE_USE_MOCK_API.')
+p('Compose espone il backend su 8081 e PostgreSQL sulla porta host configurata, prevista come 5433. Tra container PostgreSQL resta sulla porta 5432. Il volume postgres_data conserva i dati. Le variabili del backend sono documentate in backend/.env.example; il client può configurare VITE_API_BASE_URL.')
 p('Prima di utilizzare una configurazione già esistente, verificare la porta effettiva pubblicata dal container. Sul computer usato per lo sviluppo era presente anche un container mappato sulla porta host 5432: i file locali di ambiente devono riflettere la configurazione effettiva senza ricreare il database.')
 h('8.4 Configurazione e comandi',2)
 p('Dalla cartella principale, con Docker Desktop aperto, la prima configurazione locale segue questi passaggi PowerShell. La copia dei file di ambiente va eseguita solo se i file non esistono già.')

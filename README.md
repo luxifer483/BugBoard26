@@ -34,4 +34,3 @@ Conservare un eventuale `backend/.env` gia' configurato. All'avvio Sequelize cre
 dai modelli in `backend/src/models/index.js`, senza cancellare o alterare le tabelle esistenti.
 Per i test: `powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1` dalla root.
 Struttura e comandi Docker completi sono nel [README backend](backend/README.md).
-Per la demo con dati simulati, impostare `VITE_USE_MOCK_API=true` nel frontend e riavviare Vite.
