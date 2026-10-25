@@ -13,11 +13,10 @@ process.env.NODE_ENV = 'test';
 process.env.TEST_DB_SCHEMA = `bugboard_docs_${randomUUID().replaceAll('-', '')}`;
 process.env.CORS_ALLOWED_ORIGINS = 'http://127.0.0.1:8082,http://localhost:8082';
 const { sequelize, User, Project, Membership, Issue, IssueImage, Comment, Notification } = await import('../../backend/src/models/index.js');
-const { initializeSchema } = await import('../../backend/src/services/schema.js');
 const { hashPassword } = await import('../../backend/src/services/auth.js');
 const { default: api } = await import('../../backend/src/app.js');
 await sequelize.getQueryInterface().createSchema(process.env.TEST_DB_SCHEMA);
-await initializeSchema();
+await sequelize.sync();
 const passwordHash = await hashPassword('DemoPassword123!');
 const users = await Promise.all([
   { fullName: 'Amministratore Demo', email: 'admin@example.test', role: 'ADMIN' },
@@ -34,7 +33,7 @@ for (const project of projects) {
 const items = [
   { title: 'Il login non mostra il messaggio di errore', description: 'Inserendo una password errata, il modulo deve mantenere i dati e indicare che le credenziali non sono valide.\nPassi: aprire Login, inserire email e password errata, premere Sign In.', type: 'BUG', priority: 'HIGH', status: 'IN_PROGRESS' },
   { title: 'Chiarire il significato della priorità', description: 'Quale priorità va usata per un problema che non blocca il lavoro?', type: 'QUESTION', priority: null, status: 'TODO' },
-  { title: 'Aggiornare le istruzioni di avvio', description: 'Aggiungere il comando esplicito per inizializzare lo schema PostgreSQL.', type: 'DOCUMENTATION', priority: 'LOW', status: 'CLOSED' },
+  { title: 'Aggiornare le istruzioni di avvio', description: 'Descrivere la creazione delle tabelle dai modelli Sequelize durante l\'avvio.', type: 'DOCUMENTATION', priority: 'LOW', status: 'CLOSED' },
   { title: 'Mostrare una immagine nella segnalazione', description: 'Permettere di allegare una schermata al momento della creazione della issue.', type: 'FEATURE', priority: 'MEDIUM', status: 'TODO' },
 ];
 const issues = [];

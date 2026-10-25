@@ -1,6 +1,6 @@
+// Compone la barra orizzontale, il contenuto della pagina e il modulo di creazione issue.
 import { useSearchParams } from 'react-router-dom'
 import CreateIssueModal from '../components/CreateIssueModal'
-import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 
 function DashboardLayout({ children, projectId = '' }) {
@@ -16,7 +16,6 @@ function DashboardLayout({ children, projectId = '' }) {
   return (
     <>
       <div className="app-layout">
-        <Sidebar activeProjectId={projectId} />
         <div className="app-main-shell">
           <Topbar />
           <div className="app-content">{children}</div>

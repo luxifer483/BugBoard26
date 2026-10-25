@@ -289,88 +289,7 @@ p {
 
 .app-layout {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 170px minmax(0, 1fr);
   background: #f8fafc;
-}
-
-.app-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 14px 10px;
-  background: #ffffff;
-  border-right: 1px solid #e6ebf2;
-}
-
-.app-sidebar > .app-logo {
-  padding: 8px 6px;
-}
-
-.sidebar-project {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 4px -10px 4px;
-  padding: 12px 14px;
-  border-top: 1px solid #eef2f7;
-  border-bottom: 1px solid #eef2f7;
-  background: #ffffff;
-}
-
-.sidebar-project-icon {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 0.78rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.sidebar-project strong {
-  display: block;
-  color: #334155;
-  font-size: 0.82rem;
-}
-
-.sidebar-project span {
-  display: block;
-  color: #64748b;
-  font-size: 0.72rem;
-}
-
-.sidebar-nav {
-  display: grid;
-  gap: 8px;
-}
-
-.sidebar-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: #334155;
-  font-size: 0.88rem;
-  text-align: left;
-  cursor: pointer;
-}
-
-.sidebar-nav-item.is-active {
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-weight: 600;
-}
-
-.sidebar-nav-icon {
-  font-size: 0.85rem;
 }
 
 .app-main-shell {
@@ -378,47 +297,65 @@ p {
 }
 
 .topbar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 18px;
+  min-height: 80px;
+  padding: 14px 32px;
   background: #ffffff;
   border-bottom: 1px solid #e6ebf2;
 }
 
-.topbar-search {
+.topbar-brand {
+  flex-shrink: 0;
+}
+
+.topbar-navigation {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: min(100%, 390px);
-  padding: 0 12px;
-  border: 1px solid #d7dee8;
+  justify-content: center;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topbar-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
   border-radius: 10px;
-  background: #ffffff;
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.topbar-search-icon {
-  color: #94a3b8;
+.topbar-nav-link:hover,
+.topbar-nav-link.active {
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 
-.topbar-search input {
-  width: 100%;
-  height: 40px;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: #0f172a;
+.topbar-create-user {
+  border: 1px solid #dbe4ef;
 }
 
-.topbar-search input::placeholder {
-  color: #94a3b8;
+.topbar-create-project,
+.topbar-create-project:hover,
+.topbar-create-project.active {
+  color: white;
+  background: #2563eb;
 }
 
 .topbar-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .topbar-notifications {
@@ -426,6 +363,7 @@ p {
 }
 
 .topbar-icon-button {
+  position: relative;
   display: grid;
   place-items: center;
   width: 34px;
@@ -434,6 +372,20 @@ p {
   border-radius: 50%;
   background: transparent;
   font-size: 1rem;
+  color: #475569;
+}
+
+.notification-count {
+  position: absolute;
+  top: -3px;
+  right: -5px;
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 20px;
+  background: #dc2626;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
 }
 
 .topbar-icon-button.is-active {
@@ -674,7 +626,94 @@ button.notification-item:disabled {
 }
 
 .app-content {
-  padding: 24px 22px 30px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 32px 40px;
+}
+
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.page-heading h1 {
+  margin-bottom: 4px;
+  font-size: 2rem;
+}
+
+.page-heading p {
+  color: var(--text-secondary);
+}
+
+.page-heading-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.create-project-page,
+.profile-page {
+  display: grid;
+  gap: 24px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.profile-card {
+  display: flex;
+  align-items: start;
+  flex-wrap: wrap;
+  gap: 28px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: white;
+}
+
+.profile-card-avatar {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.profile-details {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  margin: 0;
+}
+
+.profile-details dt {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.profile-details dd {
+  margin: 4px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.user-list-empty {
+  padding: 20px;
+  color: var(--text-secondary);
+}
+
+.account-management-link {
+  display: inline-block;
+  margin-top: 18px;
+  color: #2563eb;
+  font-size: 0.85rem;
 }
 
 .projects-page {
@@ -1459,6 +1498,10 @@ button.notification-item:disabled {
   border-bottom: 0;
 }
 
+.account-list-item {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
 .user-list-avatar {
   display: grid;
   place-items: center;
@@ -1473,6 +1516,7 @@ button.notification-item:disabled {
 
 .user-list-identity {
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .user-list-identity strong {
@@ -1777,20 +1821,30 @@ button.notification-item:disabled {
     padding-bottom: 28px;
   }
 
-  .login-options,
-  .topbar {
+  .login-options {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .app-layout {
-    grid-template-columns: 1fr;
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 12px 18px;
   }
 
-  .app-sidebar {
-    border-right: 0;
-    border-bottom: 1px solid #e6ebf2;
+  .topbar-brand { grid-column: 1; grid-row: 1; }
+  .topbar-actions { grid-column: 2; grid-row: 1; }
+  .topbar-navigation { grid-column: 1 / -1; grid-row: 2; justify-content: start; }
+  .topbar-nav-link { padding: 8px 10px; font-size: 0.8rem; }
+  .topbar-user > div:first-child { display: none; }
+  .app-content { padding: 24px 18px; }
+  .notifications-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 16px;
   }
+  .topbar-notifications { position: static; }
 
   .issues-filters,
   .projects-stats,

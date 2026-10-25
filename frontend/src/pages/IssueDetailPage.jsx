@@ -54,6 +54,8 @@ function IssueDetailContent({ issueId }) {
   const [isAssigning, setIsAssigning] = useState(false)
   const [members, setMembers] = useState([])
   const [actionError, setActionError] = useState('')
+  const canChangeAssignee = user?.role === 'ADMIN'
+  const canAssignToMe = user?.role === 'USER' && Boolean(issue) && !issue.assignee
   const canChangeStatus = Boolean(user?.id && issue?.assignee?.id
     && String(user.id) === String(issue.assignee.id))
 
@@ -81,9 +83,11 @@ function IssueDetailContent({ issueId }) {
           return
         }
 
-        const membersResponse = await getProjectMembers(issueResponse.project.id)
-        if (!isMounted) return
-        setMembers(membersResponse.items.map((member) => ({ ...member, id: member.userId })))
+        if (canChangeAssignee) {
+          const membersResponse = await getProjectMembers(issueResponse.project.id)
+          if (!isMounted) return
+          setMembers(membersResponse.items.map((member) => ({ ...member, id: member.userId })))
+        }
         setIssue(issueResponse)
         setComments(commentsResponse.items)
       } catch {
@@ -102,7 +106,7 @@ function IssueDetailContent({ issueId }) {
     return () => {
       isMounted = false
     }
-  }, [issueId])
+  }, [issueId, canChangeAssignee])
 
   // Prepara la richiesta di cambio stato soltanto se l'utente e' l'assegnatario.
   async function handleStatusChange(nextStatus) {
@@ -123,15 +127,24 @@ function IssueDetailContent({ issueId }) {
     }
   }
 
+  // Prepara una scelta dell'ADMIN oppure l'autoassegnazione del membro, poi usa l'API protetta.
   async function handleAssigneeChange(assigneeId) {
+    if (!issue || isAssigning || isUpdatingStatus) return
+    if (!canChangeAssignee && (!canAssignToMe || String(assigneeId) !== String(user.id))) return
     setIsAssigning(true)
     setActionError('')
     try {
-      const assignee = members.find((member) => member.id === Number(assigneeId)) || null
+      const assignee = canChangeAssignee
+        ? members.find((member) => String(member.id) === String(assigneeId)) || null
+        : user
       setIssue(await updateIssueAssignee(issue.id, assignee))
       refreshNotifications()
     } catch (error) {
       setActionError(error.response?.data?.message || 'Unable to update the assignee.')
+      // Se un altro membro ha vinto la corsa, mostra subito l'assegnazione effettiva.
+      if (error.response?.data?.code === 'ISSUE_ALREADY_ASSIGNED') {
+        try { setIssue(await getIssueById(issue.id)) } catch { /* Conserva il messaggio e permette di riprovare. */ }
+      }
     } finally {
       setIsAssigning(false)
     }
@@ -215,10 +228,13 @@ function IssueDetailContent({ issueId }) {
               <IssueInfoCard
                 issue={issue}
                 canChangeStatus={canChangeStatus}
+                canChangeAssignee={canChangeAssignee}
+                canAssignToMe={canAssignToMe}
                 onStatusChange={handleStatusChange}
                 isUpdatingStatus={isUpdatingStatus}
                 members={members}
                 onAssigneeChange={handleAssigneeChange}
+                onAssignToMe={() => handleAssigneeChange(user.id)}
                 isAssigning={isAssigning}
               />
             </div>

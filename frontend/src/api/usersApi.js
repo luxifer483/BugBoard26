@@ -23,11 +23,16 @@ export async function getUsers() {
 
 export async function createUser(payload) {
   if (USE_MOCK_API) {
-    return delay({
-      id: Date.now(),
+    const user = {
+      id: Math.max(0, ...mockUsers.map((item) => item.id)) + 1,
       avatarUrl: '',
-      ...payload,
-    })
+      fullName: payload.fullName.trim(),
+      email: payload.email.trim().toLowerCase(),
+      role: payload.role,
+      createdAt: new Date().toISOString(),
+    }
+    mockUsers.push(user)
+    return delay(user)
   }
 
   const { data } = await apiClient.post('/users', payload)

@@ -1,8 +1,10 @@
+// Mostra la navigazione globale, le azioni ADMIN, le notifiche e il menu del proprio profilo.
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
 import { formatRelativeDate, getInitials } from '../utils/formatters'
+import AppLogo from './AppLogo'
 
 function Topbar() {
   const navigate = useNavigate()
@@ -63,14 +65,23 @@ function Topbar() {
 
   return (
     <header className="topbar">
-      <label className="topbar-search" aria-label="Search issues">
-        <span className="topbar-search-icon" aria-hidden="true">
-          o
-        </span>
-        <input type="search" placeholder="Search issues..." />
-      </label>
+      <Link className="topbar-brand" to={ROUTES.projects} aria-label="BugBoard26 home">
+        <AppLogo size="medium" />
+      </Link>
 
-      <div className="topbar-actions">
+      <nav className="topbar-navigation" aria-label="Primary navigation">
+        <NavLink className="topbar-nav-link" to={ROUTES.projects} end>Projects</NavLink>
+        {user?.role === 'ADMIN' ? (
+          <>
+            <NavLink className="topbar-nav-link" to={ROUTES.users}>Users</NavLink>
+            <Link className="topbar-nav-link topbar-create-user" to={`${ROUTES.users}?create=1`}>
+              <span aria-hidden="true">+</span> Create user
+            </Link>
+            <NavLink className="topbar-nav-link topbar-create-project" to={ROUTES.createProject}>
+              <span aria-hidden="true">+</span> Create project
+            </NavLink>
+          </>
+        ) : null}
         <div className="topbar-notifications" ref={notificationsRef}>
           <button
             aria-expanded={isNotificationsOpen}
@@ -81,7 +92,12 @@ function Topbar() {
             onClick={handleToggleNotifications}
             type="button"
           >
-            {isLoadingNotifications ? '...' : `!${notifications.unreadCount ? ` ${notifications.unreadCount}` : ''}`}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+              <path d="M10 21h4" />
+            </svg>
+            {notifications.unreadCount > 0 ? <span className="notification-count">{notifications.unreadCount}</span> : null}
           </button>
 
           {isNotificationsOpen ? (
@@ -155,10 +171,9 @@ function Topbar() {
             </section>
           ) : null}
         </div>
-        <button className="topbar-icon-button" type="button" aria-label="Settings">
-          *
-        </button>
+      </nav>
 
+      <div className="topbar-actions">
         <div className="topbar-profile" ref={profileRef}>
           <button
             aria-expanded={isProfileOpen}

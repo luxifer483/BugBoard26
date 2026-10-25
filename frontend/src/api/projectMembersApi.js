@@ -26,10 +26,17 @@ export async function getProjectMembers(projectId) {
 
 export async function addExistingUserToProject(payload) {
   if (USE_MOCK_API) {
-    return delay({
+    const user = mockUsers.find((item) => item.id === payload.userId)
+    const member = {
       joinedAt: new Date().toISOString(),
-      ...payload,
-    })
+      projectId: payload.projectId,
+      userId: payload.userId,
+      fullName: user?.fullName,
+      email: user?.email,
+      role: user?.role,
+    }
+    mockProjectMembers.push(member)
+    return delay(member)
   }
 
   const { data } = await apiClient.post(`/projects/${payload.projectId}/members`, { userId: payload.userId })
@@ -38,6 +45,8 @@ export async function addExistingUserToProject(payload) {
 
 export async function removeUserFromProject(payload) {
   if (USE_MOCK_API) {
+    const index = mockProjectMembers.findIndex((member) => member.projectId === payload.projectId && member.userId === payload.userId)
+    if (index !== -1) mockProjectMembers.splice(index, 1)
     return delay({
       removed: true,
       ...payload,

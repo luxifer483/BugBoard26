@@ -4,7 +4,7 @@ import { prepareImage } from './images.js';
 import { requireProject, requireIssue, requireAssignee } from './access.js';
 import { loadIssueResponse } from './responses.js';
 import { notify, notifyAssignment, notifyParticipants, notifyResolution } from './notifications.js';
-import { ApiError } from '../middleware/errors.js';
+import { ApiError, forbidden } from '../middleware/errors.js';
 
 // Aggiorna la data di attivita' del progetto senza modificare gli altri campi.
 export function touchProject(projectId, transaction) {
@@ -15,6 +15,9 @@ export function touchProject(projectId, transaction) {
 export async function createIssue(user, input, file) {
   return sequelize.transaction(async (transaction) => {
     await requireProject(user, input.projectId, transaction);
+    if (user.role !== 'ADMIN' && input.assigneeId !== null && String(input.assigneeId) !== String(user.id)) {
+      throw forbidden();
+    }
     await requireAssignee(input.projectId, input.assigneeId, transaction);
     const image = await prepareImage(file);
     const issue = await Issue.create({ ...input, reporterId: user.id, status: 'TODO' }, { transaction });
@@ -50,12 +53,19 @@ export async function changeStatus(user, issueId, status) {
   });
 }
 
-// Salva il nuovo assegnatario, oppure rimuove l'assegnazione quando viene passato null.
+// Un ADMIN gestisce le assegnazioni; un USER puo' prendere solo una issue ancora libera.
 export async function changeAssignee(user, issueId, assigneeId) {
   return sequelize.transaction(async (transaction) => {
+    // Il blocco acquisito da requireIssue serializza anche due autoassegnazioni contemporanee.
     const issue = await requireIssue(user, issueId, transaction);
+    if (user.role !== 'ADMIN') {
+      if (assigneeId === null || String(assigneeId) !== String(user.id)) throw forbidden();
+      if (issue.assigneeId !== null) {
+        throw new ApiError(409, 'ISSUE_ALREADY_ASSIGNED', 'This issue already has an assignee. Refresh its details.');
+      }
+    }
     await requireAssignee(issue.projectId, assigneeId, transaction);
-    if ((issue.assigneeId === null ? null : String(issue.assigneeId)) === assigneeId) {
+    if ((issue.assigneeId === null ? null : String(issue.assigneeId)) === (assigneeId === null ? null : String(assigneeId))) {
       return loadIssueResponse(issue.id, transaction);
     }
     await issue.update({ assigneeId, updatedAt: new Date() }, { transaction });

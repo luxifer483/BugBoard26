@@ -16,12 +16,11 @@ Per avviare anche backend e PostgreSQL con Docker Desktop:
 
 ```powershell
 docker compose -f .\infra\docker\docker-compose.yml build backend
-docker compose -f .\infra\docker\docker-compose.yml run --rm backend npm run db:init
 docker compose -f .\infra\docker\docker-compose.yml up -d
 ```
 
-L'inizializzazione e' esplicita e crea soltanto le tabelle mancanti. Con schema gia' completo
-basta `up -d --build`. Il backend ora usa Node.js/Express e Sequelize; gli endpoint restano gli stessi.
+Il backend crea automaticamente le tabelle mancanti dai modelli Sequelize durante l'avvio.
+Gli endpoint e i collegamenti del frontend restano gli stessi.
 
 Account iniziale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
 
@@ -39,10 +38,17 @@ I dati mock modificati restano in memoria fino al ricaricamento della pagina.
 
 ## Funzionalita'
 
-Login e ripristino sessione, progetti, gestione utenti/membership per ADMIN,
-creazione e assegnazione issue, filtri e statistiche, avanzamento OPEN -> IN_PROGRESS -> CLOSED,
+La home mostra la panoramica dei progetti. La barra orizzontale contiene Projects, le azioni
+Users/Create user/Create project per ADMIN e le notifiche; il profilo e raggiungibile dal menu dell'avatar.
+`/users` gestisce gli account globali: crearne uno non lo aggiunge a un progetto.
+`/projects/:projectId/members` permette di scegliere account esistenti da aggiungere al team.
+Il ruolo USER/ADMIN e globale e la rimozione da un progetto non cancella l'account.
+
+Login e ripristino sessione, progetti, creazione e assegnazione issue, filtri e statistiche,
+avanzamento TODO -> IN_PROGRESS -> CLOSED,
 commenti e notifiche personali con stato letto. Le notifiche vengono aggiornate ogni 30 secondi,
-all'apertura del pannello e dopo le operazioni. Upload e modifica del profilo non sono implementati.
+all'apertura del pannello e dopo le operazioni. Le issue ammettono una immagine facoltativa.
+Il profilo mostra i dati dell'account autenticato; la modifica del profilo non e implementata.
 
 `pages/` contiene le schermate, `components/` gli elementi riutilizzabili,
 `layouts/` la struttura comune, `api/` gli adapter HTTP/mock, `context/` e `hooks/`

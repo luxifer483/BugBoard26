@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import RoleSelector from './RoleSelector'
 
-function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
+// Raccoglie i dati di un account globale; qui non viene scelta alcuna appartenenza a progetti.
+function UserForm({ onCreateUser, onCancel, isSubmitting }) {
   const [newUser, setNewUser] = useState({
     fullName: '',
     email: '',
     password: '',
     role: 'USER',
   })
-  const [existingEmail, setExistingEmail] = useState('')
 
   function handleNewUserChange(event) {
     const { name, value } = event.target
@@ -30,16 +30,11 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
     })
   }
 
-  async function handleAddExistingUser(event) {
-    event.preventDefault()
-    if (!await onAddExistingUser(existingEmail)) return
-    setExistingEmail('')
-  }
-
   return (
     <aside className="user-management-forms">
       <section className="user-form-card" aria-label="Create new user">
-        <h2>Create New User</h2>
+        <h2>Create account</h2>
+        <p>Choose a User or Admin account.</p>
 
         <form className="user-form" onSubmit={handleCreateUser}>
           <label>
@@ -93,31 +88,12 @@ function UserForm({ onCreateUser, onAddExistingUser, isSubmitting }) {
           </div>
 
           <button className="user-form-submit" type="submit" disabled={isSubmitting}>
-            + Create User
+            {isSubmitting ? 'Creating...' : 'Create account'}
           </button>
         </form>
       </section>
 
-      <section className="user-form-card" aria-label="Add existing user">
-        <h2>Add Existing User</h2>
-        <p>Add an existing user to this project</p>
-
-        <form className="user-form" onSubmit={handleAddExistingUser}>
-          <label>
-            <span>User Email</span>
-            <input
-              type="email"
-              placeholder="user@example.com"
-              value={existingEmail}
-              onChange={(event) => setExistingEmail(event.target.value)}
-              required
-            />
-          </label>
-          <button className="user-form-submit is-green" type="submit" disabled={isSubmitting}>
-            + Add User
-          </button>
-        </form>
-      </section>
+      {onCancel ? <button className="secondary-button" type="button" onClick={onCancel} disabled={isSubmitting}>Cancel</button> : null}
     </aside>
   )
 }

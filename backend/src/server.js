@@ -1,14 +1,12 @@
-// Verifica PostgreSQL, crea se necessario l'admin di sviluppo e avvia l'ascolto HTTP.
+// Collega PostgreSQL, crea le tabelle mancanti dai modelli e avvia le API con l'admin iniziale.
 import app from './app.js';
-import { sequelize, User, Project, Membership, Issue, IssueImage, Comment, Notification } from './models/index.js';
+import { sequelize } from './models/index.js';
 import { bootstrapAdmin } from './services/bootstrap.js';
 
-// Legge le tabelle per rilevare uno schema mancante senza crearlo o alterarlo.
+// Prepara le tabelle definite in models/index.js, senza cancellare o alterare quelle gia' presenti.
 async function start() {
   await sequelize.authenticate();
-  for (const model of [User, Project, Membership, Issue, IssueImage, Comment, Notification]) {
-    await model.findOne({ limit: 1 });
-  }
+  await sequelize.sync();
   await bootstrapAdmin();
   const port = Number(process.env.SERVER_PORT || process.env.PORT || 8081);
   const server = app.listen(port, () => console.log(`BugBoard26 API: http://localhost:${server.address().port}/api`));
@@ -31,7 +29,7 @@ async function start() {
 
 start().catch(async (error) => {
   console.error(`Backend startup failed: ${error.message}`);
-  console.error('Check PostgreSQL and .env. For a new database run npm run db:init explicitly.');
+  console.error('Check the PostgreSQL connection and backend/.env.');
   await sequelize.close();
   process.exitCode = 1;
 });

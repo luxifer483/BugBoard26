@@ -6,6 +6,8 @@ import viteConfig from './vite.config.js'
 export default mergeConfig(viteConfig, defineConfig({
   test: {
     environment: 'jsdom',
+    // Evita i timeout di avvio dei processi separati riscontrati su Windows.
+    pool: 'threads',
     maxWorkers: 1,
     setupFiles: ['./test/setup.js'],
     include: ['test/**/*.test.{js,jsx}'],

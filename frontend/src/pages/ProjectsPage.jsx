@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getProjectDashboardRoute } from '../config/routeConfig'
 import DashboardLayout from '../layouts/DashboardLayout'
-import { createProject, getProjects } from '../api/projectsApi'
+import { getProjects } from '../api/projectsApi'
 import { useAuth } from '../hooks/useAuth'
 import { formatRelativeDate, getProjectAccent } from '../utils/formatters'
 
@@ -11,9 +11,6 @@ function ProjectsPage() {
   const [projects, setProjects] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [projectDraft, setProjectDraft] = useState({ name: '', description: '' })
-  const [isCreating, setIsCreating] = useState(false)
-  const [createError, setCreateError] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -45,21 +42,6 @@ function ProjectsPage() {
       isMounted = false
     }
   }, [])
-
-  async function handleCreateProject(event) {
-    event.preventDefault()
-    setIsCreating(true)
-    setCreateError('')
-    try {
-      const created = await createProject(projectDraft)
-      setProjects((current) => [created, ...current])
-      setProjectDraft({ name: '', description: '' })
-    } catch (error) {
-      setCreateError(error.response?.data?.message || 'Unable to create the project.')
-    } finally {
-      setIsCreating(false)
-    }
-  }
 
   const stats = [
     {
@@ -113,36 +95,12 @@ function ProjectsPage() {
           ))}
         </section>
 
-        {user?.role === 'ADMIN' ? (
-          <section className="user-form-card project-create-card" aria-label="Create project">
-            <h2>Create Project</h2>
-            <form onSubmit={handleCreateProject}>
-              <div className="form-field-grid">
-                <label className="form-field">
-                  <span>Name</span>
-                  <input required maxLength={120} value={projectDraft.name}
-                    onChange={(event) => setProjectDraft((draft) => ({ ...draft, name: event.target.value }))} />
-                </label>
-                <label className="form-field">
-                  <span>Description</span>
-                  <input required maxLength={2000} value={projectDraft.description}
-                    onChange={(event) => setProjectDraft((draft) => ({ ...draft, description: event.target.value }))} />
-                </label>
-              </div>
-              {createError ? <p role="alert" className="status-message is-error">{createError}</p> : null}
-              <button className="primary-button" type="submit" disabled={isCreating || isLoading || Boolean(errorMessage)}>
-                {isCreating ? 'Creating...' : 'Create Project'}
-              </button>
-            </form>
-          </section>
-        ) : null}
-
         <section className="projects-grid" aria-label="Projects list">
           {isLoading ? <p className="status-message">Loading projects...</p> : null}
           {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
           {!isLoading && !errorMessage && !projects.length ? (
             <p className="status-message">{user?.role === 'ADMIN'
-              ? 'No projects yet. Create your first project above.'
+              ? 'No projects yet. Create a project to get started.'
               : 'You do not belong to any projects yet. Contact an administrator.'}</p>
           ) : null}
           {!isLoading && !errorMessage

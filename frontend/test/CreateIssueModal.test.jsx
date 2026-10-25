@@ -11,17 +11,17 @@ vi.mock('../src/api/issuesApi', () => ({ createIssue: vi.fn() }))
 vi.mock('../src/api/projectMembersApi', () => ({ getProjectMembers: vi.fn() }))
 
 beforeEach(() => {
-  getProjectMembers.mockResolvedValue({ items: [{ userId: 7, fullName: 'Team member' }] })
+  getProjectMembers.mockResolvedValue({ items: [{ userId: 1, fullName: 'Current user' }, { userId: 7, fullName: 'Team member' }] })
   createIssue.mockResolvedValue({ id: 12 })
 })
 
 // Apre il modulo con una sessione e riempie soltanto i campi obbligatori.
-async function openForm() {
+async function openForm(role = 'ADMIN') {
   const onClose = vi.fn()
   const onIssueCreated = vi.fn()
   render(
     <MemoryRouter>
-      <AuthContext.Provider value={{ user: { id: 1, role: 'USER' } }}>
+      <AuthContext.Provider value={{ user: { id: 1, role } }}>
         <Routes>
           <Route path="/" element={<CreateIssueModal isOpen projectId={3} onClose={onClose} onIssueCreated={onIssueCreated} />} />
           <Route path="/issues/:id" element={<p>Issue detail</p>} />
@@ -29,7 +29,7 @@ async function openForm() {
       </AuthContext.Provider>
     </MemoryRouter>,
   )
-  await screen.findByRole('option', { name: 'Team member' })
+  await screen.findByRole('option', { name: 'Current user' })
   fireEvent.change(screen.getByLabelText('Title *'), { target: { value: ' Broken button ' } })
   fireEvent.change(screen.getByLabelText('Description *'), { target: { value: ' Steps to reproduce ' } })
   fireEvent.change(screen.getByLabelText('Issue Type *'), { target: { value: 'BUG' } })
@@ -101,7 +101,7 @@ test('keeps entered text and the image when the backend rejects the request', as
 
 function renderModal(properties = {}) {
   const props = { isOpen: true, projectId: 3, onClose: vi.fn(), ...properties }
-  const element = (next) => <MemoryRouter><AuthContext.Provider value={{ user: { id: 1 } }}>
+  const element = (next) => <MemoryRouter><AuthContext.Provider value={{ user: { id: 1, role: 'ADMIN' } }}>
     <CreateIssueModal {...next} />
   </AuthContext.Provider></MemoryRouter>
   const view = render(element(props))
@@ -156,4 +156,17 @@ test('clearing the file chooser removes the selection without an error', async (
   fireEvent.change(input, { target: { files: [] } })
   expect(screen.queryByText('a.png')).not.toBeInTheDocument()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})
+
+// Verifica che un USER possa creare issue senza assegnatario oppure assegnate a se stesso, senza altri nomi nel menu.
+test.each(['', '1'])('USER creation only offers self or unassigned (choice %s)', async (assigneeId) => {
+  await openForm('USER')
+  expect(screen.queryByRole('option', { name: 'Team member' })).not.toBeInTheDocument()
+  expect(screen.getByLabelText('Assignee').options).toHaveLength(2)
+  fireEvent.change(screen.getByLabelText('Assignee'), { target: { value: assigneeId } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create Issue' }))
+  await screen.findByText('Issue detail')
+  expect(createIssue).toHaveBeenCalledWith(expect.objectContaining({
+    assignee: assigneeId ? expect.objectContaining({ id: 1 }) : null,
+  }))
 })

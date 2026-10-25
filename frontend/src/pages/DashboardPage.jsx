@@ -1,6 +1,8 @@
+// Mostra le issue del progetto, i filtri e le operazioni consentite all'utente.
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ROUTES } from '../config/routeConfig'
+import { getProjectCreateIssueRoute, getProjectMembersRoute, ROUTES } from '../config/routeConfig'
+import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { getIssues } from '../api/issuesApi'
 import { getProjectById } from '../api/projectsApi'
@@ -27,6 +29,7 @@ function formatIssueCount(count) {
 
 function DashboardPage() {
   const { projectId } = useParams()
+  const { user } = useAuth()
   const [project, setProject] = useState(null)
   const [issues, setIssues] = useState([])
   const [filters, setFilters] = useState(EMPTY_FILTERS)
@@ -69,7 +72,7 @@ function DashboardPage() {
         setIssues(issuesResponse.items)
       } catch {
         if (isMounted) {
-          setErrorMessage('Unable to load the selected project dashboard.')
+          setErrorMessage('Unable to load the selected project issues.')
         }
       } finally {
         if (isMounted) {
@@ -147,25 +150,29 @@ function DashboardPage() {
   }
 
   if (errorMessage) {
-    filterSummary = 'Issue filters will be available once the dashboard loads correctly.'
+    filterSummary = 'Issue filters will be available once the project loads correctly.'
   }
 
   return (
     <DashboardLayout projectId={projectId}>
       <main className="projects-page">
-        <section className="projects-hero">
-          <h1>Dashboard</h1>
-          <p>
-            {project
-              ? `${project.name} issue overview`
-              : 'Select a project to open its dashboard'}
-          </p>
+        <section className="projects-hero page-heading">
+          <div>
+            <h1>{project?.name || 'Project issues'}</h1>
+            <p>Track issues and collaborate with your team</p>
+          </div>
+          {projectId ? (
+            <div className="page-heading-actions">
+              {user?.role === 'ADMIN' ? <Link className="secondary-button" to={getProjectMembersRoute(projectId)}>Project members</Link> : null}
+              <Link className="primary-button" to={getProjectCreateIssueRoute(projectId)}>Create issue</Link>
+            </div>
+          ) : null}
         </section>
 
         {!projectId ? (
           <section className="dashboard-empty">
             <p className="status-message">
-              Open a project from the projects page to see its issues dashboard.
+              Open a project to see its issues.
             </p>
             <Link className="dashboard-link" to={ROUTES.projects}>
               Go to projects
@@ -261,7 +268,7 @@ function DashboardPage() {
             </section>
 
             <section className="issues-list" aria-label="Selected project issues">
-              {isLoading ? <p className="status-message">Loading dashboard...</p> : null}
+              {isLoading ? <p className="status-message">Loading issues...</p> : null}
               {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
               {!isLoading && !errorMessage && !filteredIssues.length ? (
                 <section className="dashboard-empty issues-empty">

@@ -73,6 +73,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
 
         const nextOptions = membersResponse.items
           .map((member) => ({ ...member, id: member.userId }))
+          .filter((member) => user?.role === 'ADMIN' || String(member.id) === String(user?.id))
 
         setAssigneeOptions(nextOptions)
       } catch {
@@ -92,7 +93,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
     return () => {
       isMounted = false
     }
-  }, [isOpen, projectId])
+  }, [isOpen, projectId, user?.id, user?.role])
 
   if (!isOpen) {
     return null
@@ -142,7 +143,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
 
     try {
       const assignee =
-        assigneeOptions.find((member) => member.id === Number(formState.assigneeId)) || null
+        assigneeOptions.find((member) => String(member.id) === formState.assigneeId) || null
 
       const createdIssue = await createIssue({
         title: formState.title.trim(),

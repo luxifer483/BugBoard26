@@ -5,9 +5,11 @@ import CreateIssueRedirectPage from '../pages/CreateIssueRedirectPage'
 import DashboardPage from '../pages/DashboardPage'
 import IssueDetailPage from '../pages/IssueDetailPage'
 import LoginPage from '../pages/LoginPage'
-import PlaceholderPage from '../pages/PlaceholderPage'
+import ProfilePage from '../pages/ProfilePage'
+import CreateProjectPage from '../pages/CreateProjectPage'
+import ProjectMembersPage from '../pages/ProjectMembersPage'
 import ProjectsPage from '../pages/ProjectsPage'
-import UserManagementPage from '../pages/UserManagementPage'
+import UsersPage from '../pages/UsersPage'
 import RouteGuard from '../security/RouteGuard'
 
 function AppRouter() {
@@ -38,9 +40,7 @@ function AppRouter() {
       <Route
         path={ROUTES.dashboard}
         element={
-          <RouteGuard>
-            <DashboardPage />
-          </RouteGuard>
+          <Navigate to={ROUTES.projects} replace />
         }
       />
       <Route
@@ -60,13 +60,18 @@ function AppRouter() {
         }
       />
       <Route
-        path={`${ROUTES.projects}/:projectId/users`}
+        path={ROUTES.users}
         element={
           <RouteGuard>
-            <UserManagementPage />
+            <UsersPage />
           </RouteGuard>
         }
       />
+      <Route path={ROUTES.createProject} element={<RouteGuard><CreateProjectPage /></RouteGuard>} />
+      <Route path={`${ROUTES.projects}/:projectId/members`}
+        element={<RouteGuard><ProjectMembersPage /></RouteGuard>} />
+      <Route path={`${ROUTES.projects}/:projectId/users`}
+        element={<RouteGuard><ProjectMembersPage /></RouteGuard>} />
       <Route
         path={`${ROUTES.createIssue}/:projectId`}
         element={
@@ -79,7 +84,7 @@ function AppRouter() {
         path={ROUTES.profile}
         element={
           <RouteGuard>
-            <PlaceholderPage type="profile" />
+            <ProfilePage />
           </RouteGuard>
         }
       />

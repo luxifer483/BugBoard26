@@ -19,17 +19,17 @@ function reference(field, allowNull = false) {
 }
 function text(length, field) {
   return { type: DataTypes.STRING(length), allowNull: false, ...(field ? { field } : {}),
-    validate: { notEmpty: true, len: [1, length] } };
+    validate: { notEmpty: true, is: /\S/, len: [1, length] } };
 }
 function choice(values, defaultValue) {
-  return { type: DataTypes.STRING(20), allowNull: false, validate: { isIn: [values] },
+  return { type: DataTypes.ENUM(...values), allowNull: false, validate: { isIn: [values] },
     ...(defaultValue ? { defaultValue } : {}) };
 }
 
 export class User extends Model {}
 User.init({
   id: id(), fullName: text(120, 'full_name'),
-  email: { ...text(254), unique: true, validate: { isEmail: true, len: [1, 254] } },
+  email: { ...text(254), unique: true, validate: { isEmail: true, isLowercase: true, len: [1, 254] } },
   passwordHash: text(100, 'password_hash'), role: choice(ROLES), createdAt: date('created_at'),
 }, { sequelize, tableName: 'app_users', modelName: 'User' });
 
@@ -44,7 +44,10 @@ export class Membership extends Model {}
 Membership.init({
   id: id(), projectId: reference('project_id'), userId: reference('user_id'), joinedAt: date('joined_at'),
 }, { sequelize, tableName: 'project_memberships', modelName: 'Membership',
-  indexes: [{ unique: true, fields: ['project_id', 'user_id'], name: 'uk_membership_project_user' }] });
+  indexes: [
+    { unique: true, fields: ['project_id', 'user_id'], name: 'uk_membership_project_user' },
+    { fields: ['user_id'], name: 'idx_membership_user' },
+  ] });
 
 export class Issue extends Model {}
 Issue.init({
@@ -53,14 +56,23 @@ Issue.init({
   type: choice(ISSUE_TYPES), priority: { ...choice(ISSUE_PRIORITIES), allowNull: true },
   status: choice(ISSUE_STATUSES, 'TODO'),
   createdAt: date('created_at'), updatedAt: date('updated_at'),
-}, { sequelize, tableName: 'issues', modelName: 'Issue' });
+}, { sequelize, tableName: 'issues', modelName: 'Issue', indexes: [
+  { name: 'idx_issue_project', fields: ['project_id', { name: 'updated_at', order: 'DESC' }, { name: 'id', order: 'DESC' }] },
+] });
 
 // Tiene i byte separati dalla issue: le liste caricano soltanto i metadati dell'immagine.
 export class IssueImage extends Model {}
 IssueImage.init({
   issueId: { ...reference('issue_id'), primaryKey: true },
   contentType: choice(['image/png', 'image/jpeg', 'image/webp']),
-  data: { type: DataTypes.BLOB, allowNull: false },
+  data: { type: DataTypes.BLOB, allowNull: false, validate: {
+    // Controlla i byte da salvare; tipo reale e contenuto dell'immagine sono verificati dal servizio immagini.
+    validSize(value) {
+      if (!Buffer.isBuffer(value) || value.length < 1 || value.length > 5 * 1024 * 1024) {
+        throw new Error('The image must contain between 1 byte and 5 MB.');
+      }
+    },
+  } },
 }, { sequelize, tableName: 'issue_images', modelName: 'IssueImage',
   underscored: true });
 
@@ -68,7 +80,9 @@ export class Comment extends Model {}
 Comment.init({
   id: id(), issueId: reference('issue_id'), authorId: reference('author_id'),
   content: text(5000), createdAt: date('created_at'),
-}, { sequelize, tableName: 'issue_comments', modelName: 'Comment' });
+}, { sequelize, tableName: 'issue_comments', modelName: 'Comment', indexes: [
+  { name: 'idx_comment_issue', fields: ['issue_id', 'created_at', 'id'] },
+] });
 
 export class Notification extends Model {}
 Notification.init({
@@ -76,20 +90,24 @@ Notification.init({
   message: text(500), kind: choice(['ACTIVITY', 'RESOLUTION'], 'ACTIVITY'),
   read: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   createdAt: date('created_at'),
-}, { sequelize, tableName: 'notifications', modelName: 'Notification' });
+}, { sequelize, tableName: 'notifications', modelName: 'Notification', indexes: [
+  { name: 'idx_notification_recipient', fields: ['recipient_id', { name: 'created_at', order: 'DESC' }, { name: 'id', order: 'DESC' }] },
+] });
 
-// Collega gli oggetti, usando gli stessi nomi di chiave esterna del vecchio schema.
-Membership.belongsTo(Project, { as: 'project', foreignKey: 'projectId' });
-Membership.belongsTo(User, { as: 'user', foreignKey: 'userId' });
-Project.hasMany(Membership, { as: 'memberships', foreignKey: 'projectId' });
-Issue.belongsTo(Project, { as: 'project', foreignKey: 'projectId' });
-Issue.belongsTo(User, { as: 'reporter', foreignKey: 'reporterId' });
-Issue.belongsTo(User, { as: 'assignee', foreignKey: 'assigneeId' });
-Issue.hasOne(IssueImage, { as: 'image', foreignKey: 'issueId' });
-IssueImage.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId' });
-Comment.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId' });
-Comment.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
-Notification.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId' });
-Notification.belongsTo(User, { as: 'recipient', foreignKey: 'recipientId' });
+// Definisce le chiavi esterne: i dati figli seguono progetto/issue; gli account referenziati restano protetti.
+const cascade = { onDelete: 'CASCADE', onUpdate: 'RESTRICT' };
+const restrict = { onDelete: 'RESTRICT', onUpdate: 'RESTRICT' };
+Membership.belongsTo(Project, { as: 'project', foreignKey: 'projectId', ...cascade });
+Membership.belongsTo(User, { as: 'user', foreignKey: 'userId', ...restrict });
+Project.hasMany(Membership, { as: 'memberships', foreignKey: 'projectId', ...cascade });
+Issue.belongsTo(Project, { as: 'project', foreignKey: 'projectId', ...cascade });
+Issue.belongsTo(User, { as: 'reporter', foreignKey: 'reporterId', ...restrict });
+Issue.belongsTo(User, { as: 'assignee', foreignKey: 'assigneeId', ...restrict });
+Issue.hasOne(IssueImage, { as: 'image', foreignKey: 'issueId', ...cascade });
+IssueImage.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId', ...cascade });
+Comment.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId', ...cascade });
+Comment.belongsTo(User, { as: 'author', foreignKey: 'authorId', ...restrict });
+Notification.belongsTo(Issue, { as: 'issue', foreignKey: 'issueId', ...cascade });
+Notification.belongsTo(User, { as: 'recipient', foreignKey: 'recipientId', ...restrict });
 
 export { sequelize };

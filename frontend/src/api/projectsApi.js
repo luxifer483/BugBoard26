@@ -1,6 +1,7 @@
+// Prepara le richieste dei progetti senza attribuire privilegi al loro creatore.
 import apiClient from './client'
 import { USE_MOCK_API } from '../config/apiConfig'
-import { mockProjects } from './mockData'
+import { mockProjects, mockProjectMembers, mockUser } from './mockData'
 
 // Il modulo progetti espone la stessa interfaccia sia con mock sia con backend reale.
 function delay(data) {
@@ -37,11 +38,12 @@ export async function getProjectById(projectId) {
 export async function createProject(payload) {
   if (USE_MOCK_API) {
     const project = {
-      id: Date.now(), ...payload, memberCount: 0,
+      id: Date.now(), name: payload.name, description: payload.description, memberCount: 1,
       totalIssues: 0, openIssues: 0, closedIssues: 0,
       updatedAt: new Date().toISOString(),
     }
     mockProjects.unshift(project)
+    mockProjectMembers.push({ projectId: project.id, userId: mockUser.id, role: mockUser.role, joinedAt: project.updatedAt })
     return delay(project)
   }
   const { data } = await apiClient.post('/projects', payload)

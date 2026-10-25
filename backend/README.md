@@ -12,16 +12,16 @@ docker compose -f .\infra\docker\docker-compose.yml up -d postgres
 cd backend
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm.cmd ci
-npm.cmd run db:init
 npm.cmd run dev
 ```
 
 Copiare `.env.example` solo alla prima configurazione: non sovrascrivere un `.env` gia' personalizzato.
 Controllare DB_PORT e credenziali rispetto a `infra/docker/.env`; la porta prevista e' 5433.
-`db:init` crea le tabelle mancanti e applica gli aggiornamenti SQL versionati in una sola transazione.
-Eseguirlo anche sul DB esistente prima di avviare questa versione: rende facoltativa la priorita',
-converte OPEN in TODO e aggiunge il tipo delle notifiche, senza eliminare dati.
-Si puo' ripetere. L'avvio del server non modifica automaticamente lo schema.
+Il server verifica PostgreSQL ed esegue `sequelize.sync()`: crea le tabelle mancanti a partire
+da `src/models/index.js`, come nel progetto di riferimento RegexRiddle.
+Campi, tipi ammessi, chiavi esterne, unicita' e indici sono definiti nei modelli Sequelize.
+Non usa `force` o `alter`: le tabelle esistenti e i loro dati vengono conservati.
+Il semplice `sync()` non aggiorna colonne gia' presenti quando si modifica un modello.
 Per un avvio senza riavvio automatico: `npm.cmd start`.
 API: `http://localhost:8081/api`. Il frontend continua a usare gli stessi endpoint e JSON.
 
@@ -41,12 +41,9 @@ Per un database nuovo con NODE_ENV=production occorre predisporre l'admin prima 
 backend/
   package.json, package-lock.json, .env.example
   Dockerfile, run-dev.ps1, test-docker.ps1
-  scripts/init-db.js           comando esplicito di inizializzazione
-  sql/001-initial.sql          schema identico alle tabelle usate da Spring
-  sql/002-issue-requirements.sql priorita' facoltativa, TODO e notifiche di risoluzione
   src/
     app.js                    prepara Express, senza metterlo in ascolto
-    server.js                 controlla PostgreSQL e avvia HTTP
+    server.js                 controlla PostgreSQL, crea le tabelle mancanti e avvia HTTP
     routes.js                 elenco centrale degli endpoint e relativi middleware
     config/database.js        configurazione Sequelize
     models/index.js           sette modelli e relazioni, senza scritture automatiche
@@ -69,7 +66,6 @@ backend/
       responses.js            preparazione dei JSON attesi dal frontend
       validation.js           controlli dei dati ricevuti
       bootstrap.js            admin iniziale di sviluppo
-      schema.js               inizializzazione richiesta da db:init
   test/
     setup.js                  ambiente e configurazione QUnit
     unit/                     38 test unitari, senza PostgreSQL
@@ -78,7 +74,7 @@ backend/
       matchesPassword.test.js confronto BCrypt
       notify.test.js          destinatari delle notifiche
       images.test.js          decodifica e controlli immagini
-    integration/api.test.js   52 test HTTP su PostgreSQL isolato
+    integration/api.test.js   57 test HTTP su PostgreSQL isolato
 ```
 
 `models/index.js` e' abbastanza piccolo per tenere insieme le sette tabelle.
@@ -126,13 +122,14 @@ se JWT_SECRET, issuer e audience restano uguali. Ruolo e account vengono riletti
 Gli hash BCrypt gia' presenti, incluso il formato $2a$, vengono verificati senza reset delle password.
 Logout e ripristino sessione restano gestiti dal frontend come prima; non e' stato aggiunto refresh o revoca token.
 
-I modelli specificano gli stessi nomi delle tabelle e colonne di Spring, con timestamp gestiti esplicitamente.
-`sql/001-initial.sql` conserva lo schema storico; `002-issue-requirements.sql` lo aggiorna ai requisiti correnti.
-Per future modifiche aggiungere script SQL versionati ed eseguirli esplicitamente dopo una copia di sicurezza;
-non usare `sequelize.sync({ force: true })` o `sync({ alter: true })` sul database esistente.
+La struttura del database corrente e' definita soltanto in `src/models/index.js`.
+Sequelize crea le tabelle e le relazioni mancanti durante l'avvio; non sono necessari file SQL o comandi separati.
+Ruoli, tipi, priorita' e stati sono enumerazioni; email e coppia progetto/utente hanno vincoli di unicita'.
+I controlli sui dati rimangono anche nei controller e nei modelli, prima dei salvataggi.
 
 Gli stati sono TODO/IN_PROGRESS/CLOSED e la priorita' e' facoltativa (null se omessa).
 Restano invariati accesso per membership, permessi e transizioni in avanti.
+Tutti gli ADMIN hanno gli stessi poteri globali; il creatore viene aggiunto ai membri senza privilegi speciali.
 Alla risoluzione il reporter viene notificato anche se e' l'attore o ha lasciato il progetto;
 in quest'ultimo caso la notifica e' leggibile senza link e non riabilita l'accesso ai dati del progetto.
 Le immagini facoltative delle issue sono coperte dai test di upload, download e validazione.
@@ -158,10 +155,10 @@ npm.cmd test
 
 Senza TEST_DATABASE_URL la suite completa e quella di integrazione si fermano: non ripiegano sul DB del file .env.
 Coprono autenticazione, permessi, CRUD implementato, contratti JSON, CORS PATCH, transazioni/rollback,
-concorrenza, compatibilita' BCrypt/JWT, inizializzazione non distruttiva, bootstrap admin e riavvio del server.
-Verifica del 23 ottobre 2026: 90 test backend QUnit passati (38 unitari e 52 di integrazione)
-con PostgreSQL 17 temporaneo. I precedenti 52 casi API e 4 casi immagini sono stati conservati.
-Sono coperti anche priorita' omessa/null, TODO, migrazione ripetibile dei dati precedenti,
+concorrenza, autenticazione BCrypt/JWT, account admin iniziale e persistenza dopo riavvio del server.
+Verifica del 25 ottobre 2026: 95 test backend QUnit passati (38 unitari e 57 di integrazione)
+con PostgreSQL 17 temporaneo.
+Sono coperti anche priorita' omessa/null, TODO,
 notifica di risoluzione al reporter-attore/ex membro, deduplicazione concorrente e rollback.
 Verifica precedente della migrazione Express: 33 test passati; immagine Docker costruita e avviata.
 Provati inoltre il vecchio JAR Spring e Express sullo stesso DB temporaneo: token e password compatibili
@@ -185,15 +182,14 @@ Test plan, casi identificati, R-WECT/white-box e limiti delle misure sono in [do
 
 ## Docker completo
 
-Dalla root, solo la prima volta o quando mancano tabelle:
+Dalla root:
 
 ```powershell
 docker compose -f .\infra\docker\docker-compose.yml build backend
-docker compose -f .\infra\docker\docker-compose.yml run --rm backend npm run db:init
 docker compose -f .\infra\docker\docker-compose.yml up -d
 ```
 
-Per gli aggiornamenti, ricostruire l'immagine, eseguire db:init e poi avviare il backend come sopra.
+Per gli aggiornamenti, ricostruire l'immagine e avviare il backend come sopra.
 Il servizio backend espone 8081 sull'host; PostgreSQL conserva il volume `postgres_data` esistente.
 Non usare `down -v` per conservare i dati. Non avviare insieme backend locale e container sulla stessa porta.
 

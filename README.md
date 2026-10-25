@@ -20,7 +20,6 @@ docker compose -f .\infra\docker\docker-compose.yml up -d postgres
 cd backend
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm.cmd ci
-npm.cmd run db:init
 npm.cmd run dev
 ```
 
@@ -31,9 +30,8 @@ npm.cmd --prefix frontend run dev
 ```
 
 Account locale di sviluppo: `admin@bugboard26.dev` / `ChangeMe123!`.
-Conservare un eventuale `backend/.env` gia' configurato. Il server non modifica automaticamente lo schema:
-`db:init` crea le tabelle mancanti e applica gli aggiornamenti SQL versionati, inclusa la conversione OPEN -> TODO.
-Eseguirlo anche aggiornando un database esistente; dati PostgreSQL e account vengono conservati.
+Conservare un eventuale `backend/.env` gia' configurato. All'avvio Sequelize crea le tabelle mancanti
+dai modelli in `backend/src/models/index.js`, senza cancellare o alterare le tabelle esistenti.
 Per i test: `powershell -ExecutionPolicy Bypass -File .\backend\test-docker.ps1` dalla root.
-Struttura, migrazione da Spring e comandi Docker completi sono nel [README backend](backend/README.md).
+Struttura e comandi Docker completi sono nel [README backend](backend/README.md).
 Per la demo con dati simulati, impostare `VITE_USE_MOCK_API=true` nel frontend e riavviare Vite.

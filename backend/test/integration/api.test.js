@@ -2,7 +2,6 @@
 import '../setup.js';
 import QUnit from 'qunit';
 import { randomUUID, createHmac } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
 import { once } from 'node:events';
 import { spawn } from 'node:child_process';
 import bcrypt from 'bcryptjs';
@@ -14,46 +13,26 @@ if (!process.env.TEST_DATABASE_URL) {
 }
 const schema = process.env.TEST_DB_SCHEMA;
 let app, sequelize, User, Project, Membership, Issue, IssueImage, Comment, Notification;
-let createToken, bootstrapAdmin, initializeSchema, initialSql, hash, png;
+let createToken, bootstrapAdmin, hash, png;
 let server, base;
-let admin, member, reviewer, outsider, project;
-let adminToken, memberToken, reviewerToken, outsiderToken;
+let admin, member, reviewer, outsider, secondAdmin, project;
+let adminToken, memberToken, reviewerToken, outsiderToken, secondAdminToken;
 
 // Mantiene i test QUnit riconoscibili anche all'analisi statica SonarQube.
 const { test } = QUnit;
 
 QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
-  // Installa lo stesso SQL di Spring nello schema isolato, mai nel database di sviluppo.
-  async function applySql(sql = initialSql) {
-    await sequelize.transaction(async (transaction) => {
-      await sequelize.query("SELECT set_config('search_path', $schema, true)", { bind: { schema }, transaction });
-      await sequelize.query(sql, { transaction });
-    });
-  }
-
-  // Esegue il comando di migrazione su uno schema di prova e ne controlla l'esito.
-  async function runInitializer(assert, targetSchema) {
-    const child = spawn(process.execPath, ['scripts/init-db.js'], { cwd: new URL('../..', import.meta.url),
-      env: { ...process.env, TEST_DB_SCHEMA: targetSchema }, stdio: ['ignore', 'pipe', 'pipe'] });
-    let output = '';
-    child.stderr.on('data', (chunk) => { output += chunk; });
-    const [code] = await once(child, 'exit');
-    assert.strictEqual(code, 0, output);
-  }
-
   // Carica i moduli asincroni, prepara lo schema temporaneo e avvia Express solo per questa suite.
   hooks.before(async () => {
     ({ default: app } = await import('../../src/app.js'));
     ({ sequelize, User, Project, Membership, Issue, IssueImage, Comment, Notification } = await import('../../src/models/index.js'));
     ({ createToken } = await import('../../src/services/auth.js'));
     ({ bootstrapAdmin } = await import('../../src/services/bootstrap.js'));
-    ({ initializeSchema } = await import('../../src/services/schema.js'));
-    initialSql = await readFile(new URL('../../sql/001-initial.sql', import.meta.url), 'utf8');
     hash = await bcrypt.hash('Password123!', 4);
     png = await sharp({ create: { width: 8, height: 6, channels: 3, background: '#346799' } }).png().toBuffer();
     await sequelize.authenticate();
     await sequelize.getQueryInterface().createSchema(schema);
-    await initializeSchema();
+    await sequelize.sync();
     server = app.listen(0, '127.0.0.1');
     await once(server, 'listening');
     base = `http://127.0.0.1:${server.address().port}/api`;
@@ -70,9 +49,9 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   // Prepara account e progetto nuovi per evitare dipendenze dai dati dei test precedenti.
   hooks.beforeEach(async () => {
     const suffix = randomUUID();
-    [admin, member, reviewer, outsider] = await Promise.all(['ADMIN', 'USER', 'USER', 'USER'].map((role, index) =>
+    [admin, member, reviewer, outsider, secondAdmin] = await Promise.all(['ADMIN', 'USER', 'USER', 'USER', 'ADMIN'].map((role, index) =>
       User.create({ fullName: `User ${index}`, email: `${index}-${suffix}@example.test`, passwordHash: hash, role })));
-    [adminToken, memberToken, reviewerToken, outsiderToken] = [admin, member, reviewer, outsider].map((user) => createToken(user).token);
+    [adminToken, memberToken, reviewerToken, outsiderToken, secondAdminToken] = [admin, member, reviewer, outsider, secondAdmin].map((user) => createToken(user).token);
     project = await Project.create({ name: 'Test project', description: 'Disposable verification' });
     await Membership.bulkCreate([{ projectId: project.id, userId: member.id }, { projectId: project.id, userId: reviewer.id }]);
   });
@@ -209,21 +188,11 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     const original = Notification.create;
     Notification.create = async () => { throw new Error('Simulated image issue notification failure'); };
     try {
-      await call(assert, 'POST', '/issues', memberToken, imageUpload(png, 'image/png', payload(Number(reviewer.id))), 500);
+      await call(assert, 'POST', '/issues', adminToken, imageUpload(png, 'image/png', payload(Number(reviewer.id))), 500);
     } finally { Notification.create = original; }
     assert.strictEqual(await Issue.count(), issues);
     assert.strictEqual(await IssueImage.count(), images);
     assert.strictEqual((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
-  });
-
-  // Verifica che ripetere l'inizializzazione conservi i dati e i byte degli allegati.
-  test('repeated initialization preserves the existing image bytes and issue data', async (assert) => {
-    const issue = await call(assert, 'POST', '/issues', memberToken, imageUpload(), 201);
-    const saved = await IssueImage.findByPk(issue.id);
-    await initializeSchema();
-    await initializeSchema();
-    assert.true((await IssueImage.findByPk(issue.id)).data.equals(saved.data), 'Byte conservati dopo inizializzazione');
-    assert.strictEqual((await Issue.findByPk(issue.id)).title, issue.title);
   });
 
   // Verifica la normalizzazione della email e la restituzione di una sessione senza password.
@@ -314,14 +283,40 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     }
   });
 
-  // Verifica che creare un progetto aggiunga anche l'amministratore ai suoi membri.
+  // Verifica che un ADMIN crei un progetto e venga aggiunto automaticamente ai suoi membri.
   test('project creation also creates the administrator membership', async (assert) => {
-    const created = await call(assert, 'POST', '/projects', adminToken, { name: ' New project ', description: ' Description ' }, 201);
+    const created = await call(assert, 'POST', '/projects', adminToken,
+      { name: ' New project ', description: ' Description ' }, 201);
     assert.strictEqual(created.name, 'New project');
     assert.strictEqual(created.memberCount, 1);
     assert.strictEqual(created.totalIssues, 0);
     const members = await call(assert, 'GET', `/projects/${created.id}/members`, adminToken);
     assert.strictEqual(members.items[0].userId, Number(admin.id));
+  });
+
+  // Verifica che due ADMIN abbiano le stesse operazioni globali su progetti, account, membri e assegnazioni.
+  test('all administrators share the same global project and account permissions', async (assert) => {
+    const created = await call(assert, 'POST', '/projects', adminToken, { name: 'Shared administration', description: 'Shared team' }, 201);
+    for (const token of [adminToken, secondAdminToken]) {
+      await call(assert, 'GET', `/projects/${created.id}`, token);
+      await call(assert, 'GET', '/users', token);
+      await call(assert, 'POST', '/projects', token, { name: 'Another project', description: 'Same permissions' }, 201);
+      await call(assert, 'POST', `/projects/${project.id}/members`, token, { userId: Number(outsider.id) }, 201);
+      const issue = await createIssue(assert, token);
+      await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, token, { assigneeId: Number(outsider.id) });
+      await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, token, { assigneeId: Number(member.id) });
+      await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, token, { assigneeId: null });
+      await call(assert, 'DELETE', `/projects/${project.id}/members/${outsider.id}`, token, undefined, 204);
+    }
+  });
+
+  // Verifica che il creatore possa uscire dal team e resti un normale ADMIN con accesso globale.
+  test('a project creator can leave the team without losing global ADMIN access', async (assert) => {
+    const created = await call(assert, 'POST', '/projects', adminToken, { name: 'Creator leaves', description: 'Administrator membership' }, 201);
+    await call(assert, 'DELETE', `/projects/${created.id}/members/${admin.id}`, secondAdminToken, undefined, 204);
+    const detail = await call(assert, 'GET', `/projects/${created.id}`, adminToken);
+    assert.strictEqual(detail.memberCount, 0);
+    await call(assert, 'GET', `/projects/${created.id}`, secondAdminToken);
   });
 
   // Verifica la visibilita dei progetti per membri e amministratori.
@@ -417,10 +412,10 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   // Verifica che l'assegnatario esista e sia membro del progetto anche se amministratore.
   test('assignee must belong to the project, including administrator accounts', async (assert) => {
     for (const user of [outsider, admin]) {
-      const error = await call(assert, 'POST', '/issues', memberToken, payload(Number(user.id)), 400);
+      const error = await call(assert, 'POST', '/issues', adminToken, payload(Number(user.id)), 400);
       assert.strictEqual(error.code, 'ASSIGNEE_NOT_MEMBER');
     }
-    await call(assert, 'POST', '/issues', memberToken, payload(9223372036854775807n.toString()), 404);
+    await call(assert, 'POST', '/issues', adminToken, payload(9223372036854775807n.toString()), 404);
   });
 
   // Verifica che un utente esterno non possa leggere, commentare o modificare issue.
@@ -440,7 +435,8 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   // Verifica che solo l'assegnatario cambi stato, senza eccezioni per autore o amministratore.
   test('only the assignee can update status, including when the reporter or an admin is a project member', async (assert) => {
     await Membership.create({ projectId: project.id, userId: admin.id });
-    const issue = await createIssue(assert, memberToken, Number(reviewer.id));
+    const issue = await createIssue(assert, memberToken);
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(reviewer.id) });
     const savedIssue = await Issue.findByPk(issue.id);
     const savedProject = await Project.findByPk(project.id);
     const notifications = await Notification.count({ where: { issueId: issue.id } });
@@ -471,19 +467,19 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     }
     assert.strictEqual((await Issue.findByPk(issue.id)).status, 'TODO');
     assert.strictEqual(await Notification.count({ where: { issueId: issue.id } }), 0);
-    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(reviewer.id) });
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
   });
 
   // Verifica che riassegnazione e rimozione trasferiscano subito il permesso di cambiare stato.
   test('reassignment and unassignment immediately change who can update status', async (assert) => {
     const issue = await createIssue(assert, memberToken, Number(member.id));
-    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(reviewer.id) });
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 403);
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
-    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, reviewerToken, { assigneeId: null });
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: null });
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'CLOSED' }, 403);
-    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, reviewerToken, { assigneeId: Number(member.id) });
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(member.id) });
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' }, 403);
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'CLOSED' }, 403);
     assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' })).status, 'CLOSED');
@@ -492,7 +488,8 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   // Verifica che un amministratore assegnatario possa risolvere la issue e notificare il reporter.
   test('an administrator can change status when they are the assignee', async (assert) => {
     await Membership.create({ projectId: project.id, userId: admin.id });
-    const issue = await createIssue(assert, memberToken, Number(admin.id));
+    const issue = await createIssue(assert, memberToken);
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(admin.id) });
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' }, 403);
     for (const status of ['IN_PROGRESS', 'CLOSED']) {
       assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/status`, adminToken, { status })).status, status);
@@ -518,16 +515,103 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
   test('reassignment and unassignment are saved without duplicate notifications', async (assert) => {
     const issue = await createIssue(assert);
     for (let i = 0; i < 2; i++) {
-      const result = await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(reviewer.id) });
+      const result = await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(reviewer.id) });
       assert.strictEqual(result.assignee.id, Number(reviewer.id));
     }
     assert.strictEqual((await call(assert, 'GET', '/notifications', reviewerToken)).unreadCount, 1);
-    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(outsider.id) }, 400);
-    assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: null })).assignee, null);
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(outsider.id) }, 400);
+    assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: null })).assignee, null);
     assert.strictEqual((await call(assert, 'GET', `/issues/${issue.id}`, adminToken)).assignee, null);
   });
 
-  // Verifica autore autenticato, ordinamento e controlli sul contenuto dei commenti.
+  // Verifica che un USER crei issue libere o assegnate a se stesso, ma mai ad altri, anche via multipart.
+  test('USER creation allows no assignee or self and rejects another member in JSON and multipart', async (assert) => {
+    for (const assigneeId of [null, Number(member.id)]) {
+      const issue = await createIssue(assert, memberToken, assigneeId);
+      assert.strictEqual(issue.assignee?.id ?? null, assigneeId);
+      assert.strictEqual(issue.reporter.id, Number(member.id));
+    }
+    const before = await Issue.count();
+    for (const input of [payload(Number(reviewer.id)), imageUpload(png, 'image/png', payload(Number(reviewer.id)))]) {
+      assert.strictEqual((await call(assert, 'POST', '/issues', memberToken, input, 403)).code, 'FORBIDDEN');
+    }
+    assert.strictEqual(await Issue.count(), before, 'Le richieste vietate non creano issue');
+  });
+
+  // Verifica che un membro possa autoassegnarsi solo una issue libera e acquisisca il cambio di stato.
+  test('a project member can claim an unassigned issue and then change status', async (assert) => {
+    const issue = await createIssue(assert);
+    const result = await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken, { assigneeId: Number(member.id) });
+    assert.strictEqual(result.assignee.id, Number(member.id));
+    assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' })).status, 'IN_PROGRESS');
+    await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'CLOSED' }, 403);
+  });
+
+  // Verifica che i USER non assegnino ad altri, non rimuovano assegnatari e non modifichino assegnazioni esistenti.
+  test('USER assignment restrictions preserve the issue, project activity and notifications', async (assert) => {
+    for (const assigneeId of [null, Number(member.id), Number(reviewer.id)]) {
+      const issue = await createIssue(assert, adminToken, assigneeId);
+      const savedIssue = await Issue.findByPk(issue.id);
+      const savedProject = await Project.findByPk(project.id);
+      const notices = await Notification.count({ where: { issueId: issue.id } });
+      for (const target of [null, Number(reviewer.id)]) {
+        assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken,
+          { assigneeId: target }, 403)).code, 'FORBIDDEN');
+      }
+      if (assigneeId !== null) {
+        assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, memberToken,
+          { assigneeId: Number(member.id) }, 409)).code, 'ISSUE_ALREADY_ASSIGNED');
+      }
+      const unchanged = await Issue.findByPk(issue.id);
+      assert.strictEqual(unchanged.assigneeId, savedIssue.assigneeId);
+      assert.strictEqual(unchanged.updatedAt.toISOString(), savedIssue.updatedAt.toISOString());
+      assert.strictEqual((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
+      assert.strictEqual(await Notification.count({ where: { issueId: issue.id } }), notices);
+    }
+  });
+
+  // Verifica il rifiuto di un'autoassegnazione da parte di un USER esterno al progetto.
+  test('a nonmember cannot claim an unassigned issue', async (assert) => {
+    const issue = await createIssue(assert);
+    assert.strictEqual((await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, outsiderToken,
+      { assigneeId: Number(outsider.id) }, 403)).code, 'FORBIDDEN');
+    assert.strictEqual((await Issue.findByPk(issue.id)).assigneeId, null);
+  });
+
+  // Verifica con due richieste HTTP contemporanee che un solo USER ottenga l'assegnazione in PostgreSQL.
+  test('concurrent self-assignment has one winner and never overwrites the first assignment', async (assert) => {
+    const issue = await createIssue(assert);
+    const contenders = [{ token: memberToken, id: Number(member.id) }, { token: reviewerToken, id: Number(reviewer.id) }];
+    const results = await Promise.all(contenders.map(async ({ token, id }) => {
+      const response = await fetch(`${base}/issues/${issue.id}/assignee`, { method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigneeId: id }) });
+      return { status: response.status, body: await response.json(), id, token };
+    }));
+    assert.deepEqual(results.map((result) => result.status).sort(), [200, 409]);
+    const winner = results.find((result) => result.status === 200);
+    const loser = results.find((result) => result.status === 409);
+    assert.strictEqual(loser?.body.code, 'ISSUE_ALREADY_ASSIGNED');
+    assert.strictEqual(winner?.body.assignee.id, winner?.id);
+    assert.strictEqual(Number((await Issue.findByPk(issue.id)).assigneeId), winner?.id);
+    if (loser) await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, loser.token, { assigneeId: loser.id }, 409);
+    assert.strictEqual((await call(assert, 'GET', `/issues/${issue.id}`, adminToken)).assignee.id, winner?.id);
+  });
+
+  // Verifica che un errore di notifica annulli completamente l'assegnazione dell'ADMIN.
+  test('a failed assignment notification rolls back the assignment and project timestamp', async (assert) => {
+    const issue = await createIssue(assert);
+    const savedProject = await Project.findByPk(project.id);
+    const original = Notification.create;
+    Notification.create = async () => { throw new Error('Simulated assignment notification failure'); };
+    try {
+      await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(member.id) }, 500);
+    } finally { Notification.create = original; }
+    assert.strictEqual((await Issue.findByPk(issue.id)).assigneeId, null);
+    assert.strictEqual((await Project.findByPk(project.id)).updatedAt.toISOString(), savedProject.updatedAt.toISOString());
+  });
+
+  // Verifica autore autenticato, ordinamento e controlli sul contenuto dei commenti, anche per membri non assegnatari.
   test('comments use the authenticated author, are ordered and validate content', async (assert) => {
     const issue = await createIssue(assert, adminToken, Number(member.id));
     const first = await call(assert, 'POST', `/issues/${issue.id}/comments`, reviewerToken,
@@ -566,11 +650,25 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     assert.strictEqual(feed.items[0].issueId, issue.id);
     assert.true(/resolved/.test(feed.items[0].message));
     assert.strictEqual(await Notification.count({ where: { issueId: issue.id, kind: 'RESOLUTION' } }), 1);
+    assert.strictEqual((await call(assert, 'GET', '/notifications', secondAdminToken)).totalCount, 0);
+    assert.strictEqual((await call(assert, 'GET', '/notifications', adminToken)).totalCount, 0);
+  });
+
+  // Verifica la risoluzione a un reporter ADMIN, senza notificare il creatore del progetto o altri ADMIN.
+  test('an ADMIN reporter receives resolution without notifying the project creator', async (assert) => {
+    const created = await call(assert, 'POST', '/projects', secondAdminToken, { name: 'Created by another ADMIN', description: 'Reporter only' }, 201);
+    await call(assert, 'POST', `/projects/${created.id}/members`, adminToken, { userId: Number(member.id) }, 201);
+    const issue = await call(assert, 'POST', '/issues', adminToken, { ...payload(Number(member.id)), projectId: created.id }, 201);
+    for (const status of ['IN_PROGRESS', 'CLOSED', 'CLOSED']) await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status });
+    const notices = await Notification.findAll({ where: { issueId: issue.id, kind: 'RESOLUTION' } });
+    assert.deepEqual(notices.map((notice) => String(notice.recipientId)), [String(admin.id)]);
+    assert.strictEqual((await call(assert, 'GET', '/notifications', secondAdminToken)).totalCount, 0);
   });
 
   // Verifica che un ex membro riceva la risoluzione senza riottenere accesso al progetto.
   test('former reporters receive and read resolution notices without regaining project access', async (assert) => {
-    const issue = await createIssue(assert, memberToken, Number(reviewer.id));
+    const issue = await createIssue(assert, memberToken);
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(reviewer.id) });
     await call(assert, 'POST', `/issues/${issue.id}/comments`, reviewerToken, { content: 'Before revocation' }, 201);
     await call(assert, 'DELETE', `/projects/${project.id}/members/${member.id}`, adminToken, undefined, 204);
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status: 'IN_PROGRESS' });
@@ -599,7 +697,8 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
 
   // Verifica che la notifica di risoluzione resti leggibile dopo la revoca dell'appartenenza.
   test('resolution notice stays visible if reporter membership is revoked after closure', async (assert) => {
-    const issue = await createIssue(assert, memberToken, Number(reviewer.id));
+    const issue = await createIssue(assert, memberToken);
+    await call(assert, 'PATCH', `/issues/${issue.id}/assignee`, adminToken, { assigneeId: Number(reviewer.id) });
     for (const status of ['IN_PROGRESS', 'CLOSED']) {
       await call(assert, 'PATCH', `/issues/${issue.id}/status`, reviewerToken, { status });
     }
@@ -660,6 +759,8 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     await call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'IN_PROGRESS' });
     await Promise.all([1, 2].map(() => call(assert, 'PATCH', `/issues/${issue.id}/status`, memberToken, { status: 'CLOSED' })));
     assert.strictEqual((await call(assert, 'GET', '/notifications', memberToken)).totalCount, 1);
+    assert.strictEqual((await call(assert, 'GET', '/notifications', secondAdminToken)).totalCount, 0);
+    assert.strictEqual(await Notification.count({ where: { issueId: issue.id, kind: 'RESOLUTION' } }), 1);
   });
 
   // Verifica che un errore di notifica annulli stato della issue e data del progetto.
@@ -699,16 +800,6 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     assert.strictEqual(result.path, '/api/does-not-exist');
   });
 
-  // Verifica che ripetere lo script SQL conservi righe, identificatori e password esistenti.
-  test('initial SQL is repeatable and preserves rows, IDs and existing BCrypt hashes', async (assert) => {
-    const issue = await createIssue(assert, adminToken, Number(member.id));
-    const oldHash = (await User.findByPk(member.id)).passwordHash;
-    await applySql();
-    await applySql();
-    assert.strictEqual((await Issue.findByPk(issue.id)).title, issue.title);
-    assert.strictEqual((await User.findByPk(member.id)).passwordHash, oldHash);
-  });
-
   // Verifica che l'amministratore iniziale venga creato una sola volta senza reimpostare password.
   test('development admin is created once and existing credentials are not reset', async (assert) => {
     const names = ['NODE_ENV', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'ADMIN_FULL_NAME'];
@@ -732,81 +823,6 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
         if (saved[name] === undefined) delete process.env[name];
         else process.env[name] = saved[name];
       }
-    }
-  });
-
-  // Verifica la migrazione dalla prima milestone senza perdita di utenti e progetti.
-  test('explicit initializer upgrades milestone 1 without deleting existing rows', async (assert) => {
-    const legacySchema = `${schema}_legacy`;
-    await sequelize.getQueryInterface().createSchema(legacySchema);
-    try {
-      await sequelize.transaction(async (transaction) => {
-        await sequelize.query("SELECT set_config('search_path', $schema, true)", { bind: { schema: legacySchema }, transaction });
-        await sequelize.query(initialSql.split('-- Milestone 2:')[0], { transaction });
-      });
-      const legacyUser = await User.schema(legacySchema).create({ fullName: 'Existing Spring user',
-        email: 'legacy@example.test', role: 'ADMIN', passwordHash: hash.replace('$2b$', '$2a$') });
-      const legacyProject = await Project.schema(legacySchema).create({ name: 'Existing project', description: 'Milestone 1 data' });
-      await runInitializer(assert, legacySchema);
-      assert.strictEqual((await User.schema(legacySchema).findByPk(legacyUser.id)).passwordHash, legacyUser.passwordHash);
-      assert.strictEqual((await Project.schema(legacySchema).findByPk(legacyProject.id)).name, 'Existing project');
-      assert.strictEqual(await Issue.schema(legacySchema).count(), 0);
-      assert.strictEqual(await Notification.schema(legacySchema).count(), 0);
-    } finally {
-      await sequelize.getQueryInterface().dropSchema(legacySchema);
-    }
-  });
-
-  // Verifica la migrazione ripetibile di OPEN e della priorita senza perdita dei dati storici.
-  test('requirements migration preserves legacy data, converts only OPEN and is repeatable', async (assert) => {
-    const legacySchema = `${schema}_requirements`;
-    await sequelize.getQueryInterface().createSchema(legacySchema);
-    try {
-      await sequelize.transaction(async (transaction) => {
-        await sequelize.query("SELECT set_config('search_path', $schema, true)", { bind: { schema: legacySchema }, transaction });
-        await sequelize.query(initialSql, { transaction });
-      });
-      const user = await User.schema(legacySchema).create({ fullName: 'Legacy reporter',
-        email: 'reporter@example.test', role: 'USER', passwordHash: hash });
-      const legacyProject = await Project.schema(legacySchema).create({ name: 'Legacy project', description: 'Preserve me' });
-      await Membership.schema(legacySchema).create({ projectId: legacyProject.id, userId: user.id });
-      const rows = [];
-      for (const status of ['OPEN', 'IN_PROGRESS', 'CLOSED']) {
-        const [inserted] = await sequelize.query(`INSERT INTO "${legacySchema}".issues
-          (project_id, reporter_id, title, description, type, priority, status, created_at, updated_at)
-          VALUES ($project, $reporter, $status, 'Keep description', 'BUG', 'HIGH', $status, now(), now()) RETURNING *`,
-        { bind: { project: legacyProject.id, reporter: user.id, status } });
-        rows.push(inserted[0]);
-      }
-      await sequelize.query(`INSERT INTO "${legacySchema}".issue_comments (issue_id, author_id, content, created_at)
-        VALUES ($issue, $author, 'Keep comment', now())`, { bind: { issue: rows[0].id, author: user.id } });
-      await sequelize.query(`INSERT INTO "${legacySchema}".notifications (issue_id, recipient_id, message, read, created_at)
-        VALUES ($issue, $recipient, 'Keep notification', true, now())`, { bind: { issue: rows[0].id, recipient: user.id } });
-      await runInitializer(assert, legacySchema);
-      await runInitializer(assert, legacySchema);
-      const migrated = await Issue.schema(legacySchema).findAll({ order: [['id', 'ASC']] });
-      assert.deepEqual(migrated.map((issue) => issue.status), ['TODO', 'IN_PROGRESS', 'CLOSED']);
-      for (let i = 0; i < rows.length; i++) {
-        assert.strictEqual(String(migrated[i].id), String(rows[i].id));
-        assert.strictEqual(migrated[i].title, rows[i].title);
-        assert.strictEqual(migrated[i].priority, 'HIGH');
-        assert.strictEqual(migrated[i].updatedAt.toISOString(), rows[i].updated_at.toISOString());
-      }
-      assert.strictEqual((await User.schema(legacySchema).findByPk(user.id)).passwordHash, hash);
-      assert.strictEqual(await Membership.schema(legacySchema).count(), 1);
-      assert.strictEqual((await Comment.schema(legacySchema).findOne()).content, 'Keep comment');
-      const notification = await Notification.schema(legacySchema).findOne();
-      assert.strictEqual(notification.kind, 'ACTIVITY');
-      assert.strictEqual(notification.read, true);
-      const [created] = await sequelize.query(`INSERT INTO "${legacySchema}".issues
-        (project_id, reporter_id, title, description, type, created_at, updated_at)
-        VALUES ($project, $reporter, 'Without priority', 'Description', 'BUG', now(), now()) RETURNING *`,
-      { bind: { project: legacyProject.id, reporter: user.id } });
-      assert.strictEqual(created[0].priority, null);
-      assert.strictEqual(created[0].status, 'TODO');
-      await assert.rejects(sequelize.query(`UPDATE "${legacySchema}".issues SET status = 'OPEN'`));
-    } finally {
-      await sequelize.getQueryInterface().dropSchema(legacySchema);
     }
   });
 

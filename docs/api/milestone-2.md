@@ -10,7 +10,11 @@ Base URL locale: `http://localhost:8081/api`. Timestamp ISO 8601 UTC; liste non 
 ## Regole
 
 - ADMIN ha accesso globale; USER puo' leggere e modificare solo le issue dei progetti di cui e' membro.
-- Tutti i membri possono creare issue, assegnarle, avanzarne lo stato e commentarle.
+- Tutti i membri possono creare issue e leggere/inserire commenti, indipendentemente dall'assegnatario.
+- ADMIN puo' assegnare, riassegnare o rimuovere l'assegnatario. USER puo' creare una issue libera
+  oppure assegnata a se stesso e puo' autoassegnarsi soltanto una issue ancora libera.
+  USER non puo' assegnare ad altri, rimuovere un'assegnazione o modificare un'assegnazione gia' presente, neanche la propria.
+- Solo l'attuale assegnatario puo' modificare lo stato, senza eccezioni per reporter o ADMIN.
 - Reporter e autore del commento sono ricavati dall'identita' autenticata, mai dal JSON del client.
 - L'assegnatario deve essere un membro del progetto, anche quando e' ADMIN. `assigneeId: null` significa nessuna assegnazione.
 - La rimozione di un membro revoca subito l'accesso a issue e commenti e nasconde le notifiche ordinarie.
@@ -21,11 +25,15 @@ Base URL locale: `http://localhost:8081/api`. Timestamp ISO 8601 UTC; liste non 
   Ripetere lo stato corrente e' idempotente; salti, ritorni indietro e riapertura restituiscono 409.
   E' possibile commentare o cambiare assegnatario anche dopo la chiusura.
 - Le scritture e le notifiche sono nella stessa transazione. Un lock sulla issue serializza commenti,
-  assegnazioni e cambi di stato concorrenti; richieste identiche di stato/assegnazione non duplicano gli eventi.
+  assegnazioni e cambi di stato concorrenti. Due autoassegnazioni USER concorrenti producono un successo
+  e un HTTP 409 `ISSUE_ALREADY_ASSIGNED`, senza sovrascritture. Operazioni vietate restituiscono HTTP 403 `FORBIDDEN`.
+  Ripetere lo stato corrente o una stessa assegnazione ADMIN non duplica gli eventi;
+  ripetere un'autoassegnazione USER su una issue gia' assegnata restituisce invece HTTP 409.
 - Le notifiche di assegnazione vanno al nuovo assegnatario; quelle di commento e stato a reporter e assegnatario.
   L'attore e' escluso, i destinatari sono deduplicati e devono avere ancora accesso al progetto.
 - Alla chiusura il reporter riceve sempre una sola notifica di risoluzione, anche quando e' l'attore
   o non e' piu' membro. Se coincide con l'assegnatario non vengono generate due notifiche.
+  Il creatore del progetto e gli altri ADMIN non vengono notificati automaticamente.
 - Le notifiche sono personali anche per gli amministratori: non e' possibile leggere o modificare quelle altrui.
   Se una membership viene ripristinata, le precedenti notifiche tornano visibili.
 
@@ -71,7 +79,7 @@ Priorita' omessa o null viene salvata come null; stringa vuota e valori non amme
 | priority | null, LOW, MEDIUM, HIGH, CRITICAL |
 | status | TODO, IN_PROGRESS, CLOSED |
 
-OPEN non e' piu' accettato dalle API; i dati esistenti sono convertiti in TODO da db:init.
+OPEN non e' accettato dalle API; lo stato iniziale e' TODO.
 IN_PROGRESS e CLOSED mantengono il significato precedente; DONE non e' un valore previsto.
 
 IssueResponse:
@@ -93,8 +101,9 @@ non e' una numerazione progressiva per progetto. `assignee` puo' essere null.
 
 UpdateIssueStatusRequest: `{ "status": "IN_PROGRESS" }`.
 
-AssignIssueRequest: `{ "assigneeId": 2 }`; `{ "assigneeId": null }` rimuove l'assegnazione.
-Un oggetto vuoto equivale a null. ID negativi e zero sono invalidi.
+AssignIssueRequest: `{ "assigneeId": 2 }`; `{ "assigneeId": null }` rimuove l'assegnazione solo per ADMIN.
+Un oggetto vuoto equivale a null ed e' quindi vietato a USER. ID negativi e zero sono invalidi.
+USER deve indicare il proprio ID e la issue deve essere ancora senza assegnatario.
 
 CreateCommentRequest: `{ "content": "Ho riprodotto il problema." }`.
 Contenuto non vuoto, massimo 5000 caratteri; testo salvato senza spazi iniziali/finali.
@@ -140,14 +149,11 @@ Creazione issue, cambio stato/assegnatario e commenti aggiornano la data di atti
 
 ## Persistenza e frontend
 
-`backend/sql/001-initial.sql` include le tre tabelle (`issues`, `issue_comments`, `notifications`) e relativi indici
-con CREATE IF NOT EXISTS: e' compatibile con il database della milestone 1 e non elimina dati.
-L'inizializzazione si esegue esplicitamente con `npm run db:init`, anche per aggiornare un DB esistente.
-Il comando applica in transazione anche `002-issue-requirements.sql`: priorita' nullable,
-conversione OPEN -> TODO, vincoli/default aggiornati e tipo interno delle notifiche (ACTIVITY/RESOLUTION).
-Gli script sono ripetibili e conservano righe, ID, date e attributi esistenti, salvo lo stato OPEN convertito.
-Il server non aggiorna automaticamente lo schema e non usa sync/alter/force.
-Non e' necessario ricreare il volume PostgreSQL.
+Le sette tabelle, i loro campi e le relazioni sono definiti in `backend/src/models/index.js`.
+All'avvio il backend esegue `sequelize.sync()` per creare le tabelle mancanti.
+Le tabelle esistenti non vengono cancellate o alterate: non sono usate le opzioni force o alter.
+Tipi ammessi, chiavi esterne, unicita' e indici sono dichiarati nei modelli; i dati sono validati anche dal backend.
+Non sono previsti script SQL versionati o un comando separato di inizializzazione.
 
 Il frontend usa le API reali di default. La selezione assegnatari usa l'elenco dei membri,
 accessibile agli USER, senza richiedere l'elenco globale degli account riservato agli ADMIN.
@@ -167,7 +173,7 @@ e rimuove il container e il suo volume al termine. Non usa i dati di sviluppo.
 
 Copertura: regressione milestone 1, validazione, identita' server, isolamento tra progetti,
 assegnatari validi, stati e idempotenza, concorrenza, commenti, notifiche private e lette,
-revoca membership, statistiche e riavvio completo sullo stesso DB, inclusa compatibilita' con lo schema precedente.
+revoca membership, statistiche e persistenza dopo riavvio sullo stesso DB.
 
 Frontend: `npm.cmd --prefix frontend run lint` e `npm.cmd --prefix frontend run build`.
 
