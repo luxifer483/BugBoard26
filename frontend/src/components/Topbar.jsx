@@ -138,6 +138,7 @@ function Topbar() {
                         <>
                           <div className={`notification-dot${notification.read ? '' : ' is-unread'}`} />
                           <div className="notification-content">
+                            {notification.issueTitle ? <strong>{notification.issueTitle}</strong> : null}
                             <p>{notification.message}</p>
                             <span>{formatRelativeDate(notification.createdAt)}</span>
                           </div>

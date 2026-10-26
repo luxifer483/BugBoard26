@@ -648,6 +648,7 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     assert.strictEqual(feed.totalCount, 1);
     assert.strictEqual(feed.unreadCount, 1);
     assert.strictEqual(feed.items[0].issueId, issue.id);
+    assert.strictEqual(feed.items[0].issueTitle, issue.title);
     assert.true(/resolved/.test(feed.items[0].message));
     assert.strictEqual(await Notification.count({ where: { issueId: issue.id, kind: 'RESOLUTION' } }), 1);
     assert.strictEqual((await call(assert, 'GET', '/notifications', secondAdminToken)).totalCount, 0);
@@ -678,12 +679,14 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     assert.strictEqual(feed.totalCount, 1);
     assert.strictEqual(feed.unreadCount, 1);
     assert.strictEqual(feed.items[0].issueId, null);
+    assert.strictEqual(feed.items[0].issueTitle, null);
     assert.true(/resolved/.test(feed.items[0].message));
     const notificationId = feed.items[0].id;
     for (let i = 0; i < 2; i++) {
       const read = await call(assert, 'PATCH', `/notifications/${notificationId}/read`, memberToken);
       assert.strictEqual(read.read, true);
       assert.strictEqual(read.issueId, null);
+      assert.strictEqual(read.issueTitle, null);
     }
     assert.strictEqual((await call(assert, 'GET', '/notifications', memberToken)).unreadCount, 0);
     await call(assert, 'GET', `/issues/${issue.id}`, memberToken, undefined, 403);
@@ -710,12 +713,17 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
 
   // Verifica che le notifiche siano private e possano essere segnate lette senza duplicazioni.
   test('notifications remain private and marking read is idempotent', async (assert) => {
-    await createIssue(assert, adminToken, Number(member.id));
+    const issue = await createIssue(assert, adminToken, Number(member.id));
     const feed = await call(assert, 'GET', '/notifications', memberToken);
+    assert.strictEqual(feed.items[0].issueTitle, issue.title);
     const id = feed.items[0].id;
     await call(assert, 'PATCH', `/notifications/${id}/read`, adminToken, undefined, 404);
     await call(assert, 'PATCH', `/notifications/${id}/read`, outsiderToken, undefined, 404);
-    for (let i = 0; i < 2; i++) assert.strictEqual((await call(assert, 'PATCH', `/notifications/${id}/read`, memberToken)).read, true);
+    for (let i = 0; i < 2; i++) {
+      const read = await call(assert, 'PATCH', `/notifications/${id}/read`, memberToken);
+      assert.strictEqual(read.read, true);
+      assert.strictEqual(read.issueTitle, issue.title);
+    }
     assert.strictEqual((await call(assert, 'GET', '/notifications', memberToken)).unreadCount, 0);
   });
 

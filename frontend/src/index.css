@@ -481,6 +481,14 @@ button.notification-item:disabled {
 
 .notification-content {
   min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.notification-content strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #0f172a;
+  font-size: 0.88rem;
 }
 
 .notification-content p {
@@ -1300,13 +1308,14 @@ button.notification-item:disabled {
   gap: 8px;
 }
 
-.status-dropdown span {
+.status-dropdown > span {
   color: #64748b;
   font-size: 0.78rem;
   font-weight: 700;
 }
 
-.status-dropdown select {
+.status-dropdown select,
+.status-select-trigger {
   width: 100%;
   min-height: 40px;
   padding: 0 12px;
@@ -1315,6 +1324,68 @@ button.notification-item:disabled {
   background: #ffffff;
   color: #0f172a;
   outline: none;
+}
+
+.status-select {
+  position: relative;
+}
+
+.status-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.status-select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.status-select-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 4px;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.status-select-options button {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #0f172a;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.status-select-options button[aria-selected="true"] {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.status-select-options button:hover:not(:disabled),
+.status-select-options button:focus-visible {
+  background: #dbeafe;
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+.status-select-options button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 .comments-list {
@@ -1385,7 +1456,8 @@ button.notification-item:disabled {
 }
 
 .comment-input textarea:focus,
-.status-dropdown select:focus {
+.status-dropdown select:focus,
+.status-select-trigger:focus-visible {
   border-color: rgba(37, 99, 235, 0.5);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }

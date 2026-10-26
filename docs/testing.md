@@ -22,7 +22,7 @@ I test di integrazione avviano Express su una porta temporanea, inviano vere ric
 | `backend/test/unit/notify.test.js` | Unitario | 11 | Selezione destinatari e richiesta di salvataggio, white-box |
 | `backend/test/unit/images.test.js` | Unitario aggiuntivo | 4 | Decodifica e controlli delle immagini; il metodo ha un solo parametro e non e tra i quattro scelti |
 | `backend/test/integration/api.test.js` | Integrazione | 57 | API, autenticazione, permessi, transizioni, persistenza, concorrenza e rollback |
-| `frontend/test/*.test.js` e `*.test.jsx` | Componenti e moduli frontend | 55, suite Vitest separata | Rendering, interazioni, azioni consentite, sessione e contratti HTTP con risposte simulate |
+| `frontend/test/*.test.js` e `*.test.jsx` | Componenti e moduli frontend | 58, suite Vitest separata | Rendering, interazioni, azioni consentite, sessione e contratti HTTP con risposte simulate |
 
 `backend/test/setup.js` prepara soltanto ambiente e configurazione QUnit: non contiene casi di test. Sopra ciascun test backend e presente un commento che ne descrive lo scopo.
 
@@ -181,6 +181,8 @@ Verifica del 25 ottobre 2026, Node.js e PostgreSQL 17 temporaneo:
 Le percentuali sono una fotografia dell'esecuzione, non un obiettivo automaticamente garantito per modifiche future. Su Windows il percorso `server.js`, verificato con veri processi riavviati, non risulta raccolto nel report c8 dei processi terminati: il successo del test di persistenza e la copertura strumentale sono evidenze distinte.
 
 ## 5. Comandi riproducibili
+
+Aggiornamento del 26 ottobre 2026: aggiunte tre verifiche frontend sul titolo nelle notifiche e sul menu di stato. Superati i 95 test backend e i 21 test frontend interessati (`StatusDropdown`, `IssueInfoCard`, `IssueDetailPage`, `Topbar`), oltre a lint e build. Le verifiche API esistenti controllano anche il titolo nelle notifiche lette e la sua omissione quando l'accesso alla issue e revocato.
 
 Dalla radice del repository, installazione delle dipendenze backend:
 

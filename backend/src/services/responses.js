@@ -45,8 +45,10 @@ export function commentResponse(comment) {
     author: userResponse(comment.author), createdAt: comment.createdAt };
 }
 
-export function notificationResponse(notification, canAccessIssue = true) {
+// Aggiunge il titolo anche alle notifiche esistenti, solo se la issue e ancora accessibile.
+export function notificationResponse(notification, canAccessIssue = true, issue = notification.issue) {
   return { id: Number(notification.id), issueId: canAccessIssue ? Number(notification.issueId) : null, message: notification.message,
+    issueTitle: canAccessIssue ? issue.title : null,
     read: notification.read, createdAt: notification.createdAt };
 }
 

@@ -32,7 +32,7 @@ export async function read(req, res) {
       await requireProject(req.user, issue.projectId, transaction);
     }
     await notification.update({ read: true }, { transaction });
-    return notificationResponse(notification, canAccessIssue);
+    return notificationResponse(notification, canAccessIssue, issue);
   });
   res.json(result);
 }

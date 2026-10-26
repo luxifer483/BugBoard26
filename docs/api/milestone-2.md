@@ -124,14 +124,15 @@ NotificationListResponse:
 
 ```json
 {
-  "items": [{ "id": 1, "issueId": 1, "message": "Issue BUG-26-1 has been assigned to you", "read": false, "createdAt": "2026-10-18T10:00:00Z" }],
+  "items": [{ "id": 1, "issueId": 1, "issueTitle": "Login button on mobile", "message": "Issue BUG-26-1 has been assigned to you", "read": false, "createdAt": "2026-10-18T10:00:00Z" }],
   "totalCount": 1, "unreadCount": 1
 }
 ```
 
 La marcatura letta restituisce il singolo elemento con `read: true`. Per ID altrui o inesistenti:
 404; per una propria notifica ordinaria di un progetto revocato: 403. La notifica di risoluzione
-del reporter resta invece leggibile con issueId null, anche dopo la revoca. Il conteggio include
+del reporter resta invece leggibile con issueId e issueTitle null, anche dopo la revoca. Il titolo
+viene letto dalla issue anche per le notifiche gia salvate. Il conteggio include
 le notifiche accessibili e queste notifiche personali di risoluzione.
 
 ProjectResponse aggiunge `totalIssues`, `openIssues` (solo TODO, nome JSON conservato per compatibilita'), `closedIssues` (solo CLOSED).

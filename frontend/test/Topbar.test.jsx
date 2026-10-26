@@ -60,3 +60,18 @@ test.each(['ADMIN', 'USER'])('shows the appropriate horizontal navigation for %s
     expect(within(navigation).queryByRole('link', { name: 'Create project' })).not.toBeInTheDocument()
   }
 })
+
+// La notifica mostra il titolo della issue insieme al messaggio e al collegamento esistente.
+test('notifications display the issue title and keep the issue link', () => {
+  render(<MemoryRouter><AuthContext.Provider value={{
+    user: { fullName: 'Test User', role: 'USER' },
+    notifications: { items: [{ id: 4, issueId: 12, issueTitle: 'Login button on mobile',
+      message: 'Issue BUG-26-12 has been assigned to you', read: false, createdAt: '2026-10-26T12:00:00Z' }], unreadCount: 1 },
+    refreshNotifications: vi.fn(), readNotification: vi.fn(), logout: vi.fn(),
+  }}><Topbar /></AuthContext.Provider></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Notifications' }))
+  const panel = within(screen.getByRole('dialog', { name: 'Notifications panel' }))
+  expect(panel.getByText('Login button on mobile')).toBeInTheDocument()
+  expect(panel.getByText('Issue BUG-26-12 has been assigned to you')).toBeInTheDocument()
+  expect(panel.getByRole('link')).toHaveAttribute('href', '/issues/12')
+})
