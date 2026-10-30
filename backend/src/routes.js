@@ -29,6 +29,7 @@ routes.get('/users', requireAdmin, users.list);
 routes.post('/users', requireAdmin, users.create);
 routes.get('/projects', projects.list);
 routes.post('/projects', requireAdmin, projects.create);
+routes.delete('/projects/:id', requireAdmin, projects.remove);
 routes.get('/projects/:id', projects.get);
 routes.get('/projects/:projectId/members', members.list);
 routes.post('/projects/:projectId/members', requireAdmin, members.add);

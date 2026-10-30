@@ -18,3 +18,8 @@ export async function createProject(payload) {
   const { data } = await apiClient.post('/projects', payload)
   return data
 }
+
+// Elimina definitivamente il progetto e i suoi dati collegati; solo ADMIN.
+export async function deleteProject(projectId) {
+  await apiClient.delete(`/projects/${projectId}`)
+}

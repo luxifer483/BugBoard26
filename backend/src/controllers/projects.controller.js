@@ -1,4 +1,5 @@
 // Gestisce i progetti e prepara le statistiche mostrate nel frontend.
+import { notFound } from '../middleware/errors.js';
 import { Op } from 'sequelize';
 import { Project, Membership, sequelize } from '../models/index.js';
 import { visibleProjectIds, requireProject } from '../services/access.js';
@@ -29,4 +30,11 @@ export async function create(req, res) {
     return projectResponse(project, transaction);
   });
   res.status(201).json(result);
+}
+
+// Un'unica DELETE atomica; le FK CASCADE rimuovono tutti i dati figli, non gli account.
+export async function remove(req, res) {
+  const deleted = await Project.destroy({ where: { id: req.params.id } });
+  if (!deleted) throw notFound('Project');
+  res.status(204).end();
 }

@@ -1,3 +1,4 @@
+import Icon from './Icon'
 import { getInitials } from '../utils/formatters'
 
 function formatJoinedDate(value) {
@@ -20,7 +21,7 @@ function UserList({ members, onRemove, isSubmitting, title = 'Project members', 
     <section className="user-list-card" aria-label={title}>
       <header className="user-list-header">
         <div>
-          <span aria-hidden="true">oo</span>
+          <Icon name="users" />
           <h2>{title}</h2>
         </div>
         <strong>{members.length}</strong>

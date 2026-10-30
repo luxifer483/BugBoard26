@@ -1,6 +1,8 @@
+import DeleteProjectDialog from '../components/DeleteProjectDialog'
+import Icon from '../components/Icon'
 // Mostra le issue del progetto, i filtri e le operazioni consentite all'utente.
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getProjectCreateIssueRoute, getProjectMembersRoute, ROUTES } from '../config/routeConfig'
 import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -29,7 +31,9 @@ function formatIssueCount(count) {
 
 function DashboardPage() {
   const { projectId } = useParams()
-  const { user } = useAuth()
+  const { user, refreshNotifications } = useAuth()
+  const navigate = useNavigate()
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [project, setProject] = useState(null)
   const [issues, setIssues] = useState([])
   const [filters, setFilters] = useState(EMPTY_FILTERS)
@@ -116,25 +120,25 @@ function DashboardPage() {
     {
       label: 'Total Issues',
       value: filteredIssues.length,
-      icon: '!',
+      icon: 'issues',
       accentClass: 'is-blue',
     },
     {
       label: 'To do',
       value: filteredIssues.filter((issue) => issue.status === 'TODO').length,
-      icon: 'o',
+      icon: 'todo',
       accentClass: 'is-red',
     },
     {
       label: 'In Progress',
       value: filteredIssues.filter((issue) => issue.status === 'IN_PROGRESS').length,
-      icon: '~',
+      icon: 'progress',
       accentClass: 'is-orange',
     },
     {
       label: 'Closed',
       value: filteredIssues.filter((issue) => issue.status === 'CLOSED').length,
-      icon: 'v',
+      icon: 'closed',
       accentClass: 'is-green',
     },
   ]
@@ -155,7 +159,7 @@ function DashboardPage() {
 
   return (
     <DashboardLayout projectId={projectId}>
-      <main className="projects-page">
+      <main className="projects-page project-dashboard-page">
         <section className="projects-hero page-heading">
           <div>
             <h1>{project?.name || 'Project issues'}</h1>
@@ -163,8 +167,8 @@ function DashboardPage() {
           </div>
           {projectId ? (
             <div className="page-heading-actions">
-              {user?.role === 'ADMIN' ? <Link className="secondary-button" to={getProjectMembersRoute(projectId)}>Project members</Link> : null}
-              <Link className="primary-button" to={getProjectCreateIssueRoute(projectId)}>Create issue</Link>
+              {user?.role === 'ADMIN' ? <Link className="secondary-button" to={getProjectMembersRoute(projectId)}><Icon name="users" /> Project members</Link> : null}
+              <Link className="primary-button" to={getProjectCreateIssueRoute(projectId)}><Icon name="plus" /> Create issue</Link>
             </div>
           ) : null}
         </section>
@@ -261,7 +265,7 @@ function DashboardPage() {
                     <strong>{item.value}</strong>
                   </div>
                   <div className={`project-stat-icon ${item.accentClass}`} aria-hidden="true">
-                    {item.icon}
+                    <Icon name={item.icon} />
                   </div>
                 </article>
               ))}
@@ -297,7 +301,7 @@ function DashboardPage() {
                     >
                       <div className="issue-card-header">
                         <div className="project-card-badge is-blue" aria-hidden="true">
-                          !
+                          <Icon name={{ BUG: 'bug', FEATURE: 'feature', DOCUMENTATION: 'document', QUESTION: 'question' }[issue.type]} />
                         </div>
                         <div className="issue-card-title">
                           <span className="issue-card-code">{issue.code}</span>
@@ -337,6 +341,17 @@ function DashboardPage() {
                 : null}
             </section>
           </>
+        ) : null}
+        {user?.role === 'ADMIN' && project && !isLoading && !errorMessage ? (
+          <footer className="project-danger-actions">
+            <button type="button" className="project-delete-button" onClick={() => setIsDeleteOpen(true)}>
+              <Icon name="trash" size={18} /> Delete project
+            </button>
+          </footer>
+        ) : null}
+        {isDeleteOpen && user?.role === 'ADMIN' && project ? (
+          <DeleteProjectDialog key={project.id} project={project} onCancel={() => setIsDeleteOpen(false)}
+            onDeleted={() => { refreshNotifications?.(); void navigate(ROUTES.projects, { replace: true }) }} />
         ) : null}
       </main>
     </DashboardLayout>

@@ -315,7 +315,7 @@ p {
 .topbar-navigation {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex: 1;
   flex-wrap: wrap;
   gap: 8px;
@@ -1959,3 +1959,36 @@ button.notification-item:disabled {
     align-items: stretch;
   }
 }
+
+/* Icone SVG coerenti, sempre accompagnate dal testo o da aria-label. */
+.app-icon { display: inline-block; flex-shrink: 0; vertical-align: middle; }
+.project-stat-icon { border: 0; background: color-mix(in srgb, currentColor 10%, transparent); }
+.project-stat-icon .app-icon, .project-card-badge .app-icon { width: 22px; height: 22px; }
+.profile-dropdown-link, .profile-dropdown-logout { display: flex; align-items: center; gap: 8px; }
+
+.project-card-container { min-width: 0; display: flex; flex-direction: column; }
+.project-card-container > .project-card-link { flex: 1; }
+.project-card-actions { display: flex; justify-content: flex-end; padding: 8px 0; }
+.project-delete-button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid #fecaca; border-radius: 8px; background: #fff; color: #b91c1c; cursor: pointer; }
+.project-delete-button:hover:not(:disabled) { background: #fef2f2; }
+.project-delete-button:disabled { opacity: .6; cursor: wait; }
+.project-delete-button:focus-visible { outline: 2px solid #b91c1c; outline-offset: 3px; }
+
+.project-dashboard-page { min-height: calc(100dvh - 160px); display: flex; flex-direction: column; }
+.project-danger-actions { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 28px; }
+.confirmation-backdrop { z-index: 100; }
+.confirmation-dialog { position: relative; width: min(100%, 440px); max-height: calc(100dvh - 48px); overflow-y: auto; padding: 28px 24px 24px; border-radius: 18px; background: #fff; box-shadow: 0 24px 70px #0f172a40; }
+.confirmation-close { position: absolute; right: 12px; top: 12px; display: grid; place-items: center; border: 0; background: transparent; color: #64748b; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; }
+.confirmation-warning { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 18px; border-radius: 50%; color: #dc2626; background: #fee2e2; }
+.confirmation-dialog h2 { font-size: 1.2rem; text-align: center; margin: 0 0 10px; }
+.confirmation-description { color: #64748b; text-align: center; line-height: 1.6; margin-bottom: 22px; }
+.confirmation-project { display: flex; align-items: center; gap: 10px; padding: 12px; margin: 12px 0 22px; border: 1px solid #bfdbfe; border-radius: 9px; background: #eff6ff; color: #1e40af; overflow-wrap: anywhere; }
+.confirmation-member { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+.confirmation-member-icon { display: grid; place-items: center; border-radius: 50%; padding: 9px; background: #e2e8f0; color: #64748b; }
+.confirmation-member strong, .confirmation-member span { display: block; overflow-wrap: anywhere; }
+.confirmation-member div span { color: #64748b; font-size: .85rem; margin-top: 4px; }
+.confirmation-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+.confirmation-submit { border: 1px solid #dc2626; border-radius: 9px; padding: 11px 14px; background: #dc2626; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.confirmation-submit:hover:not(:disabled) { background: #b91c1c; }
+.confirmation-dialog button:disabled { cursor: wait; opacity: .65; }
+.confirmation-dialog button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }

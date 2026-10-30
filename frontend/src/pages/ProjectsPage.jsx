@@ -1,3 +1,5 @@
+import DeleteProjectDialog from '../components/DeleteProjectDialog'
+import Icon from '../components/Icon'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getProjectDashboardRoute } from '../config/routeConfig'
@@ -7,10 +9,12 @@ import { useAuth } from '../hooks/useAuth'
 import { formatRelativeDate, getProjectAccent } from '../utils/formatters'
 
 function ProjectsPage() {
-  const { user } = useAuth()
+  const { user, refreshNotifications } = useAuth()
   const [projects, setProjects] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [projectToDelete, setProjectToDelete] = useState(null)
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -43,29 +47,36 @@ function ProjectsPage() {
     }
   }, [])
 
+  function handleProjectDeleted(project) {
+    setProjects((current) => current.filter((item) => item.id !== project.id))
+    setProjectToDelete(null)
+    setSuccessMessage(`Project "${project.name}" deleted.`)
+    refreshNotifications?.()
+  }
+
   const stats = [
     {
       label: 'Total Projects',
       value: projects.length,
-      icon: '[]',
+      icon: 'folder',
       accentClass: 'is-blue',
     },
     {
       label: 'Total Issues',
       value: projects.reduce((sum, project) => sum + (project.totalIssues ?? 0), 0),
-      icon: '!',
+      icon: 'issues',
       accentClass: 'is-orange',
     },
     {
       label: 'To Do Issues',
       value: projects.reduce((sum, project) => sum + (project.openIssues ?? 0), 0),
-      icon: 'o',
+      icon: 'todo',
       accentClass: 'is-red',
     },
     {
       label: 'Closed Issues',
       value: projects.reduce((sum, project) => sum + (project.closedIssues ?? 0), 0),
-      icon: 'v',
+      icon: 'closed',
       accentClass: 'is-green',
     },
   ]
@@ -89,12 +100,13 @@ function ProjectsPage() {
                 className={`project-stat-icon ${item.accentClass}`}
                 aria-hidden="true"
               >
-                {item.icon}
+                <Icon name={item.icon} />
               </div>
             </article>
           ))}
         </section>
 
+        {successMessage ? <p role="status" className="status-message is-success">{successMessage}</p> : null}
         <section className="projects-grid" aria-label="Projects list">
           {isLoading ? <p className="status-message">Loading projects...</p> : null}
           {errorMessage ? <p className="status-message is-error">{errorMessage}</p> : null}
@@ -105,9 +117,9 @@ function ProjectsPage() {
           ) : null}
           {!isLoading && !errorMessage
             ? projects.map((project) => (
+                <article className="project-card-container" key={project.id}>
                 <Link
                   className="project-card project-card-link"
-                  key={project.id}
                   to={getProjectDashboardRoute(project.id)}
                 >
                   <div className="project-card-header">
@@ -115,7 +127,7 @@ function ProjectsPage() {
                       className={`project-card-badge ${getProjectAccent(project.id)}`}
                       aria-hidden="true"
                     >
-                      []
+                      <Icon name="folder" />
                     </div>
                     <div>
                       <h2>{project.name}</h2>
@@ -143,9 +155,22 @@ function ProjectsPage() {
                     <span>{formatRelativeDate(project.updatedAt)}</span>
                   </div>
                 </Link>
+                {user?.role === 'ADMIN' ? (
+                  <div className="project-card-actions">
+                    <button className="project-delete-button" type="button"
+                      aria-label={`Delete project ${project.name}`}
+                      onClick={() => setProjectToDelete(project)}>
+                      <Icon name="trash" size={18} />
+                      Delete project
+                    </button>
+                  </div>
+                ) : null}
+                </article>
               ))
             : null}
         </section>
+        {projectToDelete ? <DeleteProjectDialog project={projectToDelete}
+          onCancel={() => setProjectToDelete(null)} onDeleted={handleProjectDeleted} /> : null}
       </main>
     </DashboardLayout>
   )

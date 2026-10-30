@@ -1,3 +1,4 @@
+import Icon from './Icon'
 // Raccoglie i dati della nuova issue e un'immagine facoltativa prima di inviarli alle API.
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -189,7 +190,7 @@ function CreateIssueModal({ isOpen, projectId, onClose, onIssueCreated }) {
             onClick={onClose}
             type="button"
           >
-            x
+            <Icon name="close" />
           </button>
         </div>
 

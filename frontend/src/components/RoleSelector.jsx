@@ -1,3 +1,4 @@
+import Icon from './Icon'
 function RoleSelector({ value, onChange }) {
   return (
     <div className="role-selector" role="radiogroup" aria-label="User role">
@@ -6,7 +7,7 @@ function RoleSelector({ value, onChange }) {
         type="button"
         onClick={() => onChange('USER')}
       >
-        <span aria-hidden="true">o</span>
+        <Icon name="user" />
         User
       </button>
       <button
@@ -14,7 +15,7 @@ function RoleSelector({ value, onChange }) {
         type="button"
         onClick={() => onChange('ADMIN')}
       >
-        <span aria-hidden="true">^</span>
+        <Icon name="admin" />
         Admin
       </button>
     </div>

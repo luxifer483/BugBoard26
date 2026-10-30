@@ -1,3 +1,4 @@
+import Icon from './Icon'
 // Mostra la navigazione globale, le azioni ADMIN, le notifiche e il menu del proprio profilo.
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
@@ -70,15 +71,15 @@ function Topbar() {
       </Link>
 
       <nav className="topbar-navigation" aria-label="Primary navigation">
-        <NavLink className="topbar-nav-link" to={ROUTES.projects} end>Projects</NavLink>
+        <NavLink className="topbar-nav-link" to={ROUTES.projects} end><Icon name="folder" /> Projects</NavLink>
         {user?.role === 'ADMIN' ? (
           <>
-            <NavLink className="topbar-nav-link" to={ROUTES.users}>Users</NavLink>
+            <NavLink className="topbar-nav-link" to={ROUTES.users}><Icon name="users" /> Users</NavLink>
             <Link className="topbar-nav-link topbar-create-user" to={`${ROUTES.users}?create=1`}>
-              <span aria-hidden="true">+</span> Create user
+              <Icon name="userPlus" /> Create user
             </Link>
             <NavLink className="topbar-nav-link topbar-create-project" to={ROUTES.createProject}>
-              <span aria-hidden="true">+</span> Create project
+              <Icon name="folderPlus" /> Create project
             </NavLink>
           </>
         ) : null}
@@ -92,11 +93,7 @@ function Topbar() {
             onClick={handleToggleNotifications}
             type="button"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-              <path d="M10 21h4" />
-            </svg>
+            <Icon name="bell" />
             {notifications.unreadCount > 0 ? <span className="notification-count">{notifications.unreadCount}</span> : null}
           </button>
 
@@ -211,10 +208,10 @@ function Topbar() {
                 onClick={() => setIsProfileOpen(false)}
                 to={ROUTES.profile}
               >
-                View profile
+                <Icon name="user" /> View profile
               </Link>
               <button className="profile-dropdown-logout" onClick={handleLogout} type="button">
-                Logout
+                <Icon name="logout" /> Logout
               </button>
             </section>
           ) : null}

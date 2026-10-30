@@ -1,0 +1,5 @@
+# Mantiene il nome del progetto Docker e il volume postgres_data gia utilizzato.
+name: docker
+
+include:
+  - ./infra/docker/docker-compose.yml

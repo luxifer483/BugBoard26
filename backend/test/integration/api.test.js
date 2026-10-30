@@ -68,6 +68,40 @@ QUnit.module('Integrazione API e PostgreSQL', (hooks) => {
     return content ? JSON.parse(content) : null;
   }
 
+  // Verifica autorizzazione anche per membri e richieste senza JWT.
+  test('project deletion requires an authenticated administrator', async (assert) => {
+    await call(assert, 'DELETE', `/projects/${project.id}`, undefined, undefined, 401);
+    for (const token of [memberToken, outsiderToken]) {
+      await call(assert, 'DELETE', `/projects/${project.id}`, token, undefined, 403);
+    }
+    assert.ok(await Project.findByPk(project.id), 'Il progetto rimane disponibile');
+  });
+
+  // Verifica tutte le FK su PostgreSQL reale e la conservazione degli account/altri progetti.
+  test('any admin can delete a project and cascade its data without deleting users', async (assert) => {
+    const issue = await Issue.create({ projectId: project.id, reporterId: member.id,
+      assigneeId: reviewer.id, title: 'Disposable issue', description: 'Delete scenario', type: 'BUG' });
+    await IssueImage.create({ issueId: issue.id, contentType: 'image/png', data: png });
+    await Comment.create({ issueId: issue.id, authorId: member.id, content: 'A comment' });
+    await Notification.create({ issueId: issue.id, recipientId: reviewer.id, message: 'Assigned' });
+    const other = await Project.create({ name: 'Keep', description: 'Unrelated project' });
+    const otherIssue = await Issue.create({ projectId: other.id, reporterId: member.id,
+      title: 'Keep issue', description: 'Unrelated issue', type: 'QUESTION' });
+    await call(assert, 'DELETE', `/projects/${project.id}`, secondAdminToken, undefined, 204);
+    assert.strictEqual(await Project.findByPk(project.id), null);
+    assert.strictEqual(await Membership.count({ where: { projectId: project.id } }), 0);
+    assert.strictEqual(await Issue.findByPk(issue.id), null);
+    assert.strictEqual(await IssueImage.findByPk(issue.id), null);
+    assert.strictEqual(await Comment.count({ where: { issueId: issue.id } }), 0);
+    assert.strictEqual(await Notification.count({ where: { issueId: issue.id } }), 0);
+    assert.ok(await User.findByPk(member.id));
+    assert.ok(await User.findByPk(reviewer.id));
+    assert.ok(await Project.findByPk(other.id));
+    assert.ok(await Issue.findByPk(otherIssue.id));
+    await call(assert, 'DELETE', `/projects/${project.id}`, secondAdminToken, undefined, 404);
+    await call(assert, 'DELETE', '/projects/invalid', adminToken, undefined, 400);
+  });
+
   // Prepara dati validi di partenza da variare nei singoli casi di test.
   function payload(assigneeId = null) {
     return { projectId: Number(project.id), title: 'Test issue', description: 'Description', type: 'BUG', priority: 'HIGH', assigneeId };

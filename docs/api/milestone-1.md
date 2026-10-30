@@ -132,3 +132,11 @@ Gli stati issue TODO/IN_PROGRESS/DONE e la priorita' facoltativa vanno uniformat
 
 Creazione account e aggiunta al progetto sono due operazioni distinte: se la seconda fallisce,
 l'account resta creato e si puo' riprovare con Add Existing User.
+
+## Eliminazione progetto (ADMIN)
+`DELETE /api/projects/:id`: 204 senza body; 401 senza autenticazione; 403 per USER;
+404 se inesistente, 400 per ID non valido. Qualsiasi ADMIN può eliminare un progetto.
+La cancellazione è definitiva e atomica: le FK CASCADE rimuovono membership, issue,
+immagini, commenti e notifiche del progetto. Gli account e gli altri progetti rimangono.
+Il frontend richiede conferma esplicita, aggiorna elenco e contatori solo dopo successo
+e conserva il progetto in caso di errore.

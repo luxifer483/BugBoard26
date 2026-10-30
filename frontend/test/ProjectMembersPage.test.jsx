@@ -48,14 +48,28 @@ test('adds an existing account without creating another user', async () => {
 
 // Verifica che un amministratore possa uscire dal team mantenendo disponibile il proprio account globale.
 test('removes only the membership and makes the account available for re-adding', async () => {
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
   removeUserFromProject.mockResolvedValueOnce(undefined)
   openPage()
   await screen.findByRole('option', { name: /Registered user/ })
   const team = screen.getByRole('region', { name: 'Project members' })
   fireEvent.click(within(team).getByRole('button', { name: 'Remove from project' }))
+  const dialog = screen.getByRole('alertdialog')
+  expect(within(dialog).getByText(admin.email)).toBeInTheDocument()
+  expect(within(dialog).getByText('University project')).toBeInTheDocument()
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Remove member', exact: true }))
   expect(await screen.findByRole('status')).toHaveTextContent('Administrator has been removed')
   expect(removeUserFromProject).toHaveBeenCalledWith({ projectId: 3, userId: 1 })
   expect(await screen.findByRole('option', { name: /Administrator/ })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Project members', level: 1 })).toBeInTheDocument()
+})
+
+test('cancelling member removal leaves the membership unchanged', async () => {
+  removeUserFromProject.mockClear()
+  openPage()
+  const team = await screen.findByRole('region', { name: 'Project members' })
+  fireEvent.click(within(team).getByRole('button', { name: 'Remove from project' }))
+  fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }))
+  expect(removeUserFromProject).not.toHaveBeenCalled()
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  expect(within(team).getByText(admin.email)).toBeInTheDocument()
 })

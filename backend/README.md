@@ -182,16 +182,18 @@ Test plan, casi identificati, R-WECT/white-box e limiti delle misure sono in [do
 
 ## Docker completo
 
-Dalla root:
+Dalla root, con Docker Desktop avviato:
 
 ```powershell
-docker compose -f .\infra\docker\docker-compose.yml build backend
-docker compose -f .\infra\docker\docker-compose.yml up -d
+docker compose up -d --build
 ```
 
-Per gli aggiornamenti, ricostruire l'immagine e avviare il backend come sopra.
-Il servizio backend espone 8081 sull'host; PostgreSQL conserva il volume `postgres_data` esistente.
-Non usare `down -v` per conservare i dati. Non avviare insieme backend locale e container sulla stessa porta.
+Il comando avvia anche il frontend su http://localhost:5173. PostgreSQL deve essere healthy
+prima del backend; il frontend attende il controllo HTTP del backend. Le tabelle mancanti
+e l'admin di sviluppo vengono preparati dal normale avvio del server.
+I dati restano nel volume storico `docker_postgres_data`.
+Per arrestare: `docker compose down`, senza `-v`. Non avviare insieme backend locale e container.
+Dettagli nel [README Docker](../infra/docker/README.md).
 
 ## Configurazione essenziale
 

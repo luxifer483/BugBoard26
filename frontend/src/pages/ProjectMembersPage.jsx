@@ -1,3 +1,5 @@
+import ConfirmDialog from '../components/ConfirmDialog'
+import Icon from '../components/Icon'
 // Gestisce solo le appartenenze al progetto, scegliendo account gia esistenti.
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
@@ -25,6 +27,7 @@ function ProjectMembersContent({ projectId }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [memberToRemove, setMemberToRemove] = useState(null)
 
   // Legge separatamente progetto, account disponibili e membri attuali.
   useEffect(() => {
@@ -66,7 +69,7 @@ function ProjectMembersContent({ projectId }) {
 
   // Rimuove solo l'appartenenza; l'account e il suo ruolo globale restano disponibili.
   async function handleRemoveMember(member) {
-    if (!window.confirm(`Remove ${member.fullName} from this project?`)) return
+    if (isSubmitting) return
     setIsSubmitting(true)
     setErrorMessage('')
     setSuccessMessage('')
@@ -74,6 +77,7 @@ function ProjectMembersContent({ projectId }) {
       await removeUserFromProject({ projectId: Number(projectId), userId: member.userId })
       setMembers((current) => current.filter((item) => item.userId !== member.userId))
       setSuccessMessage(`${member.fullName} has been removed from the project.`)
+      setMemberToRemove(null)
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'Unable to remove this member.')
     } finally {
@@ -95,7 +99,7 @@ function ProjectMembersContent({ projectId }) {
         {successMessage ? <p role="status" className="status-message is-success">{successMessage}</p> : null}
         {!isLoading && project ? (
           <div className="user-management-grid">
-            <UserList members={members} onRemove={handleRemoveMember} isSubmitting={isSubmitting} />
+            <UserList members={members} onRemove={(member) => { setErrorMessage(''); setMemberToRemove(member) }} isSubmitting={isSubmitting} />
             <section className="user-form-card">
               <h2>Add a member</h2>
               <p>Choose an existing account to join this project.</p>
@@ -116,6 +120,19 @@ function ProjectMembersContent({ projectId }) {
               <Link className="account-management-link" to={ROUTES.users}>Manage user accounts</Link>
             </section>
           </div>
+        ) : null}
+        {memberToRemove ? (
+          <ConfirmDialog title="Remove project member?"
+            description="This user will lose membership access to the project. Their account and global role will be kept. Administrators retain their global access."
+            confirmLabel="Remove member" pendingLabel="Removing..." isPending={isSubmitting}
+            error={errorMessage} onCancel={() => setMemberToRemove(null)}
+            onConfirm={() => handleRemoveMember(memberToRemove)}>
+            <div className="confirmation-member">
+              <span className="confirmation-member-icon"><Icon name="user" size={24} /></span>
+              <div><strong>{memberToRemove.fullName}</strong><span>{memberToRemove.email}</span></div>
+            </div>
+            <div className="confirmation-project"><Icon name="folder" /><strong>{project?.name}</strong></div>
+          </ConfirmDialog>
         ) : null}
       </main>
     </DashboardLayout>
